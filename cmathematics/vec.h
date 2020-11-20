@@ -41,6 +41,7 @@ vec constructEmptyVector(unsigned int dim);
 
 /**
  * construct a new vector with specified values
+ * <b>NOTE: must pass in floats as arguments</b>
  * @param dim the dimension of the vector
  * @param ... the values to put in the vector
  * @return the vector
@@ -50,6 +51,7 @@ vec newVector(unsigned int dim, ...);
 /**
  * construct a new vector with specified values
  * will automatically calculate the number of arguments
+ * <b>NOTE: must pass in floats as arguments</b>
  * @param .. the values to put in the vector
  * @return the vector
  */
