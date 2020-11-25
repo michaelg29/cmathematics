@@ -8,6 +8,7 @@ This library is a very low level mathematics library for C and C++ that implemen
 
 List of implemented concepts so far:
 1) Vectors
+2) Matrices
 
 ### Documentation
 Full documentation can be found in the header files in the `cmathematics` folder.
@@ -33,7 +34,7 @@ Sample use in `main.c`:
 
 int main() {
 	vec v1 = vector(2.0f, 1.0f, 3.4f);
-    print(v1);
+    printVec(v1);
     
     return 0;
 }
@@ -46,3 +47,7 @@ int main() {
     2) Vector-Vector operations (+, -, .*, ./, dot, cross)
     3) Magnitude, Squared Magnitude
     4) Normalize
+2) Matrices
+    1) Matrix-Scalar operations (+, -, *, /)
+    2) Matrix-Vector multiplication
+    3) Matrix-Matrix multiplication

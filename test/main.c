@@ -2,19 +2,24 @@
 
 #include "../cmathematics/cmathematics.h"
 #include "../cmathematics/vec.h"
+#include "../cmathematics/matrix.h"
 
 int main()
 {
     printf("Hello, world!\n");
 
-    vec v1 = vector(2.0f, -3.0f, 1.0f);
-    print(v1);
+    mat m1 = newMatrix(2, 3,
+                       2.0f, 1.0f, 4.0f,
+                       0.0f, 1.0f, 1.0f);
+    printMat(m1);
 
-    vec v2 = vector(-2.0f, 1.0f, 1.0f);
-    print(v2);
+    mat m2 = newMatrix(3, 4,
+                       6.0f, 3.0f, -1.0f, 0.0f,
+                       1.0f, 1.0f, 0.0, 4.0f,
+                       -2.0f, 5.0f, 0.0f, 2.0f);
+    printMat(m2);
 
-    vec v3 = cross(v1, v2);
-    print(v3);
+    printMat(matMatMultiplication(m1, m2));
 
     return 0;
 }
