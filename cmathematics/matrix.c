@@ -88,8 +88,7 @@ mat newMatrix(unsigned int rows, unsigned int cols, unsigned int numVals, ...)
     mat ret = allocateMat(rows, cols);
 
     va_list list;
-    unsigned int size = rows * cols;
-    va_start(list, size);
+    va_start(list, numVals);
 
     unsigned int i = 0;
 
@@ -97,7 +96,7 @@ mat newMatrix(unsigned int rows, unsigned int cols, unsigned int numVals, ...)
     {
         for (unsigned int c = 0; c < cols; c++)
         {
-            if (i < numVals)
+            if (i++ < numVals)
             {
                 // get next element in list
                 ret.elements[r][c] = va_arg(list, double);
@@ -413,7 +412,7 @@ mat matScalarDivision(mat m, float k)
  * @param m the pointer to the matrix
  * @param k the scalar
  */
-void matScalarDivisionBy(mat *m, float k);
+void matScalarDivisionBy(mat *m, float k)
 {
     for (unsigned int r = 0; r < m->rows; r++)
     {

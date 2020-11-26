@@ -64,7 +64,7 @@ mat newMatrix(unsigned int rows, unsigned int cols, unsigned int numVals, ...);
  * @param .. the values to put in the matrix
  * @return the matrix
  */
-#define matrix(unsigned int rows, unsigned int cols, ...) newMatrix(rows, cols, NUMARGS(float, __VA_ARGS__), ##__VA_ARGS__)
+#define matrix(rows, cols, ...) newMatrix(rows, cols, NUMARGS(float, __VA_ARGS__), ##__VA_ARGS__)
 
 /**
  * copies a matrix's values
