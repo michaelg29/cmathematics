@@ -233,4 +233,92 @@ vec matVecMultiplication(mat m, vec v);
  */
 mat matMatMultiplication(mat m1, mat m2);
 
+/**
+ * transpose a matrix (swap rows and columns)
+ * @param m the matrix
+ * @return the transpose
+ */
+mat transpose(mat *m);
+
+/**
+ * elementary row operation - swap rows
+ * @param m the pointer to the matrix
+ * @param r1 the index of the first row (count from 1)
+ * @param r2 the index of the second row (count from 1)
+ * @return true if the row indices are in bounds and are unique
+ */
+bool swapRows(mat *m, unsigned int r1, unsigned int r2);
+
+/**
+ * elementary row operation - add one row to a nother
+ * @param m the pointer to the matrix
+ * @param r1 the index of the row to be added to (count from 1)
+ * @param r2 the index of the row to be added (count from 1)
+ * @return true if the row indices are in bounds and are unique
+ */
+bool addRows(mat *m, unsigned int r1, unsigned int r2);
+
+/**
+ * elementary row operation - multiply a row by a factor
+ * @param m the pointer to the matrix
+ * @param r1 the index of the row to be multiplied (count from 1)
+ * @param k the factor
+ * @return true if the row index is in bounds and the factor is not 0
+ */
+bool multiplyRow(mat *m, unsigned int r, float k);
+
+/**
+ * elementary row operation - add a multiple of one row to another row
+ * @param m the pointer to the matrix
+ * @param r1 the index of the row to be added to (count from 1)
+ * @param r2 the index of the row to be added (count from 1)
+ * @param k the factor
+ * @return true if the row indices are in bounds, they are unique, and the factor is not 0
+ */
+bool addMultiple(mat *m, unsigned int r1, unsigned int r2, float k);
+
+/**
+ * performs Gaussian elimination to transform the matrix to row echelon form (REF)
+ * @param m the matrix
+ */
+void ref(mat *m);
+
+/**
+ * performs Gaussian elimination to transform the matrix to reduced row echelon form (REF)
+ * @param m the matrix
+ */
+void rref(mat *m);
+
+/**
+ * augment a vector on the end of the matrix
+ * @param m the matrix
+ * @param v the vector
+ * @return the augmented matrix, MAT_UNDEFINED if the dimensions do not match
+ */
+mat augmentVector(mat *m, vec *v);
+
+/**
+ * augment a matrix on the end of the matrix
+ * @param m the original matrix
+ * @param m2 the matrix to be augmented
+ * @return the augmented matrix, MAT_UNDEFINED if the dimensions do not match
+ */
+mat augmentMatrix(mat *m, mat *m2);
+
+/**
+ * copy matrix without an excluded row and column
+ * @param m the matrix
+ * @param exclRow the index of the row to be excluded (count from 1)
+ * @param exclCol the index of the col to be excluded (count from 1)
+ * @return the matrix without the row and column
+ */
+mat spliceMat(mat *m, unsigned int exclRow, unsigned int exclCol);
+
+/**
+ * calculate the determinant of the matrix through cofactor expansion
+ * @param m the matrix
+ * the determinant value, 0 if not a square matrix
+ */
+float determinant(mat m);
+
 #endif

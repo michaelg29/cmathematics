@@ -51,3 +51,10 @@ int main() {
     1) Matrix-Scalar operations (+, -, *, /)
     2) Matrix-Vector multiplication
     3) Matrix-Matrix multiplication
+    4) Matrix operations
+        1) Transpose
+        2) Elementary row operations
+        3) Row Echelon Form/Reduced Row Echelon Form
+        4) Splicing
+        5) Determinant
+    5) Augmentation (vectors and matrices)
