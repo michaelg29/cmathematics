@@ -167,7 +167,7 @@ void printMat(mat m)
 vec getMatRow(mat *m, unsigned int row)
 {
     row--; // subtract one because start counting from 1
-    if (row < 0 || row >= m->rows)
+    if (row >= m->rows)
     {
         // index out of bounds
         return VEC_UNDEFINED;
@@ -193,7 +193,7 @@ vec getMatRow(mat *m, unsigned int row)
 vec getMatCol(mat *m, unsigned int col)
 {
     col--; // subtract one because start counting from 1
-    if (col < 0 || col >= m->cols)
+    if (col >= m->cols)
     {
         // index out of bounds
         return VEC_UNDEFINED;
@@ -593,6 +593,392 @@ mat matMatMultiplication(mat m1, mat m2)
             // dot product of the rth row of m1 with the cth column of m2
             ret.elements[r][c] = dot(m1Rows[r], m2Cols[c]);
         }
+    }
+
+    return ret;
+}
+
+/**
+ * transpose a matrix (swap rows and columns)
+ * @param m the matrix
+ * @return the transpose
+ */
+mat transpose(mat *m)
+{
+    mat ret = allocateMat(m->cols, m->rows);
+
+    for (unsigned int r = 0; r < ret.rows; r++)
+    {
+        for (unsigned int c = 0; c < ret.cols; c++)
+        {
+            // A_transpose(i, j) = A(i, j)
+            ret.elements[r][c] = m->elements[c][r];
+        }
+    }
+
+    return ret;
+}
+
+/**
+ * elementary row operation - swap rows
+ * @param m the pointer to the matrix
+ * @param r1 the index of the first row (count from 1)
+ * @param r2 the index of the second row (count from 1)
+ * @return true if the row indices are in bounds and are unique
+ */
+bool swapRows(mat *m, unsigned int r1, unsigned int r2)
+{
+    r1--;
+    r2--;
+
+    if (r1 >= m->rows || r2 >= m->rows ||
+        r1 == r2)
+    {
+        return false;
+    }
+
+    // swap pointers
+    float *tmp = m->elements[r1];
+    m->elements[r1] = m->elements[r2];
+    m->elements[r2] = tmp;
+
+    return true;
+}
+
+/**
+ * elementary row operation - add one row to a nother
+ * @param m the pointer to the matrix
+ * @param r1 the index of the row to be added to (count from 1)
+ * @param r2 the index of the row to be added (count from 1)
+ * @return true if the row indices are in bounds and are unique
+ */
+bool addRows(mat *m, unsigned int r1, unsigned int r2)
+{
+    r1--;
+    r2--;
+
+    if (r1 >= m->rows || r2 >= m->rows ||
+        r1 == r2)
+    {
+        return false;
+    }
+
+    for (unsigned int c = 0; c < m->cols; c++)
+    {
+        // add corresponding elements
+        m->elements[r1][c] += m->elements[r2][c];
+    }
+
+    return true;
+}
+
+/**
+ * elementary row operation - multiply a row by a factor
+ * @param m the pointer to the matrix
+ * @param r1 the index of the row to be multiplied (count from 1)
+ * @param k the factor
+ * @return true if the row index is in bounds and the factor is not 0
+ */
+bool multiplyRow(mat *m, unsigned int r, float k)
+{
+    r--;
+
+    if (r >= m->rows ||
+        k == 0.0f)
+    {
+        return false;
+    }
+
+    for (unsigned int c = 0; c < m->cols; c++)
+    {
+        // multiply each element
+        m->elements[r][c] *= k;
+    }
+
+    return true;
+}
+
+/**
+ * elementary row operation - add a multiple of one row to another row
+ * @param m the pointer to the matrix
+ * @param r1 the index of the row to be added to (count from 1)
+ * @param r2 the index of the row to be added (count from 1)
+ * @param k the factor
+ * @return true if the row indices are in bounds, they are unique, and the factor is not 0
+ */
+bool addMultiple(mat *m, unsigned int r1, unsigned int r2, float k)
+{
+    r1--;
+    r2--;
+
+    if (r1 >= m->rows || r2 >= m->rows ||
+        r1 == r2 ||
+        k == 0.0f)
+    {
+        return false;
+    }
+
+    for (unsigned int c = 0; c < m->cols; c++)
+    {
+        // add corresponding elements
+        m->elements[r1][c] += k * m->elements[r2][c];
+    }
+}
+
+/**
+ * performs Gaussian elimination to transform the matrix to row echelon form (REF)
+ * @param m the matrix
+ */
+void ref(mat *m)
+{
+    unsigned int currentRow = 0;
+    for (unsigned int c = 0; c < m->cols; c++)
+    {
+        unsigned int r = currentRow;
+        if (r >= m->rows)
+        {
+            // no more rows
+            break;
+        }
+
+        // find nonzero entry
+        for (; r < m->rows; r++)
+        {
+            if (m->elements[r][c] != 0.0f)
+            {
+                // non-zero element
+                break;
+            }
+        }
+
+        // didn't find a nonzero entry in column
+        if (r == m->rows)
+        {
+            continue;
+        }
+
+        // swap with proper row
+        swapRows(m, currentRow + 1, r + 1);
+
+        // multiply row by 1 / value
+        // don't call function because only need to multiply values to right
+        float factor = 1 / m->elements[currentRow][c];
+        for (unsigned int col = c; col < m->cols; col++)
+        {
+            m->elements[currentRow][col] *= factor;
+        }
+
+        // clear out rows below
+        for (r = currentRow + 1; r < m->rows; r++)
+        {
+            addMultiple(m, r + 1, currentRow + 1, -1 * m->elements[r][c]);
+        }
+
+        currentRow++;
+    }
+}
+
+/**
+ * performs Gaussian elimination to transform the matrix to reduced row echelon form (REF)
+ * @param m the matrix
+ */
+void rref(mat *m)
+{
+    unsigned int currentRow = 0;
+    for (unsigned int c = 0; c < m->cols; c++)
+    {
+        unsigned int r = currentRow;
+        if (r >= m->rows)
+        {
+            // no more rows
+            break;
+        }
+
+        // find nonzero entry
+        for (; r < m->rows; r++)
+        {
+            if (m->elements[r][c] != 0.0f)
+            {
+                // non-zero value
+                break;
+            }
+        }
+
+        // didn't find a nonzero entry in column
+        if (r == m->rows)
+        {
+            continue;
+        }
+
+        // swap with proper row
+        swapRows(m, currentRow + 1, r + 1);
+
+        // multiply row by 1 / value
+        // don't call function because only need to multiply values to right
+        float factor = 1 / m->elements[currentRow][c];
+        for (unsigned int col = c; col < m->cols; col++)
+        {
+            m->elements[currentRow][col] *= factor;
+        }
+
+        // clear out rows above and below
+        for (r = 0; r < m->rows; r++)
+        {
+            if (r == currentRow)
+            {
+                continue;
+            }
+            addMultiple(m, r + 1, currentRow + 1, -1 * m->elements[r][c]);
+        }
+
+        currentRow++;
+    }
+}
+
+/**
+ * augment a vector on the end of the matrix
+ * @param m the matrix
+ * @param v the vector
+ * @return the augmented matrix, MAT_UNDEFINED if the dimensions do not match
+ */
+mat augmentVector(mat *m, vec *v)
+{
+    // number of rows of the matrix must equal the number of elements in the vector
+    if (m->rows != v->dim)
+    {
+        return MAT_UNDEFINED;
+    }
+
+    // allocate new matrix
+    mat ret = allocateMat(m->rows, m->cols + 1);
+
+    // input values
+    for (unsigned int r = 0; r < m->rows; r++)
+    {
+        // copy matrix values
+        unsigned int c = 0;
+        for (; c < m->cols; c++)
+        {
+            ret.elements[r][c] = m->elements[r][c];
+        }
+
+        // put vector values at end
+        ret.elements[r][c] = v->elements[r];
+    }
+
+    return ret;
+}
+
+/**
+ * augment a matrix on the end of the matrix
+ * @param m the original matrix
+ * @param m2 the matrix to be augmented
+ * @return the augmented matrix, MAT_UNDEFINED if the dimensions do not match
+ */
+mat augmentMatrix(mat *m, mat *m2)
+{
+    // the number of rows must be the same
+    if (m->rows != m2->rows)
+    {
+        return MAT_UNDEFINED;
+    }
+
+    // allocate new matrix
+    mat ret = allocateMat(m->rows, m->cols + m2->cols);
+
+    // input values
+    for (unsigned int r = 0; r < m->rows; r++)
+    {
+        // copy original matrix
+        unsigned int c = 0;
+        for (; c < m->cols; c++)
+        {
+            ret.elements[r][c] = m->elements[r][c];
+        }
+
+        // augment values from second matrix
+        for (; c < ret.cols; c++)
+        {
+            ret.elements[r][c] = m2->elements[r][c - m->cols];
+        }
+    }
+
+    return ret;
+}
+
+/**
+ * copy matrix without an excluded row and column
+ * @param m the matrix
+ * @param exclRow the index of the row to be excluded (count from 1)
+ * @param exclCol the index of the col to be excluded (count from 1)
+ * @return the matrix without the row and column
+ */
+mat spliceMat(mat *m, unsigned int exclRow, unsigned int exclCol)
+{
+    exclRow--;
+    exclCol--;
+
+    // allocate new matrix
+    mat ret = allocateMat(m->rows - 1, m->cols - 1);
+
+    // offset to account for skipped row
+    unsigned int rowOffset = 0;
+    for (unsigned int r = 0; r < ret.rows; r++)
+    {
+        // offset to account for skipped column
+        unsigned int colOffset = 0;
+
+        if (r == exclRow)
+        {
+            // access values from next row
+            rowOffset++;
+        }
+
+        for (unsigned int c = 0; c < ret.cols; c++)
+        {
+            if (c == exclCol)
+            {
+                // access values from next col
+                colOffset++;
+            }
+
+            // assign value
+            ret.elements[r][c] = m->elements[r + rowOffset][c + colOffset];
+        }
+    }
+
+    return ret;
+}
+
+/**
+ * calculate the determinant of the matrix through cofactor expansion
+ * @param m the matrix
+ * the determinant value, 0 if not a square matrix
+ */
+float determinant(mat m)
+{
+    // must be a square matrix
+    if (m.rows != m.cols)
+    {
+        return 0.0f;
+    }
+
+    // base case
+    if (m.rows == 1)
+    {
+        return m.elements[0][0];
+    }
+
+    char cofactorSign = 1;
+    float ret = 0.0f;
+
+    // expand across first row
+    for (unsigned int c = 0; c < m.cols; c++)
+    {
+        // recurse to matrix without first row and current column
+        ret += cofactorSign * m.elements[0][c] * determinant(spliceMat(&m, 1, c + 1));
+        // alternate sign
+        cofactorSign = -cofactorSign;
     }
 
     return ret;
