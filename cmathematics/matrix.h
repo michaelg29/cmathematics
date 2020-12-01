@@ -68,17 +68,10 @@ mat newMatrix(unsigned int rows, unsigned int cols, unsigned int numVals, ...);
 
 /**
  * copies a matrix's values
- * @param m the matrix to be copied
- * @return the copy (the parameter to the function)
- */
-mat copyMat(mat m);
-
-/**
- * copies a matrix's values using memcpy
  * @param m the pointer to the matrix to be copied
  * @return the copy
  */
-mat copyMatPtr(mat *m);
+mat copyMat(mat *m);
 
 /**
  * prints the values of a matrix

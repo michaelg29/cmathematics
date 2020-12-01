@@ -77,23 +77,18 @@ vec newVector(unsigned int dim, ...)
 
 /**
  * copies a vector's values
- * @param v the vector to be copied
- * @return the copy (the parameter to the function)
- */
-vec copyVec(vec v)
-{
-    return v;
-}
-
-/**
- * copies a vector's values using memcpy
  * @param v the pointer to the vector to be copied
  * @return the copy
  */
-vec copyVecPtr(vec *v)
+vec copyVec(vec *v)
 {
-    vec ret;
-    memcpy(&ret, v, sizeof(vec));
+    vec ret = allocateVec(v->dim);
+
+    for (unsigned int i = 0; i < ret.dim; i++)
+    {
+        ret.elements[i] = v->elements[i];
+    }
+
     return ret;
 }
 
