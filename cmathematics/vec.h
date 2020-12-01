@@ -59,17 +59,10 @@ vec newVector(unsigned int dim, ...);
 
 /**
  * copies a vector's values
- * @param v the vector to be copied
- * @return the copy (the parameter to the function)
- */
-vec copyVec(vec v);
-
-/**
- * copies a vector's values using memcpy
  * @param v the pointer to the vector to be copied
  * @return the copy
  */
-vec copyVecPtr(vec *v);
+vec copyVec(vec *v);
 
 /**
  * prints the values of a vector

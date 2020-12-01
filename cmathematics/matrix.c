@@ -116,23 +116,21 @@ mat newMatrix(unsigned int rows, unsigned int cols, unsigned int numVals, ...)
 
 /**
  * copies a matrix's values
- * @param m the matrix to be copied
- * @return the copy (the parameter to the function)
- */
-mat copyMat(mat m)
-{
-    return m;
-}
-
-/**
- * copies a matrix's values using memcpy
  * @param m the pointer to the matrix to be copied
  * @return the copy
  */
-mat copyMatPtr(mat *m)
+mat copyMat(mat *m)
 {
-    mat ret;
-    memcpy(&ret, m, sizeof(mat));
+    mat ret = allocateMat(m->rows, m->cols);
+
+    for (unsigned int r = 0; r < ret.rows; r++)
+    {
+        for (unsigned int c = 0; c < ret.cols; c++)
+        {
+            ret.elements[r][c] = m->elements[r][c];
+        }
+    }
+
     return ret;
 }
 
