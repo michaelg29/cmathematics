@@ -951,33 +951,96 @@ mat spliceMat(mat *m, unsigned int exclRow, unsigned int exclCol)
 /**
  * calculate the determinant of the matrix through cofactor expansion
  * @param m the matrix
- * the determinant value, 0 if not a square matrix
+ * @return the determinant value, 0 if not a square matrix
  */
-float determinant(mat m)
+float determinant(mat *m)
 {
-    // must be a square matrix
-    if (m.rows != m.cols)
+    // must be a square matrix with mroe than 1 row
+    if (m->rows != m->cols || m->rows == 0)
     {
         return 0.0f;
     }
 
-    // base case
-    if (m.rows == 1)
+    // initialize array
+    unsigned int *skipCols = malloc(m->cols * sizeof(unsigned int));
+    unsigned int noSkipCols = 0;
+
+    float ret = determinantExclusion(m, 1, 0, skipCols, &noSkipCols);
+
+    free(skipCols);
+
+    return ret;
+}
+
+/**
+ * calculate the determinant of a matrix through cofactor expansion using an exclusion list
+ * @param m the matrix
+ * @param row the row to expand on
+ * @param col the new column to exclude
+ * @param skipCols the existing list of columns to exclude
+ * @param noSkipCols the number of columns in the list to skip
+ * @return the determinant
+ */
+float determinantExclusion(mat *m,
+                           unsigned int row,
+                           unsigned int col,
+                           unsigned int *skipCols,
+                           unsigned int *noSkipCols)
+{
+    // insert current column into exclusion list
+    skipCols[*noSkipCols] = col;
+    (*noSkipCols)++;
+
+    if (row == m->rows - 1)
     {
-        return m.elements[0][0];
+        printf("");
     }
 
-    char cofactorSign = 1;
-    float ret = 0.0f;
-
-    // expand across first row
-    for (unsigned int c = 0; c < m.cols; c++)
+    // base case to return single element
+    if (row == m->rows)
     {
-        // recurse to matrix without first row and current column
-        ret += cofactorSign * m.elements[0][c] * determinant(spliceMat(&m, 1, c + 1));
-        // alternate sign
+        unsigned int c = m->cols;
+        // find last column not in exclusion list
+        if (*noSkipCols != 0)
+        {
+            if (skipCols[*noSkipCols - 1] != 0)
+            {
+                while (containsUint(skipCols, *noSkipCols, c))
+                {
+                    c--;
+                }
+                (*noSkipCols)--;
+            }
+        }
+        return m->elements[row - 1][c - 1];
+    }
+
+    float ret = 0.0f;
+    char cofactorSign = 1;
+
+    // cofactor expansion across current row
+    for (unsigned int c = 1; c <= m->cols; c++)
+    {
+        // skip excluded cols
+        if (containsUint(skipCols, *noSkipCols, c))
+        {
+            continue;
+        }
+
+        float res = 0.0f;
+        if (m->elements[row - 1][c - 1] != 0.0f)
+        {
+            // recursive
+            res = cofactorSign *
+                  m->elements[row - 1][c - 1] *
+                  determinantExclusion(m, row + 1, c, skipCols, noSkipCols);
+        }
+
+        ret += res;
         cofactorSign = -cofactorSign;
     }
 
+    // remove current column from the list
+    (*noSkipCols)--;
     return ret;
 }

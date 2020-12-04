@@ -310,8 +310,23 @@ mat spliceMat(mat *m, unsigned int exclRow, unsigned int exclCol);
 /**
  * calculate the determinant of the matrix through cofactor expansion
  * @param m the matrix
- * the determinant value, 0 if not a square matrix
+ * @return the determinant value, 0 if not a square matrix
  */
-float determinant(mat m);
+float determinant(mat *m);
+
+/**
+ * calculate the determinant of a matrix through cofactor expansion using an exclusion list
+ * @param m the matrix
+ * @param row the row to expand on
+ * @param col the new column to exclude
+ * @param skipCols the existing list of columns to exclude
+ * @param noSkipCols the number of columns in the list to skip
+ * @return the determinant
+ */
+float determinantExclusion(mat *m,
+                           unsigned int row,
+                           unsigned int col,
+                           unsigned int *skipCols,
+                           unsigned int *noSkipCols);
 
 #endif

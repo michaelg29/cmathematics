@@ -9,10 +9,14 @@ int main()
 {
     printf("Hello, world!\n");
 
-    bigint b1 = newBigint(-15932);
-    bigint b2 = strToBigint("12334576129854641928374691283742109834709812374");
+    mat m = matrix(4, 4,
+                   1.0f, 3.0f, 1.0f, 4.0f,
+                   3.0f, 9.0f, 5.0f, 15.0f,
+                   6.0f, 2.0f, 1.0f, 1.0f,
+                   12.0f, 4.0f, 2.0f, 3.0f);
 
-    printf("%s\n", bigintToString(subtractBigint(b1, b2)));
+    printMat(m);
+    printf("%f\n", determinant(&m));
 
     return 0;
 }
