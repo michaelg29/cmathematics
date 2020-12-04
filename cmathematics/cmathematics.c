@@ -1,13 +1,37 @@
 #include "cmathematics.h"
+#include <stdio.h>
 
-void swap(int *a, int *b)
+/**
+ * method to determine if an integer exists in an array
+ * @param arr the array
+ * @param noElements the number of elements in the array
+ * @param target the target element
+ * @return if the element exists in the array
+ */
+bool containsUint(unsigned int *arr, unsigned int noElements, unsigned int target)
 {
-    *a ^= *b;
-    *b = *a ^ *b;
-    *a ^= *b;
+    for (unsigned int i = 0; i < noElements; i++)
+    {
+        if (arr[i] == target)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-void swapFloat(float *a, float *b)
+/**
+ * method to print out an integer array
+ * @param arr the array
+ * @param noElements the number of elements in the array
+ */
+void printUintArray(unsigned int *arr, unsigned int noElements)
 {
-    swap((int *)a, (int *)b);
+    printf("[");
+    for (unsigned int i = 0; i < noElements; i++)
+    {
+        printf("%d ", arr[i]);
+    }
+    printf("]\n");
 }
