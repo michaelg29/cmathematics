@@ -19,6 +19,7 @@ int main()
     printMat(m);
     printf("%f\n", determinant(&m));
     printf("%f\n", determinantModREF(&m));
+    freeMat(&m);
 
     return 0;
 }

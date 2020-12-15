@@ -30,6 +30,18 @@ mat allocateMat(unsigned int rows, unsigned int cols)
 }
 
 /**
+ * frees a matrix's memory
+ * @param m the matrix
+ */
+void freeMat(mat *m)
+{
+    free(m->elements);
+    m->elements = NULL;
+    m->rows = 0;
+    m->cols = 0;
+}
+
+/**
  * construct an identity matrix:
  * square matrix with ones along the main diagonal
  * @param dim the dimension of the matrix (the number of rows and cols)

@@ -28,6 +28,12 @@ extern const mat MAT_UNDEFINED; // undefined vector (no dimension)
 mat allocateMat(unsigned int rows, unsigned int cols);
 
 /**
+ * frees a matrix's memory
+ * @param m the matrix
+ */
+void freeMat(mat *m);
+
+/**
  * construct an identity matrix:
  * square matrix with ones along the main diagonal
  * @param dim the dimension of the matrix (the number of rows and cols)
