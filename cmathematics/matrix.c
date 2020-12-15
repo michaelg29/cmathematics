@@ -955,7 +955,7 @@ mat spliceMat(mat *m, unsigned int exclRow, unsigned int exclCol)
  */
 float determinant(mat *m)
 {
-    // must be a square matrix with mroe than 1 row
+    // must be a square matrix with at least 1 row
     if (m->rows != m->cols || m->rows == 0)
     {
         return 0.0f;
@@ -1042,5 +1042,74 @@ float determinantExclusion(mat *m,
 
     // remove current column from the list
     (*noSkipCols)--;
+    return ret;
+}
+
+/**
+ * calculate the determinant of a matrix using a modified REF algorithm
+ * @param m the matrix
+ * @return the determinant
+ */
+float determinantModREF(mat *m)
+{
+    // must be a square matrix with at least 1 row
+    if (m->rows != m->cols || m->rows == 0)
+    {
+        return 0.0f;
+    }
+
+    mat opMat = copyMat(m);
+    float ret = 1.0f;
+
+    // modified REF algorithm
+    /*
+        perform REF but do not multiply to make entries equal to one
+        makes the matrix upper triangular
+        determinant of an upper triangular matrix is the product of the elements on the main diagonal
+    */
+    for (unsigned int c = 0, currentRow = 0; c < opMat.cols; c++, currentRow++)
+    {
+        unsigned int r = currentRow;
+        if (r >= opMat.rows)
+        {
+            // no more rows
+            break;
+        }
+
+        // find nonzero entry
+        for (; r < opMat.rows; r++)
+        {
+            if (opMat.elements[r][c] != 0.0f)
+            {
+                // non-zero element
+                break;
+            }
+        }
+
+        // didn't find a nonzero entry in column -> non invertible
+        if (r == opMat.rows)
+        {
+            return 0.0f;
+        }
+
+        // swap with proper row
+        if (currentRow != r)
+        {
+            swapRows(&opMat, currentRow + 1, r + 1);
+
+            // swapping rows reverses sign of determinant
+            ret = -ret;
+        }
+
+        // clear out rows below
+        for (r = currentRow + 1; r < opMat.rows; r++)
+        {
+            addMultiple(&opMat, r + 1, currentRow + 1, -1 * opMat.elements[r][c] / opMat.elements[currentRow][c]);
+        }
+
+        // multiply determinant by element on main diagonal
+        ret *= opMat.elements[currentRow][c];
+    }
+
     return ret;
 }

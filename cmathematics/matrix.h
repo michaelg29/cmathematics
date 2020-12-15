@@ -329,4 +329,11 @@ float determinantExclusion(mat *m,
                            unsigned int *skipCols,
                            unsigned int *noSkipCols);
 
+/**
+ * calculate the determinant of a matrix using a modified REF algorithm
+ * @param m the matrix
+ * @return the determinant
+ */
+float determinantModREF(mat *m);
+
 #endif
