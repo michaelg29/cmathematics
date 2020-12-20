@@ -63,8 +63,7 @@ int main() {
         2) Elementary row operations
         3) Row Echelon Form/Reduced Row Echelon Form
         4) Splicing
-        5) Determinant
-    5) Augmentation (vectors and matrices)
-    6) Determinants (through 3 different methods)
-    7) Cofactors/adjugates
-    8) Matrix Inverses
+        5) Determinant (through 3 different methods)
+        6) Augmentation (vectors and matrices)
+        7) Cofactors/adjugates
+        8) Matrix Inverses
