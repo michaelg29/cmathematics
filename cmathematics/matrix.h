@@ -314,11 +314,18 @@ mat augmentMatrix(mat *m, mat *m2);
 mat spliceMat(mat *m, unsigned int exclRow, unsigned int exclCol);
 
 /**
- * calculate the determinant of the matrix through cofactor expansion
+ * calculate the determinant of a matrix through cofactor expansion
  * @param m the matrix
  * @return the determinant value, 0 if not a square matrix
  */
 float determinant(mat *m);
+
+/**
+ * base method to calculate the determinant of the matrix through cofactor expansion with an exclusion list
+ * @param m the matrix
+ * @return the determinant value, 0 if not a square matrix
+ */
+float determinantExclusion(mat *m);
 
 /**
  * calculate the determinant of a matrix through cofactor expansion using an exclusion list
@@ -329,17 +336,54 @@ float determinant(mat *m);
  * @param noSkipCols the number of columns in the list to skip
  * @return the determinant
  */
-float determinantExclusion(mat *m,
-                           unsigned int row,
-                           unsigned int col,
-                           unsigned int *skipCols,
-                           unsigned int *noSkipCols);
+float _determinantExclusion(mat *m,
+                            unsigned int row,
+                            unsigned int col,
+                            unsigned int *skipCols,
+                            unsigned int *noSkipCols);
 
 /**
- * calculate the determinant of a matrix using a modified REF algorithm
+ * calculates the cofactor of a matrix at the corresponding row and column
  * @param m the matrix
- * @return the determinant
+ * @param r the row index (count from 1)
+ * @param c the col index (count from 1)
+ * @return the cofactor value
  */
-float determinantModREF(mat *m);
+float cofactor(mat *m, unsigned int r, unsigned int c);
+
+/**
+ * calculate the cofactor matrix (entries are the corresponding cofactors)
+ * @param m the matrix
+ * @return the cofactor matrix, MAT_UNDEFINED if not a square matrix
+ */
+mat cofactorMatrix(mat *m);
+
+/**
+ * calculate the adjugate of a matrix (transpose of the cofactor matrix)
+ * @param m the matrix
+ * @return the adjugate, MAT_UNDEFINED if not a square matrix
+ */
+mat adjugate(mat *m);
+
+/**
+ * determine if a matrix is invertible
+ * @param m the matrix
+ * @return if the matrix is square and has a nonzero determinant
+ */
+bool invertible(mat *m);
+
+/**
+ * calculate the inverse of a matrix using the adjugate
+ * @param m the matrix
+ * @return the inverse, MAT_UNDEFINED if not invertible
+ */
+mat inverseMat(mat *m);
+
+/**
+ * calculate the inverse of a matrix using Gaussian Elimination
+ * @param m the matrix
+ * @return the inverse, MAT_UNDEFINED if not invertible
+ */
+mat inverseMatRREF(mat *m);
 
 #endif
