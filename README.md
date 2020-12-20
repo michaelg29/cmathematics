@@ -41,6 +41,12 @@ int main() {
 ```
 
 ### Complete list of functions
+##### Utility
+1) Big Integers
+    1) Parsing from string
+    2) Output to string
+    3) Comparison
+    4) Addition, subtraction
 ##### Linear Algebra
 1) Vectors
 	1) Vector-Scalar operations (+, -, *, /, ^)
@@ -58,3 +64,6 @@ int main() {
         4) Splicing
         5) Determinant
     5) Augmentation (vectors and matrices)
+    6) Determinants (through 3 different methods)
+    7) Cofactors/adjugates
+    8) Matrix Inverses
