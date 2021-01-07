@@ -4,7 +4,7 @@ Mathematics library for C and C++
 Follows this tutorial playlist on [YouTube](https://www.youtube.com/playlist?list=PLysLvOneEETMjrK5N-PLIYhZKwmxjGs2-).
 
 ### Description
-This library is a very low level mathematics library for C and C++ that implements common mathematical concepts and ideas from algebra, calculus, statistics, and linear algebra. A complete list of implemented functions and concepts can be found [here](#complete-list-of-functions).
+This library is a low level mathematics library for C and C++ that implements common mathematical concepts and ideas from algebra, calculus, statistics, and linear algebra. A complete list of implemented functions and concepts can be found [here](#complete-list-of-functions).
 
 List of implemented concepts so far:
 1) Big Integers
