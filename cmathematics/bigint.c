@@ -16,65 +16,146 @@ bigint allocateBigint(unsigned int capacity)
     ret.noDigits = 0;
     ret.sign = true;
     // allocate array
-    ret.digits = malloc(capacity * sizeof(char));
+    ret.digits = malloc(capacity * sizeof(int));
     return ret;
 }
 
 /**
+ * free the memory of a big integer
+ * @param i the integer
+ */
+void freeBigint(bigint *i)
+{
+    i->capacity = 0;
+    i->noDigits = 0;
+    i->sign = 1;
+
+    free(i->digits);
+}
+
+/**
  * convert string to a big integer by parsing each digit
+ * 
+ * PROCESS
+ * for each block of 9 base 10 digits
+ * val = digit[8] * 10^8 + digit[7] * 10^7 + ... + digit[0] + 10^0
+ *     = ((digit[8] * 10 + digit[7]) * 10 + ... ) * 10 + digit[0]
+ * 
  * @param str the string
  * @return the integer
  */
 bigint strToBigint(char *str)
 {
-    // length of input
-    unsigned int len = strlen(str);
-    unsigned int noDigits = len;
+    unsigned int len = strlen(str);  // length of raw string
+    unsigned int effectiveLen = len; // length of string to parse after discarding negative sign and leading zeros
+    unsigned int firstDigit = 0;     // index of first digit
 
     // sign placeholder
     bool sign = true;
-    if (str[0] == '-')
+    if (str[firstDigit] == '-')
     {
-        // first character is a negative sign
+        // first character is negative sign
         sign = false;
-        // number of digits to read is less
-        noDigits--;
+        effectiveLen--;
+
+        // advance cursor
+        firstDigit++;
     }
 
-    if (noDigits == 0)
+    // skip leading zeros
+    while (str[firstDigit] == '0')
+    {
+        effectiveLen--;
+
+        // advance cursor
+        firstDigit++;
+    }
+
+    if (effectiveLen == 0)
     {
         // no digits
         return BIGINT_ZERO;
     }
 
-    bigint ret = allocateBigint(noDigits);
+    // get number of digits
+    unsigned int numDigits, extra;
+    divMod(effectiveLen, NO_BASE_DIGITS, &numDigits, &extra);
+
+    if (extra)
+    {
+        // remainder, so need extra digit
+        numDigits++;
+    }
+
+    // allocate integer
+    bigint ret = allocateBigint(numDigits);
     // set determined values
-    ret.noDigits = noDigits;
+    ret.noDigits = numDigits;
     ret.sign = sign;
 
-    // iterate through each character
-    for (unsigned int idx = 0; idx < noDigits; idx++)
-    {
-        // read from end
-        char c = str[len - 1 - idx];
+    unsigned int currentDigit = 0;            // index in bigint array
+    unsigned int digitArrIdx = numDigits - 1; // index of the current bigint digit
 
-        // character must be between 0 and 9
+    // begin counting down from number of digits in largest value integer
+    char currentDigitCharIdx = extra ? extra : NO_BASE_DIGITS; // current string digit
+
+    // iterate through each character
+    for (unsigned int idx = firstDigit; idx < len; idx++)
+    {
+        char c = str[idx];
+
+        // validate
         if (c >= '0' && c <= '9')
         {
-            // get integer value of character
-            ret.digits[idx] = c - '0';
+            // get integer
+            currentDigit *= 10;      // increase magnitude
+            currentDigit += c - '0'; // get integer value of digit
+            currentDigitCharIdx--;
+
+            if (!currentDigitCharIdx)
+            {
+                // end of block, set in array
+                ret.digits[digitArrIdx--] = currentDigit;
+
+                // reset values
+                currentDigit = 0;
+                currentDigitCharIdx = NO_BASE_DIGITS;
+            }
         }
         else
         {
             // invalid character
+            freeBigint(&ret);
             return BIGINT_ZERO;
         }
     }
 
-    // remove leading zeros
-    while (!ret.digits[ret.noDigits - 1])
+    return ret;
+}
+
+/**
+ * creates new positive big integer from an unsigned integer
+ * 
+ * PROCESS - conversion of bases
+ * i_10 / BASE = i' R digits[0] = LSD (least significant digit)
+ * i' / BASE = i'' R digits[1]
+ * ...
+ * i''' / BASE = 0 R digits[N - 1] = MSD (most significant digit)
+ * 
+ * @param i the integer
+ * @return the integer
+ */
+bigint newPositiveBigint(unsigned int i)
+{
+    // get number of digits
+    unsigned int noDigits = numDigits(i, BASE);
+
+    bigint ret = allocateBigint(noDigits);
+    ret.noDigits = noDigits;
+    for (unsigned int idx = 0; idx < noDigits; idx++)
     {
-        ret.noDigits--;
+        // get next digit
+        divMod(i, BASE, &i, &ret.digits[idx]);
     }
 
     return ret;
@@ -82,6 +163,7 @@ bigint strToBigint(char *str)
 
 /**
  * creates new big integer from an integer
+ * calls newPositiveBigInt then applies sign after
  * @param i the integer
  * @return the big integer
  */
@@ -103,35 +185,23 @@ bigint newBigint(int i)
 }
 
 /**
- * creates new positive big integer from an unsigned integer
- * @param i the integer
- * @return the integer
- */
-bigint newPositiveBigint(unsigned int i)
-{
-    // get number of digits
-    unsigned int copy = i;
-    unsigned int noDigits = 0;
-    while (copy > 0)
-    {
-        noDigits++;
-        copy /= 10;
-    }
-
-    bigint ret = allocateBigint(noDigits);
-    ret.noDigits = noDigits;
-    for (unsigned int idx = 0;
-         idx < noDigits;
-         idx++, i /= 10)
-    {
-        ret.digits[idx] = i % 10;
-    }
-
-    return ret;
-}
-
-/**
  * get string representation of number
+ * 
+ * EXAMPLE
+ * [456789780, 123] => "123456789780"
+ * 
+ * digitIdx strIdx  char    offset
+ * 1        0       '3'     2
+ *                  '2'     1
+ *                  '1'     0 => "123"
+ * 2        3       '0'     8
+ *                  '8'     7
+ *                  ...
+ *                  '5'     1
+ *                  '4'     0 => "456789780"
+ *                               -----------
+ *                               "123456789780"
+ * 
  * @param i the pointer to the big integer
  * @return the string
  */
@@ -143,7 +213,11 @@ char *bigintPtrToString(bigint *i)
         return "0";
     }
 
-    unsigned int noChars = i->noDigits;
+    unsigned int noChars = (i->noDigits - 1) * NO_BASE_DIGITS;
+    // may not need all characters for the last
+    unsigned int numDigitsLast = numDigits(i->digits[i->noDigits - 1], 10);
+    noChars += numDigitsLast;
+
     if (!i->sign)
     {
         // extra character for negative sign
@@ -153,30 +227,45 @@ char *bigintPtrToString(bigint *i)
     // allocate string (extra character for terminator)
     char *ret = malloc((noChars + 1) * sizeof(char));
 
-    // could not allocate memory
     if (!ret)
     {
+        // could not allocate memory
         return NULL;
     }
 
     unsigned int strIdx = 0;
     if (!i->sign)
     {
-        // set first character to negative sign
+        // set first char to negative sign
         ret[strIdx++] = '-';
     }
 
-    // highest magnitude digits are last terms in the array
-    // highest magnitude digits will be the first characters in the string
-    for (unsigned int digitIdx = i->noDigits;
-         digitIdx != 0;
-         digitIdx--, strIdx++)
+    // highest magnitude digits are last in the array but first characters in string
+    char offset = numDigitsLast;
+    int strDigit;
+    for (int digitIdx = i->noDigits;
+         digitIdx; // digitIdx != 0
+         digitIdx--)
     {
-        // convert integer value to character
-        ret[strIdx] = '0' + i->digits[digitIdx - 1];
+        // keep track of original offset
+        char increment = offset;
+
+        // get integer value
+        int digit = i->digits[digitIdx - 1];
+        while (offset--)
+        {
+            // get next lowest magnitude digit in base 10
+            divMod(digit, 10, &digit, &strDigit);
+            ret[strIdx + offset] = '0' + strDigit;
+        }
+
+        offset = NO_BASE_DIGITS;
+
+        // advance cursor
+        strIdx += increment;
     }
 
-    // string termination characters
+    // string termination
     ret[noChars] = '\0';
 
     return ret;
@@ -279,7 +368,7 @@ bigint addBigint(bigint i1, bigint i2)
     for (unsigned int idx = 0; idx < ret.noDigits; idx++)
     {
         // determine carryover from operation on previous digit
-        char res = carry ? 1 : 0;
+        int res = carry ? 1 : 0;
         // add corresponding digits
         if (idx < i1.noDigits)
         {
@@ -291,10 +380,10 @@ bigint addBigint(bigint i1, bigint i2)
         }
 
         // determine carryover for operation on next digit
-        if (res >= 10)
+        if (res >= BASE)
         {
             carry = true;
-            res -= 10;
+            res -= BASE;
         }
         else
         {
@@ -372,7 +461,7 @@ bigint subtractBigint(bigint i1, bigint i2)
     for (unsigned int idx = 0; idx < ret.noDigits; idx++)
     {
         // determine carryover from operation on previous digit
-        char res = carry ? -1 : 0;
+        int res = carry ? -1 : 0;
         // add corresponding digit from first term
         // subtract corresponding digit from second term
         if (idx < i1.noDigits)
@@ -388,7 +477,7 @@ bigint subtractBigint(bigint i1, bigint i2)
         if (res < 0)
         {
             carry = true;
-            res += 10;
+            res += BASE;
         }
         else
         {
