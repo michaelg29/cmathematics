@@ -35,3 +35,48 @@ void printUintArray(unsigned int *arr, unsigned int noElements)
     }
     printf("]\n");
 }
+
+/**
+ * method to divide and get the remainder
+ * @param num the number to divide by
+ * @param divisor the divisor
+ * @param quotient the pointer to where to store the quotient
+ * @param remainder the pointer to where to store the remainder
+ */
+void divMod(unsigned int num, unsigned int divisor, unsigned int *quotient, unsigned int *remainder)
+{
+    *quotient = 0;
+
+    while (num >= divisor)
+    {
+        // subtract one multiple
+        num -= divisor;
+
+        // add one to the quotient
+        (*quotient)++;
+    }
+
+    // the rest of the value is the remainder
+    *remainder = num;
+}
+
+/**
+ * method to calculate the number of digits required to represent an integer in a specific base
+ * @param val the integer
+ * @param base the base
+ * @return the number of digits
+ */
+unsigned int numDigits(unsigned int val, unsigned int base)
+{
+    // result = ceil(log_base(val))
+
+    unsigned int ret = 0;
+
+    while (val)
+    {
+        ret++;
+        val /= base;
+    }
+
+    return ret;
+}
