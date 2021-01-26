@@ -162,6 +162,32 @@ bigint newPositiveBigint(unsigned int i)
 }
 
 /**
+ * creates new positive big integer from an unsigned long long
+ * same process as newPositiveBigInt
+ * 
+ * @param l the num
+ * @return the big integer
+ */
+bigint newLLPositiveBigInt(unsigned long long l)
+{
+    // get number of digits
+    unsigned long long noDigits = numDigitsLL(l, BASE);
+
+    bigint ret = allocateBigint(noDigits);
+    ret.noDigits = noDigits;
+    for (unsigned int idx = 0; idx < noDigits; idx++)
+    {
+        unsigned long long digit;
+
+        // get next digit
+        divModLL(l, BASE, &l, (unsigned long long *)&digit);
+        ret.digits[idx] = digit;
+    }
+
+    return ret;
+}
+
+/**
  * creates new big integer from an integer
  * calls newPositiveBigInt then applies sign after
  * @param i the integer
@@ -182,6 +208,73 @@ bigint newBigint(int i)
     ret.sign = sign;
 
     return ret;
+}
+
+/**
+ * creates new big integer from a long long
+ * calls newLLPositiveBigInt then applies sign after
+ * @param i the long long
+ * @return the big integer
+ */
+bigint newLLBigInt(long long l)
+{
+    bool sign = true;
+    if (l < 0LL)
+    {
+        sign = false;
+        l *= -1LL;
+    }
+
+    // pass in positive component
+    bigint ret = newLLPositiveBigInt(l);
+    // set sign
+    ret.sign = sign;
+
+    return ret;
+}
+
+/**
+ * multiplies two integers together and handles possible overflow
+ * @param i1 the first integer
+ * @param i2 the second integer
+ * @return the big integer containing the product
+ */
+bigint multiplyIntInt(unsigned int i1, unsigned int i2)
+{
+    bigint ret = newLLPositiveBigInt((long long)i1 * (long long)i2);
+
+    // get product (account for overflow)
+    return ret;
+}
+
+/**
+ * trims leading zeros in the array of digits
+ * @param b the pointer to the integer to trim
+ */
+void trimBigint(bigint *b)
+{
+    // determine how many digits to remove
+    while (!b->digits[b->noDigits - 1])
+    {
+        b->noDigits--;
+    }
+
+    // copy over elements
+    int *newDigits = malloc(b->noDigits * sizeof(int));
+
+    for (unsigned int i = 0; i < b->noDigits; i++)
+    {
+        newDigits[i] = b->digits[i];
+    }
+
+    // temporary variable for swap
+    int *tmp = b->digits;
+    b->digits = newDigits;
+    newDigits = tmp;
+
+    // free old
+    free(newDigits);
+    free(tmp);
 }
 
 /**
@@ -207,7 +300,7 @@ bigint newBigint(int i)
  */
 char *bigintPtrToString(bigint *i)
 {
-    if (!i->noDigits)
+    if (!i || !i->noDigits)
     {
         // no digits
         return "0";
@@ -395,10 +488,7 @@ bigint addBigint(bigint i1, bigint i2)
     }
 
     // remove leading zeros
-    while (!ret.digits[ret.noDigits - 1])
-    {
-        ret.noDigits--;
-    }
+    trimBigint(&ret);
 
     if (!i1.sign && !i2.sign) // -i1 + -i2 = -(i1 + i2)
     {
@@ -489,10 +579,90 @@ bigint subtractBigint(bigint i1, bigint i2)
     }
 
     // remove leading zeros
-    while (!ret.digits[ret.noDigits - 1])
+    trimBigint(&ret);
+
+    return ret;
+}
+
+/**
+ * multiplies two integers with elementary multiplication
+ * @param i1 the first integer
+ * @param i2 the second integer
+ * @return the product
+ */
+bigint multiplyBigint(bigint i1, bigint i2)
+{
+    // if either are zero, the product will be zero
+    if (!compareBigint(i1, BIGINT_ZERO) ||
+        !compareBigint(i2, BIGINT_ZERO))
     {
-        ret.noDigits--;
+        return BIGINT_ZERO;
     }
+
+    // if both have same sign, result is positive (exclusive NOR)
+    bool sign = !(i1.sign ^ i2.sign);
+
+    // maximum number of digits is the sum of numbers of digits
+    unsigned int noDigits = i1.noDigits + i2.noDigits;
+
+    // allocate
+    bigint ret = allocateBigint(noDigits);
+    ret.noDigits = noDigits;
+
+    // set all to 0
+    for (unsigned int i = 0; i < ret.noDigits; i++)
+    {
+        ret.digits[i] = 0;
+    }
+
+    // for each digit of i1
+    for (unsigned int i = 0; i < i1.noDigits; i++)
+    {
+        int carry = 0;
+
+        // for each digit of i2
+        for (unsigned int j = 0; j < i2.noDigits; j++)
+        {
+            // get product (account for overflow)
+            // prod[0] = addition to digit[i + j]
+            // prod[1] = addition to carry
+            bigint prod = multiplyIntInt(i1.digits[i], i2.digits[j]);
+
+            // assign to digit[i + j]
+            if (prod.noDigits > 0)
+            {
+                ret.digits[i + j] += prod.digits[0];
+            }
+            ret.digits[i + j] += carry;
+
+            // determine carry for next digit
+            if (ret.digits[i + j] >= BASE)
+            {
+                carry = 1;
+                ret.digits[i + j] -= BASE;
+            }
+            else
+            {
+                // reset carry
+                carry = 0;
+            }
+
+            // add carry from product
+            if (prod.noDigits > 1)
+            {
+                carry += prod.digits[1];
+            }
+        }
+
+        // deal with leftover carry
+        if (carry)
+        {
+            ret.digits[i + i2.noDigits] += carry;
+        }
+    }
+
+    // remove leading zeros
+    trimBigint(&ret);
 
     return ret;
 }
