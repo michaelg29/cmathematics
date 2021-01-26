@@ -64,12 +64,43 @@ bigint strToBigint(char *str);
 bigint newPositiveBigint(unsigned int i);
 
 /**
+ * creates new positive big integer from an unsigned long long
+ * same process as newPositiveBigInt
+ * 
+ * @param l the num
+ * @return the big integer
+ */
+bigint newLLPositiveBigInt(unsigned long long l);
+
+/**
  * creates new big integer from an integer
  * calls newPositiveBigInt then applies sign after
  * @param i the integer
  * @return the big integer
  */
 bigint newBigint(int i);
+
+/**
+ * creates new big integer from a long long
+ * calls newLLPositiveBigInt then applies sign after
+ * @param i the long long
+ * @return the big integer
+ */
+bigint newLLBigInt(long long l);
+
+/**
+ * multiplies two integers together and handles possible overflow
+ * @param i1 the first integer
+ * @param i2 the second integer
+ * @return the big integer containing the product
+ */
+bigint multiplyIntInt(unsigned int i1, unsigned int i2);
+
+/**
+ * trims leading zeros in the array of digits
+ * @param b the pointer to the integer to trim
+ */
+void trimBigint(bigint *b);
 
 /**
  * get string representation of number
@@ -124,5 +155,13 @@ bigint addBigint(bigint i1, bigint i2);
  * @return the difference
  */
 bigint subtractBigint(bigint i1, bigint i2);
+
+/**
+ * multiplies two integers with elementary multiplication
+ * @param i1 the first integer
+ * @param i2 the second integer
+ * @return the product
+ */
+bigint multiplyBigint(bigint i1, bigint i2);
 
 #endif
