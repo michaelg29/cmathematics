@@ -11,6 +11,8 @@ List of implemented concepts so far:
 2) Vectors
 3) Matrices
 
+*Note: a good reference book is **Modern Computer Arithmetic** by Richard Brent and Paul Zimmerman*
+
 ### Documentation
 Full documentation can be found in the header files in the `cmathematics` folder.
 
@@ -48,6 +50,7 @@ int main() {
     2) Output to string
     3) Comparison
     4) Addition, subtraction
+    5) Multiplication
 ##### Linear Algebra
 1) Vectors
 	1) Vector-Scalar operations (+, -, *, /, ^)
