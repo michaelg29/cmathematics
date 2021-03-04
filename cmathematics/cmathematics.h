@@ -22,6 +22,14 @@ typedef unsigned char bool;
 #define MAX(i1, i2) (i1 > i2 ? i1 : i2)
 
 /**
+ * finds the minimum of two values
+ * @param i1 the first value
+ * @param i2 the second value
+ * @return the larger element
+ */
+#define MIN(i1, i2) (i1 < i2 ? i1 : i2)
+
+/**
  * method to determine if an integer exists in an array
  * @param arr the array
  * @param noElements the number of elements in the array

@@ -1,0 +1,80 @@
+eg x[6] * y[4]
+karatsuba(x, 6, y, 4, 0, 8)
+    xsum = x[0:4) + x[4:8) // use 0 when out of bounds
+    ysum = y[0:4) + y[4:8) // use 0 when out of bounds = y[0:4)
+    
+    e = karatsuba(x, 6, y, 4, 4, 8)
+        idxi <= yf || idxi <= xf return 0
+    f = karatsuba(x, 6, y, 4, 0, 4)
+        xsum = x[0:2) + x[2:4) // do not carry
+        ysum = y[0:2) + y[2:4) // do not carry
+
+        e = karatsuba(x, 6, y, 4, 2, 4)
+            idxf - idxi <= 2 return longMultiply(x, 2, 4, y, 2, 4)
+        f = karatsuba(x, 6, y, 4, 0, 2)
+            idxf - idxi <= 2 return longMultiply(x, 0, 2, y, 0, 2)
+        g = karatsuba(xsum, 2, ysum, 2, 0, 2)
+            idxf - idxi <= 2 return longMultiply(xsum, 0, 2, ysum, 0, 2)
+
+        g = g - e - f
+
+        out = int[8] { 0 }
+        out[0:4) += f
+        out[2:6) += g
+        out[4:8) += e
+    g = karatsuba(xsum, 4, ysum, 4, 0, 4)
+        xsum_ = xsum[0:2) + xsum[2:4)
+        ysum_ = ysum[0:2) + ysum[2:4)
+
+        e = karatsuba(xsum, 4, ysum, 4, 2, 4)
+            idxf - idxi <= 2 return longMultiply(xsum, 2, 4, ysum, 2, 4)
+        f = karatsuba(xsum, 4, ysum, 4, 0, 2)
+            idxf - idxi <= 2 return longMultiply(xsum, 0, 2, ysum, 0, 2)
+        g = karatsuba(xsum_, 2, ysum_, 2, 0, 2)
+            idxf - idxi <= 2 return longMultiply(xsum_, 0, 2, ysum_, 0, 2)
+
+        g = g - e - f
+
+        out = int[8] { 0 }
+        out[0:4) += f
+        out[2:6) += g
+        out[4:8) += e
+
+    g = g - e - f
+
+    out = int[16] { 0 }
+    out[0:8) += f
+    out[4:12) += g
+    out[8:16) += e
+
+eg
+293187123947883712964819237 * 123987040123875132908741 = 36351403700729809780893177598379367542877082250617
+x[3] = { 964819237, 947883712, 293187123 }
+y[3] = { 132908741, 040123875, 123987 }
+
+x * y = { 082250617, 367542877, 177598379, 809780893, 403700729, 36351 }
+
+karatsuba(x, 3, y, 3, 0, 4)
+    xsum = { 964819237 + 293187123, 947883712 + 0 } = { 1258006360, 947883712 } = { 258006360, 947883713 }
+    ysum = { 132908741 + 123987,    040123875 + 0 } = {  133032728, 040123875 } = { 133032728, 040123875 }
+
+    e = karatsuba(x, 3, y, 3, 2, 4)
+        return x[2:4) * y[2:4) = x[2:3) * y[2:3) = 293187123 * 123987 = { 391819401, 36351 }
+    f = karatsuba(x, 3, y, 3, 0, 2)
+        return x[0:2) * y[0:2) = 947883712964819237 * 40123875132908741 = { 082250617, 367542877, 739518317, 38032767 }
+    g = karatsuba(xsum, 2, ysum, 2, 0, 2)
+        return xsum[0:2) * ysum[0:2) = 947883713258006360 * 40123875133032728 = { 912150080, 139327353, 751399646, 38032767 }
+
+    g -= e + f = 11881328771748125438080062 = { 438080062, 771748125, 11881328 }
+
+    out = {
+        082250617,                  = 082250617     = 082250617
+        367542877,                  = 367542877     = 367542877
+        739518317 + 438080062,      = 1177598379    = 177598379
+        38032767 + 771748125,       = 809780892     = 809780893
+        391819401 + 11881328,       = 403700729     = 403700729
+        36351 + 0,                  = 36351         = 36351
+        0,                          = 0             = 0
+        0                           = 0             = 0
+    }
+    
