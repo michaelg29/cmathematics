@@ -1,13 +1,13 @@
 #include <stdarg.h>
-#include <stdio.h>
 
 #include "cmathematics.h"
 
 #ifndef BIGINT_H
 #define BIGINT_H
 
-#define BASE 1000000000  // base used to represent each digit in the big integer
-#define NO_BASE_DIGITS 9 // number of base 10 digits the base uses
+#define BASE 1000000000       // base used to represent each digit in the big integer
+#define NO_BASE_DIGITS 9      // number of base 10 digits the base uses
+#define KARATSUBA_THRESHOLD 2 // threshold between performing long and karatsuba multiplication
 
 /**
  * structure representing an integer
@@ -21,7 +21,9 @@ typedef struct
     int *digits;           // array of the digits in reverse order; digits[i] = BASE^i component
 } bigint;
 
-extern const bigint BIGINT_ZERO; // zero integer
+extern const bigint BIGINT_ZERO;    // zero integer
+extern const bigint BIGINT_ONE;     // one integer
+extern const bigint BIGINT_NEG_ONE; // negative one integer
 
 /**
  * allocate memory for the integer
@@ -29,6 +31,15 @@ extern const bigint BIGINT_ZERO; // zero integer
  * @return the integer
  */
 bigint allocateBigint(unsigned int capacity);
+
+/**
+ * copies an array of integers into a bigint structure
+ * @param arr the array
+ * @param n the number of digits
+ * @param sign the sign of the bigint
+ * @return the bigint structure
+ */
+bigint copyIntArr(int *arr, unsigned int n, bool sign);
 
 /**
  * free the memory of a big integer
@@ -157,11 +168,58 @@ bigint addBigint(bigint i1, bigint i2);
 bigint subtractBigint(bigint i1, bigint i2);
 
 /**
- * multiplies two integers with elementary multiplication
+ * multiplies two bigints
  * @param i1 the first integer
  * @param i2 the second integer
  * @return the product
  */
 bigint multiplyBigint(bigint i1, bigint i2);
+
+/**
+ * multiplies two bigints using long (elementary) multiplication
+ * @param i1 the first integer
+ * @param i2 the second integer
+ * @return the product
+ */
+bigint longMultiplyBigint(bigint i1, bigint i2);
+
+/**
+ * multiplies two specified ranges of integers using long (elementary) multiplication
+ * @param i1 the first integer
+ * @param i1i the index of the first digit in the first integer
+ * @param i1f the index of the last digit (non-inclusive) in the first integer
+ * @param i2 the second integer
+ * @param i2i the index of the first digit in the second integer
+ * @param i2f the index of the last digit (non-inclusive) in the second integer
+ * @param outSize the variable to output the product size to
+ * @return the integer array containing the product
+ */
+int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
+                        int *i2, unsigned int i2i, unsigned int i2f,
+                        unsigned int *outSize);
+
+/**
+ * multiplies two bigints using karatsuba multiplication
+ * @param i1 the first integer
+ * @param i2 the second integer
+ * @return the product
+ */
+bigint karatsubaMultiplyBigint(bigint i1, bigint i2);
+
+/**
+ * multiplies two specified ranges of integers using long (elementary) multiplication
+ * @param i1 the first integer
+ * @param i1size one more than the index of the last digit in the first integer
+ * @param i2 the second integer
+ * @param i2size one more than the index of the last digit in the second integer
+ * @param idxi the index of the first digit in both integers, when padded to a power of 2 with zeros
+ * @param idxf the index of the last digit in both integers, when padded to a power of 2 with zeros
+ * @param outSize the variable to output the product size to
+ * @return the integer array containing the product
+ */
+int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
+                             int *i2, unsigned int i2size,
+                             unsigned int idxi, unsigned int idxf,
+                             unsigned int *outSize);
 
 #endif

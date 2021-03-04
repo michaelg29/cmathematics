@@ -50,7 +50,7 @@ int main() {
     2) Output to string
     3) Comparison
     4) Addition, subtraction
-    5) Multiplication
+    5) Multiplication (Long, Karatsuba)
 ##### Linear Algebra
 1) Vectors
 	1) Vector-Scalar operations (+, -, *, /, ^)
