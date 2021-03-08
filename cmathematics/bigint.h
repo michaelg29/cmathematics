@@ -5,8 +5,8 @@
 #ifndef BIGINT_H
 #define BIGINT_H
 
-#define BASE 1000000000       // base used to represent each digit in the big integer
-#define NO_BASE_DIGITS 9      // number of base 10 digits the base uses
+#define BASE 100000000        // base used to represent each digit in the big integer
+#define NO_BASE_DIGITS 8      // number of base 10 digits the base uses
 #define KARATSUBA_THRESHOLD 2 // threshold between performing long and karatsuba multiplication
 
 /**
