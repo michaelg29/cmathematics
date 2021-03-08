@@ -784,16 +784,18 @@ int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
             }
 
             // add carry from the product
-            if (prod.noDigits > 1)
+            unsigned int factor = 1;
+            for (int k = 1; k < prod.noDigits; k++)
             {
-                carry += prod.digits[1];
+                carry += prod.digits[k] * factor;
+                factor *= BASE;
             }
         }
 
         // deal with leftover carry
         if (carry)
         {
-            ret[i + i1range] += carry;
+            ret[i + i2range] += carry;
         }
     }
 
