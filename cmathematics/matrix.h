@@ -62,6 +62,24 @@ mat zeroMatrix(unsigned int rows, unsigned int cols);
 mat newMatrix(unsigned int rows, unsigned int cols, unsigned int numVals, ...);
 
 /**
+ * construct a new matrix with passed in columns
+ * @param rows the number of rows
+ * @param cols the number of columns
+ * @param ... the column vectors
+ * @return the matrix
+ */
+mat newColMat(unsigned int rows, unsigned int cols, ...);
+
+/**
+ * construct a new matrix with passed in rows
+ * @param rows the number of rows
+ * @param cols the number of columns
+ * @param ... the row vectors
+ * @return the matrix
+ */
+mat newRowMat(unsigned int rows, unsigned int cols, ...);
+
+/**
  * construct a new matrix with specified values
  * will automatically calculate the number of arguments
  * <b>NOTE: must pass in floats as arguments</b>
