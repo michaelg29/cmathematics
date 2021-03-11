@@ -127,6 +127,68 @@ mat newMatrix(unsigned int rows, unsigned int cols, unsigned int numVals, ...)
 }
 
 /**
+ * construct a new matrix with passed in columns
+ * @param rows the number of rows
+ * @param cols the number of columns
+ * @param ... the column vectors
+ * @return the matrix
+ */
+mat newColMat(unsigned int rows, unsigned int cols, ...)
+{
+    mat ret = allocateMat(rows, cols);
+
+    // get list
+    va_list list;
+    va_start(list, cols);
+
+    // iterate through each passed-in column
+    for (unsigned int c = 0; c < cols; c++)
+    {
+        vec col = va_arg(list, vec);
+
+        for (unsigned int r = 0; r < rows; r++)
+        {
+            ret.elements[r][c] = col.elements[r];
+        }
+    }
+
+    va_end(list);
+
+    return ret;
+}
+
+/**
+ * construct a new matrix with passed in rows
+ * @param rows the number of rows
+ * @param cols the number of columns
+ * @param ... the row vectors
+ * @return the matrix
+ */
+mat newRowMat(unsigned int rows, unsigned int cols, ...)
+{
+    mat ret = allocateMat(rows, cols);
+
+    // get list
+    va_list list;
+    va_start(list, cols);
+
+    // iterate through each passed in row
+    for (unsigned int r = 0; r < rows; r++)
+    {
+        vec row = va_arg(list, vec);
+
+        for (unsigned int c = 0; c < cols; c++)
+        {
+            ret.elements[r][c] = row.elements[c];
+        }
+    }
+
+    va_end(list);
+
+    return ret;
+}
+
+/**
  * copies a matrix's values
  * @param m the pointer to the matrix to be copied
  * @return the copy
