@@ -110,21 +110,6 @@ void dynarr_reallocate(dynamicarray *list, unsigned int additionalLength)
 
         list->capacity = capacity;
     }
-
-    // allocate memory (double capacity)
-    // void **newList = malloc((list->capacity * 2) * sizeof(void *));
-
-    // // copy elements
-    // for (unsigned int i = 0; i < list->size; i++)
-    // {
-    //     newList[i] = list->list[i];
-    // }
-
-    // // update pointer
-    // free(list->list);
-    // list->list = newList;
-    // // double size
-    // list->capacity <<= 1;
 }
 
 void *dynarr_removeAtIdx(dynamicarray *list, unsigned int idx)
@@ -187,7 +172,6 @@ void dynarr_clear(dynamicarray *list)
 void dynarr_free(dynamicarray *list)
 {
     free(list->list);
-    free(list);
 }
 
 void dynarr_freeDeep(dynamicarray *list)
@@ -197,7 +181,6 @@ void dynarr_freeDeep(dynamicarray *list)
     {
         free(list->list[i]);
     }
-    free(list);
 }
 
 dynarr_iterator dynarr_iterator_new(dynamicarray *list)
