@@ -88,24 +88,16 @@ void dynarr_reallocate(dynamicarray *list, unsigned int additionalLength)
         }
 
         // must reallocate
-        void **newMem = realloc(list->list, capacity * sizeof(void *));
-        if (!newMem)
+        void **oldMem = list->list;
+        list->list = realloc(list->list, capacity * sizeof(void *));
+        if (!list->list)
         {
             // allocate in new location
-            newMem = malloc(capacity * sizeof(void *));
-            memcpy(newMem, list->list, capacity * sizeof(void *));
+            list->list = malloc(capacity * sizeof(void *));
+            memcpy(list->list, oldMem, capacity * sizeof(void *));
 
             // update pointers
-            free(list->list);
-            list->list = newMem;
-        }
-        else if (newMem != list->list)
-        {
-            // reallocated in a new location
-            // update pointers
-
-            free(list->list);
-            list->list = newMem;
+            free(oldMem);
         }
 
         list->capacity = capacity;
@@ -176,7 +168,6 @@ void dynarr_free(dynamicarray *list)
 
 void dynarr_freeDeep(dynamicarray *list)
 {
-    free(list->list);
     for (unsigned int i = 0; i < list->size; i++)
     {
         free(list->list[i]);
