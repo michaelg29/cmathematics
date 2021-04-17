@@ -65,23 +65,18 @@ char strstream_realloc(strstream *s, unsigned int additionalLength)
         }
 
         // must reallocate
-        char *newMem = realloc(s->str, capacity * sizeof(char));
-        if (!newMem)
+        char *oldMem = s->str;
+        s->str = realloc(s->str, capacity * sizeof(char));
+        if (!s->str)
         {
             // must allocate in new location
-            newMem = malloc(capacity * sizeof(char));
-            memcpy(newMem, s->str, capacity * sizeof(char));
+            s->str = malloc(capacity * sizeof(char));
+            // copy existing characters
+            memcpy(s->str, oldMem, s->capacity * sizeof(char));
 
             // update pointers
-            free(s->str);
-            s->str = newMem;
-        }
-        else if (newMem != s->str)
-        {
-            // reallocated in a new location
-            // update pointers
-            free(s->str);
-            s->str = newMem;
+            free(oldMem);
+            s->str = oldMem;
         }
 
         s->capacity = capacity;
