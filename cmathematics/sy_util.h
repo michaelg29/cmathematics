@@ -66,7 +66,7 @@ typedef struct SY_tokenNode
 } SY_tokenNode;
 
 bool SY_charIsNumber(char c);
-SY_token *SY_findElement(int i, strstream *s, avl *list, int *length);
+SY_token *SY_findElement(unsigned int i, strstream *s, avl *list, int *length);
 
 SY_token *SY_createToken(tokentype type);
 SY_token *SY_createTokenConstant(double value);

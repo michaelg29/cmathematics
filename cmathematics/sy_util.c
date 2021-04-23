@@ -50,23 +50,28 @@ bool SY_charIsNumber(char c)
            c == '-';
 }
 
-SY_token *SY_findElement(int i, strstream *s, avl *list, int *length)
+SY_token *SY_findElement(unsigned int i, strstream *s, avl *list, int *length)
 {
     if (!list)
     {
+        *length = 0;
         return NULL;
     }
+
+    // compare to current key
     unsigned int n = strlen((char *)list->key);
     int cmp = 0;
     if (i + n < s->size)
     {
-        char c = s->str[i + n];
-        s->str[i + n] = '\0';
-        cmp = strcmp(s->str + i, list->key);
-        s->str[i + n] = c;
+        // have room to find the token
+        char c = s->str[i + n];              // store first excluded character
+        s->str[i + n] = '\0';                // create a temporary terminator
+        cmp = strcmp(s->str + i, list->key); // compare substring to the current key
+        s->str[i + n] = c;                   // return character to spot
     }
     else
     {
+        // still compare to end of the string
         cmp = strcmp(s->str + i, list->key);
     }
 
