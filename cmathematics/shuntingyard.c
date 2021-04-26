@@ -21,7 +21,22 @@ void sy_init()
     functions = avl_createEmptyRoot(strkeycmp);
     functions = avl_insert(functions, "sin", SY_createDefaultUnaryFunction("sin", sin));
     functions = avl_insert(functions, "cos", SY_createDefaultUnaryFunction("cos", cos));
+    functions = avl_insert(functions, "tan", SY_createDefaultUnaryFunction("tan", tan));
+    functions = avl_insert(functions, "asin", SY_createDefaultUnaryFunction("asin", asin));
+    functions = avl_insert(functions, "acos", SY_createDefaultUnaryFunction("acos", acos));
+    functions = avl_insert(functions, "atan", SY_createDefaultUnaryFunction("atan", atan));
+    functions = avl_insert(functions, "csc", SY_createDefaultUnaryFunction("csc", csc));
+    functions = avl_insert(functions, "sec", SY_createDefaultUnaryFunction("sec", sec));
+    functions = avl_insert(functions, "cot", SY_createDefaultUnaryFunction("cot", cot));
+    functions = avl_insert(functions, "acsc", SY_createDefaultUnaryFunction("acsc", acsc));
+    functions = avl_insert(functions, "asec", SY_createDefaultUnaryFunction("asec", asec));
+    functions = avl_insert(functions, "acot", SY_createDefaultUnaryFunction("acot", acot));
+    functions = avl_insert(functions, "abs", SY_createDefaultUnaryFunction("abs", absf));
+    functions = avl_insert(functions, "ln", SY_createDefaultUnaryFunction("ln", log));
+    functions = avl_insert(functions, "log2", SY_createDefaultUnaryFunction("log2", log2));
+    functions = avl_insert(functions, "log10", SY_createDefaultUnaryFunction("log10", log10));
     functions = avl_insert(functions, "sqrt", SY_createDefaultUnaryFunction("sqrt", sqrt));
+    functions = avl_insert(functions, "exp", SY_createDefaultUnaryFunction("exp", exp));
 
     subtractionToken = SY_createBinaryFunction("-", subtract, OPERATOR, 2, true);
     multiplicationToken = SY_createBinaryFunction("*", multiply, OPERATOR, 3, true);
