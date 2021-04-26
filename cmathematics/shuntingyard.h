@@ -18,4 +18,7 @@ double evalTree(SY_tokenNode *tree);
 
 double SY_eval(SY_token *t, double x, double y);
 
+bool SY_registerVariable(char *name, double value);
+bool SY_clearVariable(char *name);
+
 #endif

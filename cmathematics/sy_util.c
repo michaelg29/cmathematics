@@ -110,11 +110,12 @@ SY_token *SY_createTokenConstant(double value)
     return ret;
 }
 
-SY_token *SY_createTokenConstantString(char *name, double value)
+SY_token *SY_createTokenConstantString(char *name, double value, bool restricted)
 {
     SY_token *ret = SY_createToken(CONSTANTSTR);
     ret->val.namedConstVal.name = name;
     ret->val.namedConstVal.value = value;
+    ret->val.namedConstVal.restricted = restricted;
     return ret;
 }
 
@@ -160,6 +161,22 @@ void SY_freeToken(SY_token *t)
         //free(t->val.strVal);
     }
     free(t);
+}
+
+void SY_freeTokenList(dynamicarray *list)
+{
+    dynarr_iterator it = dynarr_iterator_new(list);
+    SY_token *cur = NULL;
+
+    while ((cur = dynarr_iterator_next(&it)))
+    {
+        if (cur->type == CONSTANT)
+        {
+            free(cur);
+        }
+    }
+
+    dynarr_free(list);
 }
 
 SY_token *SY_createDefaultFunction(char *name)

@@ -1,4 +1,5 @@
 #include "lib/strstream.h"
+#include "lib/dynamicarray.h"
 #include "lib/avl.h"
 #include "cmathematics.h"
 
@@ -44,6 +45,7 @@ typedef struct
 {
     char *name;
     double value;
+    bool restricted;
 } SY_constant;
 
 typedef struct
@@ -70,7 +72,7 @@ SY_token *SY_findElement(unsigned int i, strstream *s, avl *list, int *length);
 
 SY_token *SY_createToken(tokentype type);
 SY_token *SY_createTokenConstant(double value);
-SY_token *SY_createTokenConstantString(char *name, double value);
+SY_token *SY_createTokenConstantString(char *name, double value, bool restricted);
 SY_token *SY_createTokenUnary(char *value);
 SY_token *SY_createTokenBinary(char *value);
 SY_token *SY_createTokenOperator(char *value);
@@ -78,6 +80,7 @@ SY_token *SY_createTokenLParen();
 SY_token *SY_createTokenRParen();
 
 void SY_freeToken(SY_token *t);
+void SY_freeTokenList(dynamicarray *list);
 
 char SY_getPrecedence(SY_token *f);
 bool SY_isFunction(SY_token *f);
