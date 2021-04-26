@@ -48,8 +48,8 @@ void sy_init()
 
     // create constants tree
     constants = avl_createEmptyRoot(strkeycmp);
-    constants = avl_insert(constants, "pi", SY_createTokenConstantString("pi", 4.0 * atan(1.0)));
-    constants = avl_insert(constants, "e", SY_createTokenConstantString("e", exp(1.0)));
+    constants = avl_insert(constants, "pi", SY_createTokenConstantString("pi", 4.0 * atan(1.0), true));
+    constants = avl_insert(constants, "e", SY_createTokenConstantString("e", exp(1.0), true));
 
     // initialize other tokens
     lparenToken = SY_createTokenLParen();
@@ -268,7 +268,128 @@ dynamicarray RPN(char *str)
 }
 
 // char *RPNstring(char *str);
-// SY_tokenNode *getEquationTree(dynamicarray RPN);
-// double evalTree(SY_tokenNode *tree);
 
-// double SY_eval(SY_token *t, double x, double y);
+SY_tokenNode *getEquationTree(dynamicarray RPN)
+{
+    dynamicarray stack = dynarr_defaultAllocate();
+
+    dynarr_iterator it = dynarr_iterator_new(&RPN);
+    SY_token *cur = NULL;
+
+    while ((cur = dynarr_iterator_next(&it)))
+    {
+        // while another token is to be processed
+        if (cur->type == CONSTANT || cur->type == CONSTANTSTR)
+        {
+            // create a new number node
+            dynarr_addLast(&stack, SY_createNode(cur));
+        }
+        else
+        {
+            // create a function node
+            SY_tokenNode *func = SY_createNode(cur);
+            if (SY_isUnary(cur))
+            {
+                // unary function, insert one child
+                if (stack.size)
+                {
+                    func->left = dynarr_removeLast(&stack);
+                }
+            }
+            else
+            {
+                // binary function, insert two children
+                // right child is second argument
+                if (stack.size)
+                {
+                    func->right = dynarr_removeLast(&stack);
+                }
+
+                // left child is first argument
+                if (stack.size)
+                {
+                    func->left = dynarr_removeLast(&stack);
+                }
+            }
+            dynarr_addLast(&stack, func);
+        }
+    }
+
+    SY_tokenNode *ret = dynarr_removeLast(&stack);
+    dynarr_freeDeep(&stack);
+
+    return ret;
+}
+
+double evalTree(SY_tokenNode *tree)
+{
+    return tree ? SY_eval(tree->t, evalTree(tree->left), evalTree(tree->right)) : 0.0;
+}
+
+double SY_eval(SY_token *t, double x, double y)
+{
+    if (!t)
+    {
+        return 0.0;
+    }
+
+    if (t->type == FUNCTION || t->type == OPERATOR)
+    {
+        return SY_isUnary(t) ? SY_evalUnary(t, x) : SY_evalBinary(t, x, y);
+    }
+    else if (t->type == CONSTANT)
+    {
+        return t->val.constVal;
+    }
+    else if (t->type == CONSTANTSTR)
+    {
+        return t->val.namedConstVal.value;
+    }
+
+    return 0.0;
+}
+
+bool SY_registerVariable(char *name, double value)
+{
+    SY_token *t = avl_get(constants, name);
+    if (t)
+    {
+        if (t->val.namedConstVal.restricted)
+        {
+            // cannot modify restricted value
+            return false;
+        }
+
+        // replace existing value
+        t->val.namedConstVal.value = value;
+    }
+    else
+    {
+        // create a token
+        t = SY_createTokenConstantString(name, value, false);
+        constants = avl_insert(constants, name, t);
+    }
+
+    return true;
+}
+
+bool SY_clearVariable(char *name)
+{
+    SY_token *t = avl_get(constants, name);
+    if (t)
+    {
+        if (t->val.namedConstVal.restricted)
+        {
+            // cannot remove restricted variable
+            return false;
+        }
+
+        avl_remove(constants, name);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}

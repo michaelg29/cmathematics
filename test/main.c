@@ -47,10 +47,33 @@ int main()
 
     sy_init();
 
+    if (SY_registerVariable("pi", 2.0))
+    {
+        printf("Registered into variable\n");
+    }
+    else
+    {
+        printf("Failed to register\n");
+    }
+
+    if (SY_registerVariable("xc", 2.0))
+    {
+        printf("Registered into variable\n");
+    }
+    else
+    {
+        printf("Failed to register\n");
+    }
+
     // -1 * sin(2 * pi * cos(2 * e) - sqrt(22)) + -1
-    dynamicarray tokenList = RPN("sin(3^-2*27/4pi)+1");
+    dynamicarray tokenList = RPN("-sin(2picos(2e) - sqrt(22))+-1-xc");
     dynarr_iterate(&tokenList, printToken);
-    dynarr_free(&tokenList);
+
+    SY_tokenNode *tree = getEquationTree(tokenList);
+    printf("\n%.8f\n", evalTree(tree));
+
+    SY_freeNode(tree);
+    SY_freeTokenList(&tokenList);
 
     sy_cleanup();
 
