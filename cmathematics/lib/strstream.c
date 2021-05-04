@@ -76,7 +76,6 @@ char strstream_realloc(strstream *s, unsigned int additionalLength)
 
             // update pointers
             free(oldMem);
-            s->str = oldMem;
         }
 
         s->capacity = capacity;
