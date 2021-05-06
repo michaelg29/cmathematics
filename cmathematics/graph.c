@@ -1,0 +1,290 @@
+#include "graph.h"
+#include "lib/strstream.h"
+#include <stdlib.h>
+#include <string.h>
+
+edge *createEdge(int v1, int v2)
+{
+    edge *ret = malloc(sizeof(edge));
+
+    ret->v1 = v1;
+    ret->v2 = v2;
+    ret->weight = 1;
+
+    return ret;
+}
+
+edge *createWeightedEdge(int v1, int v2, int weight)
+{
+    edge *ret = malloc(sizeof(edge));
+
+    ret->v1 = v1;
+    ret->v2 = v2;
+    ret->weight = weight;
+
+    return ret;
+}
+
+// graph constructor/destructor
+graph graph_new(char mode, int n)
+{
+    graph ret = {n, NULL, mode};
+
+    // setup edge storage
+    if (mode)
+    {
+        // allocate array of lists
+        ret.adjacencyLists = malloc(n * sizeof(dynamicarray));
+        for (int i = 0; i < n; i++)
+        {
+            // allocate each adjacency list
+            ret.adjacencyLists[i] = dynarr_defaultAllocate();
+        }
+    }
+    else
+    {
+        // allocate adjacency matrix
+        ret.adjacencyMatrix = malloc(n * sizeof(int *));
+        for (int i = 0; i < n; i++)
+        {
+            // allocate row
+            ret.adjacencyMatrix[i] = malloc(n * sizeof(int));
+            for (int j = 0; j < n; j++)
+            {
+                ret.adjacencyMatrix[i][j] = 0;
+            }
+        }
+    }
+
+    return ret;
+}
+
+void graph_free(graph *g)
+{
+    if (g)
+    {
+        if (g->adjacencyMode)
+        {
+            // free each list
+            for (int i = 0; i < g->n; i++)
+            {
+                dynarr_freeDeep(g->adjacencyLists + i); // &g->adjacencyLists[i]
+            }
+            free(g->adjacencyLists);
+        }
+        else
+        {
+            for (int i = 0; i < g->n; i++)
+            {
+                free(g->adjacencyMatrix + i);
+            }
+            free(g->adjacencyMatrix);
+        }
+    }
+}
+
+// graph modifiers
+void graph_addVertices(graph *g, int n)
+{
+    int nextN = g->n + n;
+
+    if (g->adjacencyMode)
+    {
+        dynamicarray *oldMem = g->adjacencyLists; // get original pointer
+        g->adjacencyLists = realloc(g->adjacencyLists, nextN * sizeof(dynamicarray));
+        if (!g->adjacencyLists)
+        {
+            // reallocate in new location
+            g->adjacencyLists = malloc(nextN * sizeof(dynamicarray));
+            memcpy(g->adjacencyLists, oldMem, g->n * sizeof(dynamicarray));
+
+            free(oldMem);
+
+            // allocate new lists
+            for (int i = 0; i < n; i++)
+            {
+                g->adjacencyLists[i + g->n] = dynarr_defaultAllocate();
+            }
+        }
+    }
+    else
+    {
+        int **newAdjacencyMatrix = malloc(nextN * sizeof(int *));
+        for (int i = 0; i < nextN; i++)
+        {
+            newAdjacencyMatrix[i] = malloc(nextN * sizeof(int));
+            if (i < g->n)
+            {
+                // copy existing values
+                memcpy(newAdjacencyMatrix[i], g->adjacencyMatrix[i], g->n * sizeof(int));
+                // set new values
+                for (int j = 0; j < n; j++)
+                {
+                    newAdjacencyMatrix[i][j + g->n] = 0;
+                }
+
+                // free old memory
+                free(g->adjacencyMatrix[i]);
+            }
+            else
+            {
+                // set new rows to hold all zeros
+                for (int j = 0; j < nextN; j++)
+                {
+                    newAdjacencyMatrix[i][j] = 0;
+                }
+            }
+        }
+        // free old memory
+        free(g->adjacencyMatrix);
+
+        // update pointers
+        g->adjacencyMatrix = newAdjacencyMatrix;
+    }
+
+    g->n = nextN;
+}
+
+void graph_addDirectedEdge(graph *g, int v1, int v2)
+{
+    if (g->adjacencyMode)
+    {
+        dynarr_addLast(g->adjacencyLists + v1, createEdge(v1, v2));
+    }
+    else
+    {
+        g->adjacencyMatrix[v1][v2] = !0; // true
+    }
+}
+
+void graph_addDirectedWeightedEdge(graph *g, int v1, int v2, int weight)
+{
+    if (g->adjacencyMode)
+    {
+        dynarr_addLast(g->adjacencyLists + v1, createWeightedEdge(v1, v2, weight));
+    }
+    else
+    {
+        g->adjacencyMatrix[v1][v2] = weight; // true
+    }
+}
+
+void graph_addUndirectedEdge(graph *g, int v1, int v2)
+{
+    if (g->adjacencyMode)
+    {
+        dynarr_addLast(g->adjacencyLists + v1, createEdge(v1, v2));
+        dynarr_addLast(g->adjacencyLists + v2, createEdge(v2, v1));
+    }
+    else
+    {
+        g->adjacencyMatrix[v1][v2] = !0;
+        g->adjacencyMatrix[v2][v1] = !0;
+    }
+}
+
+void graph_addUndirectedWeightedEdge(graph *g, int v1, int v2, int weight)
+{
+    if (g->adjacencyMode)
+    {
+        dynarr_addLast(g->adjacencyLists + v1, createWeightedEdge(v1, v2, weight));
+        dynarr_addLast(g->adjacencyLists + v2, createWeightedEdge(v2, v1, weight));
+    }
+    else
+    {
+        g->adjacencyMatrix[v1][v2] = weight;
+        g->adjacencyMatrix[v2][v1] = weight;
+    }
+}
+
+// graph accessors
+char *graph_toString(graph *g)
+{
+    strstream ret = strstream_alloc(g->n);
+
+    // iterate through each vertex
+    for (int i = 0; i < g->n; i++)
+    {
+        if (g->adjacencyMode)
+        {
+            edge *e = NULL;
+            dynarr_iterator it = dynarr_iterator_new(g->adjacencyLists + i);
+
+            // iterate through adjacency list
+            while ((e = dynarr_iterator_next(&it)))
+            {
+                if (e->weight)
+                {
+                    strstream_concat(&ret, "%d -> %d; %d\n", e->v1, e->v2, e->weight);
+                }
+            }
+        }
+        else
+        {
+            // scan through row, output edges
+            for (int j = 0; j < g->n; j++)
+            {
+                if (g->adjacencyMatrix[i][j])
+                {
+                    strstream_concat(&ret, "%d -> %d; %d\n", i, j, g->adjacencyMatrix[i][j]);
+                }
+            }
+        }
+    }
+
+    return ret.str;
+}
+
+// DFS
+void graph_dfsStart(graph *g, int src, int *d, int *f, int *p)
+{
+    int time = 0;
+    for (int i = 0; i < g->n; i++)
+    {
+        d[i] = 0;
+        f[i] = 0;
+        p[i] = -1;
+    }
+
+    graph_dfs(g, src, d, f, p, &time);
+}
+
+void graph_dfs(graph *g, int src, int *d, int *f, int *p, int *time)
+{
+    (*time)++;
+    d[src] = *time;
+
+    // discover neighbors
+    if (g->adjacencyMode)
+    {
+        edge *e = NULL;
+        dynarr_iterator it = dynarr_iterator_new(g->adjacencyLists + src);
+
+        // iterate through edges
+        while ((e = dynarr_iterator_next(&it)))
+        {
+            if (e->weight && !d[e->v2])
+            {
+                // edge has weight (valid), second vertex not discovered yet
+                graph_dfs(g, e->v2, d, f, p, time);
+                p[e->v2] = src;
+            }
+        }
+    }
+    else
+    {
+        // scan through rows
+        for (int i = 0; i < g->n; i++)
+        {
+            if (g->adjacencyMatrix[src][i] && !d[i])
+            {
+                // edge has weight (valid), second vertex not discovered yet
+                graph_dfs(g, i, d, f, p, time);
+                p[i] = src;
+            }
+        }
+    }
+
+    (*time)++;
+    f[src] = *time;
+}
