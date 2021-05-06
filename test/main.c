@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../cmathematics/cmathematics.h"
 #include "../cmathematics/vec.h"
 #include "../cmathematics/matrix.h"
 #include "../cmathematics/bigint.h"
 #include "../cmathematics/shuntingyard.h"
+#include "../cmathematics/graph.h"
 
 void printToken(void *el)
 {
@@ -30,6 +32,18 @@ void printToken(void *el)
     }
 }
 
+void printIntArr(int *arr, int n)
+{
+    printf("[ ");
+
+    for (int i = 0; i < n; i++)
+    {
+        printf("%d, ", arr[i]);
+    }
+
+    printf("]\n");
+}
+
 int main()
 {
     printf("Hello, world!\n");
@@ -45,37 +59,34 @@ int main()
     // freeBigint(&b2);
     // freeBigint(&b3);
 
-    sy_init();
+    int N = 5;
+    graph g = graph_new(ADJ_MATRIX, N);
 
-    if (SY_registerVariable("pi", 2.0))
-    {
-        printf("Registered into variable\n");
-    }
-    else
-    {
-        printf("Failed to register\n");
-    }
+    graph_addDirectedWeightedEdge(&g, 0, 1, 5);
+    graph_addUndirectedWeightedEdge(&g, 0, 2, 13);
+    graph_addDirectedEdge(&g, 2, 3);
+    graph_addDirectedWeightedEdge(&g, 3, 1, 6);
+    graph_addDirectedWeightedEdge(&g, 3, 4, 78);
 
-    if (SY_registerVariable("xc", 2.0))
-    {
-        printf("Registered into variable\n");
-    }
-    else
-    {
-        printf("Failed to register\n");
-    }
+    char *str = graph_toString(&g);
+    printf("%s\n", str);
+    free(str);
 
-    // -1 * sin(2 * pi * cos(2 * e) - sqrt(22)) + -1
-    dynamicarray tokenList = RPN("-sin(2picos(2e) - sqrt(22))+-1-xc");
-    dynarr_iterate(&tokenList, printToken);
+    int *d = malloc(N * sizeof(int));
+    int *f = malloc(N * sizeof(int));
+    int *p = malloc(N * sizeof(int));
 
-    SY_tokenNode *tree = getEquationTree(tokenList);
-    printf("\n%.8f\n", evalTree(tree));
+    graph_dfsStart(&g, 0, d, f, p);
 
-    SY_freeNode(tree);
-    SY_freeTokenList(&tokenList);
+    graph_free(&g);
 
-    sy_cleanup();
+    printIntArr(d, N);
+    printIntArr(f, N);
+    printIntArr(p, N);
+
+    free(d);
+    free(f);
+    free(p);
 
     return 0;
 }
