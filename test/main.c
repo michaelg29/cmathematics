@@ -48,45 +48,16 @@ int main()
 {
     printf("Hello, world!\n");
 
-    // bigint b1 = strToBigint("293187123947883712964819237");
-    // bigint b2 = strToBigint("123987040123875132908741");
+    bigint b1 = strToBigint("29318714789650187194709093218470912834709867109874321423947883712964819237");
+    bigint b2 = strToBigint("12398704012381274312094710985714156298746129568167163279458172374619275132908741");
 
-    // bigint b3 = multiplyBigint(b1, b2);
+    bigint b3 = multiplyBigint(b1, b2);
 
-    // printf("%s * %s = %s\n", bigintToString(b1), bigintToString(b2), bigintToString(b3));
+    printf("%s * %s = %s\n", bigintToString(b1), bigintToString(b2), bigintToString(b3));
 
-    // freeBigint(&b1);
-    // freeBigint(&b2);
-    // freeBigint(&b3);
-
-    int N = 5;
-    graph g = graph_new(ADJ_MATRIX, N);
-
-    graph_addDirectedWeightedEdge(&g, 0, 1, 5);
-    graph_addUndirectedWeightedEdge(&g, 0, 2, 13);
-    graph_addDirectedEdge(&g, 2, 3);
-    graph_addDirectedWeightedEdge(&g, 3, 1, 6);
-    graph_addDirectedWeightedEdge(&g, 3, 4, 78);
-
-    char *str = graph_toString(&g);
-    printf("%s\n", str);
-    free(str);
-
-    int *d = malloc(N * sizeof(int));
-    int *f = malloc(N * sizeof(int));
-    int *p = malloc(N * sizeof(int));
-
-    graph_dfsStart(&g, 0, d, f, p);
-
-    graph_free(&g);
-
-    printIntArr(d, N);
-    printIntArr(f, N);
-    printIntArr(p, N);
-
-    free(d);
-    free(f);
-    free(p);
+    freeBigint(&b1);
+    freeBigint(&b2);
+    freeBigint(&b3);
 
     return 0;
 }

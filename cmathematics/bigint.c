@@ -615,6 +615,9 @@ bigint subtractBigint(bigint i1, bigint i2)
  */
 bigint multiplyBigint(bigint i1, bigint i2)
 {
+    // compute the sign using XNOR
+    bool sign = !(i1.sign ^ i2.sign);
+
     /*
         simplification checks
     */
@@ -625,26 +628,14 @@ bigint multiplyBigint(bigint i1, bigint i2)
         return BIGINT_ZERO;
     }
 
-    // if either number is 1, copy the other digits and keep the sign
-    // if either number is -1, copy the other digits and reverse the sign
-    char i1Comparison_p1 = compareBigint(i1, BIGINT_ONE);
-    char i1Comparison_n1 = compareBigint(i1, BIGINT_NEG_ONE);
-    if (!(i1Comparison_p1 && i1Comparison_n1))
+    // if either number has a magnitude of 1, copy the other digits
+    if (i1.noDigits == 1 && i1.digits[0] == 1)
     {
-        return copyIntArr(
-            i2.digits,
-            i2.noDigits,
-            !i1Comparison_p1 ? i2.sign : !i2.sign);
+        return copyIntArr(i2.digits, i2.noDigits, sign);
     }
-
-    char i2Comparison_p1 = compareBigint(i2, BIGINT_ONE);
-    char i2Comparison_n1 = compareBigint(i2, BIGINT_NEG_ONE);
-    if (!(i2Comparison_p1 && i2Comparison_n1))
+    else if (i2.noDigits == 1 && i2.digits[0] == 1)
     {
-        return copyIntArr(
-            i1.digits,
-            i1.noDigits,
-            !i2Comparison_p1 ? i1.sign : !i1.sign);
+        return copyIntArr(i1.digits, i1.noDigits, sign);
     }
 
     /*
@@ -676,42 +667,35 @@ bigint multiplyBigint(bigint i1, bigint i2)
 
             or under the threshold
     */
+    unsigned int noDigits;
+    int *retArr;
     if (maxNoDigits < KARATSUBA_THRESHOLD ||
         minNoDigits <= sqrt(maxNoDigits))
     {
         // perform long multiplication
-        return longMultiplyBigint(i1, i2);
+        retArr = longMultiplyIntArr(i1.digits, 0, i1.noDigits,
+                                    i2.digits, 0, i2.noDigits,
+                                    &noDigits);
     }
     else
     {
         // perform karatsuba multiplication
-        return karatsubaMultiplyBigint(i1, i2);
+        retArr = karatsubaMultiplyIntArr(i1.digits, i1.noDigits,
+                                         i2.digits, i2.noDigits,
+                                         0, maxNoDigits,
+                                         &noDigits);
     }
-}
 
-/**
- * multiplies two bigints using long (elementary) multiplication
- * @param i1 the first integer
- * @param i2 the second integer
- * @return the product
- */
-bigint longMultiplyBigint(bigint i1, bigint i2)
-{
-    // compute the sign using XNOR
-    bool sign = !(i1.sign ^ i2.sign);
-
-    // get result and insert into bigint structure
-    unsigned int noDigits;
-    int *retArr = longMultiplyIntArr(i1.digits, 0, i1.noDigits,
-                                     i2.digits, 0, i2.noDigits,
-                                     &noDigits);
     bigint ret = copyIntArr(retArr, noDigits, sign);
 
     // remove leading zeros
     trimBigint(&ret);
 
     // free tempoary array
-    free(retArr);
+    if (retArr)
+    {
+        free(retArr);
+    }
 
     return ret;
 }
@@ -762,25 +746,36 @@ int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
             // prod[1] = addition to carry
             bigint prod = multiplyIntInt(i1[i1i + i], i2[i2i + j]);
 
-            // assign to current digit
+            // calculate contribution
+            unsigned int addition = 0;
             if (prod.noDigits > 0)
             {
-                ret[i + j] += prod.digits[0];
+                addition = carry + prod.digits[0];
             }
-            if (carry)
+            else
             {
-                ret[i + j] += carry;
+                addition = carry;
             }
 
-            // determine carry for next digit
-            if (ret[i + j] >= BASE)
+            // calculate possible carry from contribution
+            if (addition >= BASE)
             {
                 carry = 1;
-                ret[i + j] -= BASE;
+                addition -= BASE;
             }
             else
             {
                 carry = 0;
+            }
+
+            // assign to digit
+            ret[i + j] += addition;
+
+            // determine additional carry for next digit
+            if (ret[i + j] >= BASE)
+            {
+                carry++;
+                ret[i + j] -= BASE;
             }
 
             // add carry from the product
@@ -804,44 +799,6 @@ int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
 }
 
 /**
- * multiplies two bigints using karatsuba multiplication
- * @param i1 the first integer
- * @param i2 the second integer
- * @return the product
- */
-bigint karatsubaMultiplyBigint(bigint i1, bigint i2)
-{
-    // compute the sign using XNOR
-    bool sign = !(i1.sign ^ i2.sign);
-
-    // calculate implicit padding (does not actually exist)
-    // determine next power of 2
-    unsigned int maxNoDigits = MAX(i1.noDigits, i2.noDigits);
-    unsigned int nextPow2 = 1;
-    while (nextPow2 < maxNoDigits)
-    {
-        // multiply by 2
-        nextPow2 <<= 1;
-    }
-
-    // get result and insert into bigint structure
-    unsigned int noDigits;
-    int *retArr = karatsubaMultiplyIntArr(i1.digits, i1.noDigits,
-                                          i2.digits, i2.noDigits,
-                                          0, nextPow2,
-                                          &noDigits);
-    bigint ret = copyIntArr(retArr, noDigits, sign);
-
-    // remove leading zeros
-    trimBigint(&ret);
-
-    // free temporary array
-    free(retArr);
-
-    return ret;
-}
-
-/**
  * multiplies two specified ranges of integers using long (elementary) multiplication
  * @param i1 the first integer
  * @param i1size one more than the index of the last digit in the first integer
@@ -858,15 +815,16 @@ int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
                              unsigned int *outSize)
 {
     // if either index out of bounds, return all zeros
-    if (idxi >= i1size || idxi >= i2size)
+    if (idxi >= i1size || idxi >= i2size || idxi >= idxf)
     {
         *outSize = 0;
         return NULL;
     }
 
-    unsigned int range = idxf - idxi;
-    unsigned int noDigits = range << 1;
-    unsigned int sumTermSize = range >> 1;
+    unsigned int range = idxf - idxi;                       // global range
+    unsigned int noDigits = range << 1;                     // number of digits in result
+    unsigned int half = ((idxf + idxi) >> 1) + (range & 1); // = ceil(avg(idxi, idxf))
+    unsigned int sumTermSize = half - idxi + 1;             // sum size is 1 + half of the range
 
     // Base case: do long multiplication if under threshold
     if (range <= KARATSUBA_THRESHOLD)
@@ -889,7 +847,7 @@ int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
 
     // use parallel pointers to iterate through left half and right half of the digit array
     unsigned int leftIdx = idxi;
-    unsigned int rightIdx = idxi + sumTermSize;
+    unsigned int rightIdx = half;
     bool c1 = false;
     bool c2 = false;
 
@@ -899,32 +857,28 @@ int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
     {
         i1sum[i] = c1;
         c1 = false;
-        if (leftIdx < i1size)
+        if (leftIdx < i1size && leftIdx < half)
             i1sum[i] += i1[leftIdx];
-        if (rightIdx < i1size)
+        if (rightIdx < i1size && rightIdx < idxf)
             i1sum[i] += i1[rightIdx];
 
         i2sum[i] = c2;
         c2 = false;
-        if (leftIdx < i2size)
+        if (leftIdx < i2size && leftIdx < half)
             i2sum[i] += i2[leftIdx];
-        if (rightIdx < i2size)
+        if (rightIdx < i2size && rightIdx < idxf)
             i2sum[i] += i2[rightIdx];
 
-        // consider carry if not last digit
-        if (i < sumTermSize - 1)
+        if (i1sum[i] >= BASE)
         {
-            if (i1sum[i] >= BASE)
-            {
-                c1 = true;
-                i1sum[i] -= BASE;
-            }
+            c1 = true;
+            i1sum[i] -= BASE;
+        }
 
-            if (i2sum[i] >= BASE)
-            {
-                c2 = true;
-                i2sum[i] -= BASE;
-            }
+        if (i2sum[i] >= BASE)
+        {
+            c2 = true;
+            i2sum[i] -= BASE;
         }
     }
 
@@ -940,9 +894,13 @@ int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
         md  = x0y1 + x1y0 = (x0y0 + x0y1 + x1y0 + x1y1) - x0y0 - x1y1 = md' - hi - lo > 0
     */
     unsigned int hiSize, loSize, mdSize;
-    int *hi = karatsubaMultiplyIntArr(i1, i1size, i2, i2size, idxi + sumTermSize, idxf, &hiSize);
-    int *lo = karatsubaMultiplyIntArr(i1, i1size, i2, i2size, idxi, idxi + sumTermSize, &loSize);
+    int *hi = karatsubaMultiplyIntArr(i1, i1size, i2, i2size, half, idxf, &hiSize);
+    int *lo = karatsubaMultiplyIntArr(i1, i1size, i2, i2size, idxi, half, &loSize);
     int *md = karatsubaMultiplyIntArr(i1sum, sumTermSize, i2sum, sumTermSize, 0, sumTermSize, &mdSize);
+
+    /*
+        combine results of sub-problems
+    */
 
     // attain middle term through subtractions
     // net result is positive, so do not have to worry about last carry
@@ -964,38 +922,35 @@ int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
         }
     }
 
-    /*
-        combine results of sub-problems
-    */
-    for (int i = 0; i < range; i++) // low term
+    int loHalf = (half - idxi) << 1; // end bound for the lo term
+    int i = 0;
+    for (; i < loHalf; i++) // low term
     {
         ret[i] = (i < loSize) ? lo[i] : 0;
     }
-    for (int i = 0; i < range; i++) // hi term
+    int hiIdx = 0;                     // counter for the hi term array
+    for (; i < noDigits; i++, hiIdx++) // hi term, continue counter
     {
-        ret[i + range] = (i < hiSize) ? hi[i] : 0;
+        ret[i] = (hiIdx < hiSize) ? hi[hiIdx] : 0;
     }
 
     carry = false;
-    for (int i = 0; i < range; i++) // middle term (increment)
+    unsigned int retIdx = half - idxi;
+    for (i = 0; i < mdSize && retIdx < noDigits; i++, retIdx++) // middle term (increment)
     {
-        ret[i + sumTermSize] += (i < mdSize) ? md[i] : 0;
-        if (carry)
-        {
-            ret[i + sumTermSize]++;
-        }
+        ret[retIdx] += md[i] + carry;
 
         carry = false;
-        if (ret[i + sumTermSize] >= BASE)
+        if (ret[retIdx] >= BASE)
         {
             carry = true;
-            ret[i + sumTermSize] -= BASE;
+            ret[retIdx] -= BASE;
         }
     }
     // consider last carry
-    if (carry)
+    if (carry && retIdx < noDigits)
     {
-        ret[noDigits - sumTermSize]++;
+        ret[retIdx]++;
     }
 
     /*

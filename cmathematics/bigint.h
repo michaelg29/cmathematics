@@ -5,9 +5,9 @@
 #ifndef BIGINT_H
 #define BIGINT_H
 
-#define BASE 100000000        // base used to represent each digit in the big integer
-#define NO_BASE_DIGITS 8      // number of base 10 digits the base uses
-#define KARATSUBA_THRESHOLD 2 // threshold between performing long and karatsuba multiplication
+#define BASE 1000000000       // base used to represent each digit in the big integer
+#define NO_BASE_DIGITS 9      // number of base 10 digits the base uses
+#define KARATSUBA_THRESHOLD 5 // threshold between performing long and karatsuba multiplication
 
 /**
  * structure representing an integer
@@ -176,14 +176,6 @@ bigint subtractBigint(bigint i1, bigint i2);
 bigint multiplyBigint(bigint i1, bigint i2);
 
 /**
- * multiplies two bigints using long (elementary) multiplication
- * @param i1 the first integer
- * @param i2 the second integer
- * @return the product
- */
-bigint longMultiplyBigint(bigint i1, bigint i2);
-
-/**
  * multiplies two specified ranges of integers using long (elementary) multiplication
  * @param i1 the first integer
  * @param i1i the index of the first digit in the first integer
@@ -197,14 +189,6 @@ bigint longMultiplyBigint(bigint i1, bigint i2);
 int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
                         int *i2, unsigned int i2i, unsigned int i2f,
                         unsigned int *outSize);
-
-/**
- * multiplies two bigints using karatsuba multiplication
- * @param i1 the first integer
- * @param i2 the second integer
- * @return the product
- */
-bigint karatsubaMultiplyBigint(bigint i1, bigint i2);
 
 /**
  * multiplies two specified ranges of integers using long (elementary) multiplication
