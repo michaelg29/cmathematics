@@ -7,11 +7,9 @@ Follows this tutorial playlist on [YouTube](https://www.youtube.com/playlist?lis
 This library is a low level mathematics library for C and C++ that implements common mathematical concepts and ideas from algebra, calculus, statistics, and linear algebra. A complete list of implemented functions and concepts can be found [here](#complete-list-of-functions).
 
 List of implemented concepts so far:
-1) Big Integers
-2) Vectors
-3) Matrices
-
-*Note: a good reference book is **Modern Computer Arithmetic** by Richard Brent and Paul Zimmerman*
+1) Big Integers (*Note: a good reference book for integer representations is **Modern Computer Arithmetic** by Richard Brent and Paul Zimmerman*)
+2) Linear Algebra - Vectors, Matrices
+4) Graph Theory
 
 ### Documentation
 Full documentation can be found in the header files in the `cmathematics` folder.
@@ -22,7 +20,7 @@ Simply drag the `cmathematics` folder into your C or C++ project, not the includ
 Example file structure:
 ```
 PROJECT_DIR \
-	...
+    ...
     cmathematics \
     	cmathematics.h
         ...
@@ -43,15 +41,18 @@ int main() {
 }
 ```
 
-### Complete list of functions
-##### Utility
+### Complete list of implemented functions
+#### Utility
 1) Big Integers
     1) Parsing from string
     2) Output to string
     3) Comparison
     4) Addition, subtraction
     5) Multiplication (Long, Karatsuba)
-##### Linear Algebra
+#### Algebra/Calculus
+1) Calculation
+    1) Shunting-Yard Algorithm/Expression evaluation
+#### Linear Algebra
 1) Vectors
 	1) Vector-Scalar operations (+, -, *, /, ^)
     2) Vector-Vector operations (+, -, .*, ./, dot, cross)
@@ -70,3 +71,24 @@ int main() {
         6) Augmentation (vectors and matrices)
         7) Cofactors/adjugates
         8) Matrix Inverses
+#### Graph Theory
+1) Representation
+    1) Adjacency Lists/Adjacency Matrices
+2) Algorithms
+    1) DFS
+
+### Todo
+#### Utility
+1) Big Integers
+    1) Division
+    2) Modular Division
+    3) Exponentiation
+    4) Modular Exponentiation
+#### Graph Theory
+1) Algorithms
+    1) Dijkstra Shortest Path
+    2) Ford-Fulkerson
+#### Algebra/Calculus
+1) Functions
+    1) Polynomials
+    2) Differentiation
