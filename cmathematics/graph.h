@@ -45,3 +45,6 @@ char *graph_toString(graph *g);
 // DFS
 void graph_dfsStart(graph *g, int src, int *d, int *f, int *p);
 void graph_dfs(graph *g, int src, int *d, int *f, int *p, int *time);
+
+// algorithms
+int *graph_dijkstra(graph *g, int src);
