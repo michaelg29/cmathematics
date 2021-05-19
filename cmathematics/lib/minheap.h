@@ -9,12 +9,17 @@ typedef struct minheap
     unsigned int size;
 
     void **heap;
+    int *indexMap;
 
     int (*entrycmp)(void *val1, void *val2);
+    int (*indexFunc)(void *v);
 } minheap;
 
 minheap mheap_allocate(int (*entrycmp)(void *val1, void *val2));
 void mheap_reallocate(minheap *heap);
+
+void mheap_attachIndexMap(minheap *heap, int n, int (*indexFunc)(void *v));
+void mheap_updateIndex(minheap *heap, void *e, int idx);
 
 void mheap_swapElements(minheap *heap, unsigned int i1, unsigned int i2);
 int mheap_entrycmp(minheap *heap, unsigned int i1, unsigned int i2);

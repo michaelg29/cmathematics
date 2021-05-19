@@ -46,11 +46,43 @@ void mheap_reallocate(minheap *heap)
     }
 }
 
+void mheap_attachIndexMap(minheap *heap, int n, int (*indexFunc)(void *v))
+{
+    if (!n)
+    {
+        n = heap->size;
+    }
+
+    if (heap->indexMap)
+    {
+        free(heap->indexMap);
+    }
+
+    heap->indexMap = malloc(n * sizeof(int));
+    heap->indexFunc = indexFunc;
+
+    for (int i = 1; i < heap->size; i++)
+    {
+        heap->indexMap[indexFunc(heap->heap[i])] = i;
+    }
+}
+
+void mheap_updateIndex(minheap *heap, void *e, int idx)
+{
+    if (heap->indexMap && heap->indexFunc && e)
+    {
+        heap->indexMap[heap->indexFunc(e)] = idx;
+    }
+}
+
 void mheap_swapElements(minheap *heap, unsigned int i1, unsigned int i2)
 {
     void *tmp = heap->heap[i1];
     heap->heap[i1] = heap->heap[i2];
     heap->heap[i2] = tmp;
+
+    mheap_updateIndex(heap, heap->heap[i1], i1);
+    mheap_updateIndex(heap, heap->heap[i2], i2);
 }
 
 int mheap_entrycmp(minheap *heap, unsigned int i1, unsigned int i2)
@@ -71,6 +103,7 @@ void mheap_add(minheap *heap, void *val)
 
     // set next open slot to val
     heap->heap[heap->size] = val;
+    mheap_updateIndex(heap, val, heap->size);
 
     mheap_upheap(heap, heap->size);
 }
@@ -90,11 +123,13 @@ void mheap_upheap(minheap *heap, unsigned int idx)
 void *mheap_pop(minheap *heap)
 {
     void *ret = heap->heap[1]; // get root node
+    mheap_updateIndex(heap, ret, -1);
 
     if (ret && heap->size > 1)
     {
         // substitute with last node
         heap->heap[1] = heap->heap[heap->size--];
+        mheap_updateIndex(heap, heap->heap[1], 1);
         mheap_downheap(heap, 1);
     }
     else if (heap->size == 1)
@@ -143,6 +178,11 @@ void mheap_free(minheap *heap)
     free(heap->heap);
     heap->size = 0;
     heap->capacity = 0;
+
+    if (heap->indexMap)
+    {
+        free(heap->indexMap);
+    }
 }
 
 void mheap_freeDeep(minheap *heap)

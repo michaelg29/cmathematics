@@ -1,6 +1,8 @@
 #include "graph.h"
 #include "lib/strstream.h"
+#include "lib/minheap.h"
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 
 edge *createEdge(int v1, int v2)
@@ -287,4 +289,143 @@ void graph_dfs(graph *g, int src, int *d, int *f, int *p, int *time)
 
     (*time)++;
     f[src] = *time;
+}
+
+typedef struct
+{
+    int v;       // vertex number
+    int *weight; // weight to the vertex (serves as the key)
+} dijkstra_node;
+
+dijkstra_node *create_dijkstra_node(int node, int *weight)
+{
+    dijkstra_node *ret = malloc(sizeof(dijkstra_node));
+
+    ret->v = node;
+    ret->weight = weight;
+
+    return ret;
+}
+
+int dijkstra_node_compare(void *v1, void *v2)
+{
+    dijkstra_node *n1 = v1;
+    dijkstra_node *n2 = v2;
+
+    int w1 = *(n1->weight);
+    int w2 = *(n2->weight);
+
+    if (w1 > w2)
+    {
+        return 1;
+    }
+    else if (w1 == w2)
+    {
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+int dijkstra_node_index(void *v)
+{
+    return ((dijkstra_node *)v)->v;
+}
+
+// algorithms
+int *graph_dijkstra(graph *g, int src)
+{
+    /*
+        INITIALIZATION
+    */
+    int *d = malloc(g->n * sizeof(int));
+    int *p = malloc(g->n * sizeof(int));
+
+    minheap q = mheap_allocate(dijkstra_node_compare);
+
+    // initialize the source values
+    d[src] = 0;
+    p[src] = src;
+    mheap_add(&q, create_dijkstra_node(src, d + src));
+
+    // add other nodes
+    for (int i = 0; i < g->n; i++)
+    {
+        if (i == src)
+        {
+            continue;
+        }
+
+        d[i] = INT_MAX; // infinity
+        p[i] = -1;
+        mheap_add(&q, create_dijkstra_node(i, d + i));
+    }
+
+    mheap_attachIndexMap(&q, 0, dijkstra_node_index);
+
+    /*
+        MAIN LOOP
+    */
+    dijkstra_node *cur = NULL;
+    while ((cur = mheap_pop(&q)))
+    {
+        // relax edges from the popped node
+        if (g->adjacencyMode)
+        {
+            edge *e = NULL;
+            dynarr_iterator it = dynarr_iterator_new(g->adjacencyLists + cur->v);
+
+            while ((e = dynarr_iterator_next(&it)))
+            {
+                int v = e->v2;
+                if (cur->v != v && q.indexMap[v] != -1)
+                {
+                    // cur is not v, v is not finished
+                    // determine if lighter path to v through cur
+                    if (d[v] > d[cur->v] + e->weight)
+                    {
+                        // update weight
+                        d[v] = d[cur->v] + e->weight;
+                        p[v] = cur->v;
+
+                        // call upheap on the new weight
+                        mheap_upheap(&q, q.indexMap[v]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int v = 0; v < g->n; v++)
+            {
+                if (cur->v != v && g->adjacencyMatrix[cur->v][v] && q.indexMap[v] != -1)
+                {
+                    // cur is not v, edge exists from cur to v, v is not finished
+                    // determine if lighter path to v through cur
+                    if (d[v] > d[cur->v] + g->adjacencyMatrix[cur->v][v])
+                    {
+                        // update weight
+                        d[v] = d[cur->v] + g->adjacencyMatrix[cur->v][v];
+                        p[v] = cur->v;
+
+                        // call upheap on the new weight
+                        mheap_upheap(&q, q.indexMap[v]);
+                    }
+                }
+            }
+        }
+
+        free(cur);
+    }
+
+    /*
+        CLEANUP
+    */
+    mheap_freeDeep(&q);
+    free(d);
+
+    // return predecessor array
+    return p;
 }

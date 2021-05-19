@@ -48,16 +48,29 @@ int main()
 {
     printf("Hello, world!\n");
 
-    bigint b1 = strToBigint("29318714789650187194709093218470912834709867109874321423947883712964819237");
-    bigint b2 = strToBigint("12398704012381274312094710985714156298746129568167163279458172374619275132908741");
+    graph g = graph_new(ADJ_MATRIX, 7);
 
-    bigint b3 = multiplyBigint(b1, b2);
+    graph_addDirectedWeightedEdge(&g, 0, 1, 6);
+    graph_addDirectedWeightedEdge(&g, 0, 3, 5);
+    graph_addDirectedWeightedEdge(&g, 1, 2, 7);
+    graph_addDirectedWeightedEdge(&g, 1, 3, 3);
+    graph_addDirectedWeightedEdge(&g, 2, 4, 15);
+    graph_addDirectedWeightedEdge(&g, 2, 5, 2);
+    graph_addDirectedWeightedEdge(&g, 3, 2, 2);
+    graph_addDirectedWeightedEdge(&g, 3, 4, 11);
+    graph_addDirectedWeightedEdge(&g, 4, 6, 3);
+    graph_addDirectedWeightedEdge(&g, 5, 4, 1);
+    graph_addDirectedWeightedEdge(&g, 5, 6, 6);
 
-    printf("%s * %s = %s\n", bigintToString(b1), bigintToString(b2), bigintToString(b3));
+    char *str = graph_toString(&g);
+    printf("%s\n", str);
+    free(str);
 
-    freeBigint(&b1);
-    freeBigint(&b2);
-    freeBigint(&b3);
+    int *p = graph_dijkstra(&g, 0);
+    printIntArr(p, g.n);
+    free(p);
+
+    graph_free(&g);
 
     return 0;
 }
