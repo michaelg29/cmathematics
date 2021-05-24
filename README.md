@@ -76,6 +76,7 @@ int main() {
     1) Adjacency Lists/Adjacency Matrices
 2) Algorithms
     1) DFS
+    2) Dijkstra Shortest Path
 
 ### Todo
 #### Utility
@@ -86,8 +87,7 @@ int main() {
     4) Modular Exponentiation
 #### Graph Theory
 1) Algorithms
-    1) Dijkstra Shortest Path
-    2) Ford-Fulkerson
+    1) Ford-Fulkerson
 #### Algebra/Calculus
 1) Functions
     1) Polynomials
