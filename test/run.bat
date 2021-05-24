@@ -1,4 +1,4 @@
 cd ../cmathematics
-gcc -o ../test/a.exe ../test/main.c cmathematics.c lib/avl.c lib/dynamicarray.c lib/minheap.c lib/strstream.c vec.c matrix.c bigint.c sy_util.c shuntingyard.c graph.c
+gcc -o ../test/a.exe ../test/main.c cmathematics.c lib/avl.c lib/dynamicarray.c lib/functions.c lib/minheap.c lib/strstream.c vec.c matrix.c bigint.c exp_util.c expressions.c graph.c
 cd ../test
 a.exe

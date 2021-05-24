@@ -1,4 +1,4 @@
-#include "sy_util.h"
+#include "exp_util.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -7,7 +7,7 @@
     bit  6          is 1 if the function is left associative
     bit  7          is 1 if the function is a unary function
 */
-char SY_getPrecedence(SY_token *f)
+char exp_getPrecedence(exp_token *f)
 {
     if (!(f->type == FUNCTION || f->type == OPERATOR))
     {
@@ -16,7 +16,7 @@ char SY_getPrecedence(SY_token *f)
     return f->val.funcVal.state & 0b00011111;
 }
 
-bool SY_isFunction(SY_token *f)
+bool exp_isFunction(exp_token *f)
 {
     if (!(f->type == FUNCTION || f->type == OPERATOR))
     {
@@ -25,7 +25,7 @@ bool SY_isFunction(SY_token *f)
     return f->val.funcVal.state & 0b00100000;
 }
 
-bool SY_isLeftAssociative(SY_token *f)
+bool exp_isLeftAssociative(exp_token *f)
 {
     if (!(f->type == FUNCTION || f->type == OPERATOR))
     {
@@ -34,7 +34,7 @@ bool SY_isLeftAssociative(SY_token *f)
     return f->val.funcVal.state & 0b01000000;
 }
 
-bool SY_isUnary(SY_token *f)
+bool exp_isUnary(exp_token *f)
 {
     if (!(f->type == FUNCTION || f->type == OPERATOR))
     {
@@ -43,14 +43,14 @@ bool SY_isUnary(SY_token *f)
     return f->val.funcVal.state & 0b10000000;
 }
 
-bool SY_charIsNumber(char c)
+bool exp_charIsNumber(char c)
 {
     return (c >= '0' && c <= '9') ||
            c == '.' ||
            c == '-';
 }
 
-SY_token *SY_findElement(unsigned int i, strstream *s, avl *list, int *length)
+exp_token *exp_findElement(unsigned int i, strstream *s, avl *list, int *length)
 {
     if (!list)
     {
@@ -84,77 +84,77 @@ SY_token *SY_findElement(unsigned int i, strstream *s, avl *list, int *length)
     else if (cmp > 0 && list->right)
     {
         // traverse right
-        return SY_findElement(i, s, list->right, length);
+        return exp_findElement(i, s, list->right, length);
     }
     else if (cmp < 0 && list->left)
     {
         // traverse left
-        return SY_findElement(i, s, list->left, length);
+        return exp_findElement(i, s, list->left, length);
     }
 
     *length = 0;
     return NULL;
 }
 
-SY_token *SY_createToken(tokentype type)
+exp_token *exp_createToken(tokentype type)
 {
-    SY_token *ret = malloc(sizeof(SY_token));
+    exp_token *ret = malloc(sizeof(exp_token));
     ret->type = type;
     return ret;
 }
 
-SY_token *SY_createTokenConstant(double value)
+exp_token *exp_createTokenConstant(double value)
 {
-    SY_token *ret = SY_createToken(CONSTANT);
+    exp_token *ret = exp_createToken(CONSTANT);
     ret->val.constVal = value;
     return ret;
 }
 
-SY_token *SY_createTokenConstantString(char *name, double value, bool restricted)
+exp_token *exp_createTokenConstantString(char *name, double value, bool restricted)
 {
-    SY_token *ret = SY_createToken(CONSTANTSTR);
+    exp_token *ret = exp_createToken(CONSTANTSTR);
     ret->val.namedConstVal.name = name;
     ret->val.namedConstVal.value = value;
     ret->val.namedConstVal.restricted = restricted;
     return ret;
 }
 
-SY_token *SY_createTokenUnary(char *value)
+exp_token *exp_createTokenUnary(char *value)
 {
-    SY_token *ret = SY_createToken(FUNCTION);
+    exp_token *ret = exp_createToken(FUNCTION);
     ret->val.strVal = value;
     return ret;
 }
 
-SY_token *SY_createTokenBinary(char *value)
+exp_token *exp_createTokenBinary(char *value)
 {
-    SY_token *ret = SY_createToken(FUNCTION);
+    exp_token *ret = exp_createToken(FUNCTION);
     ret->val.strVal = value;
     return ret;
 }
 
-SY_token *SY_createTokenOperator(char *value)
+exp_token *exp_createTokenOperator(char *value)
 {
-    SY_token *ret = SY_createToken(OPERATOR);
+    exp_token *ret = exp_createToken(OPERATOR);
     ret->val.strVal = value;
     return ret;
 }
 
-SY_token *SY_createTokenLParen()
+exp_token *exp_createTokenLParen()
 {
-    SY_token *ret = SY_createToken(LPAREN);
+    exp_token *ret = exp_createToken(LPAREN);
     ret->val.strVal = "(";
     return ret;
 }
 
-SY_token *SY_createTokenRParen()
+exp_token *exp_createTokenRParen()
 {
-    SY_token *ret = SY_createToken(RPAREN);
+    exp_token *ret = exp_createToken(RPAREN);
     ret->val.strVal = ")";
     return ret;
 }
 
-void SY_freeToken(SY_token *t)
+void exp_freeToken(exp_token *t)
 {
     if (t->type != CONSTANT)
     {
@@ -163,10 +163,10 @@ void SY_freeToken(SY_token *t)
     free(t);
 }
 
-void SY_freeTokenList(dynamicarray *list)
+void exp_freeTokenList(dynamicarray *list)
 {
     dynarr_iterator it = dynarr_iterator_new(list);
-    SY_token *cur = NULL;
+    exp_token *cur = NULL;
 
     while ((cur = dynarr_iterator_next(&it)))
     {
@@ -179,9 +179,9 @@ void SY_freeTokenList(dynamicarray *list)
     dynarr_free(list);
 }
 
-SY_token *SY_createDefaultFunction(char *name)
+exp_token *exp_createDefaultFunction(char *name)
 {
-    SY_token *ret = SY_createTokenUnary(name);
+    exp_token *ret = exp_createTokenUnary(name);
     ret->type = FUNCTION;
 
     ret->val.funcVal.name = name;
@@ -191,14 +191,14 @@ SY_token *SY_createDefaultFunction(char *name)
     return ret;
 }
 
-SY_token *SY_createDefaultUnaryFunction(char *name, UnaryFuncEval eval)
+exp_token *exp_createDefaultUnaryFunction(char *name, UnaryFuncEval eval)
 {
-    return SY_createUnaryFunction(name, eval, FUNCTION, 0, true);
+    return exp_createUnaryFunction(name, eval, FUNCTION, 0, true);
 }
 
-SY_token *SY_createUnaryFunction(char *name, UnaryFuncEval eval, tokentype type, char prec, bool left)
+exp_token *exp_createUnaryFunction(char *name, UnaryFuncEval eval, tokentype type, char prec, bool left)
 {
-    SY_token *ret = SY_createTokenUnary(name);
+    exp_token *ret = exp_createTokenUnary(name);
 
     ret->type = type;
     ret->val.funcVal.name = name;
@@ -212,14 +212,14 @@ SY_token *SY_createUnaryFunction(char *name, UnaryFuncEval eval, tokentype type,
     return ret;
 }
 
-SY_token *SY_createDefaultBinaryFunction(char *name, BinaryFuncEval eval)
+exp_token *exp_createDefaultBinaryFunction(char *name, BinaryFuncEval eval)
 {
-    return SY_createBinaryFunction(name, eval, FUNCTION, 0, true);
+    return exp_createBinaryFunction(name, eval, FUNCTION, 0, true);
 }
 
-SY_token *SY_createBinaryFunction(char *name, BinaryFuncEval eval, tokentype type, char prec, bool left)
+exp_token *exp_createBinaryFunction(char *name, BinaryFuncEval eval, tokentype type, char prec, bool left)
 {
-    SY_token *ret = SY_createTokenUnary(name);
+    exp_token *ret = exp_createTokenUnary(name);
 
     ret->type = type;
     ret->val.funcVal.name = name;
@@ -233,9 +233,9 @@ SY_token *SY_createBinaryFunction(char *name, BinaryFuncEval eval, tokentype typ
     return ret;
 }
 
-SY_tokenNode *SY_createNode(SY_token *t)
+exp_tokenNode *exp_createNode(exp_token *t)
 {
-    SY_tokenNode *ret = malloc(sizeof(SY_tokenNode));
+    exp_tokenNode *ret = malloc(sizeof(exp_tokenNode));
     ret->t = t;
     ret->left = NULL;
     ret->right = NULL;
@@ -243,39 +243,39 @@ SY_tokenNode *SY_createNode(SY_token *t)
     return ret;
 }
 
-void SY_freeNode(SY_tokenNode *node)
+void exp_freeNode(exp_tokenNode *node)
 {
     if (node->left)
     {
-        SY_freeNode(node->left);
+        exp_freeNode(node->left);
     }
     if (node->right)
     {
-        SY_freeNode(node->right);
+        exp_freeNode(node->right);
     }
     free(node);
 }
 
-void SY_freeNodeDeep(SY_tokenNode *node)
+void exp_freeNodeDeep(exp_tokenNode *node)
 {
     if (node->left)
     {
-        SY_freeNodeDeep(node->left);
+        exp_freeNodeDeep(node->left);
     }
     if (node->right)
     {
-        SY_freeNodeDeep(node->right);
+        exp_freeNodeDeep(node->right);
     }
-    SY_freeToken(node->t);
+    exp_freeToken(node->t);
     free(node);
 }
 
-double SY_evalUnary(SY_token *t, double x)
+double exp_evalUnary(exp_token *t, double x)
 {
     return t->val.funcVal.eval.u_eval(x);
 }
 
-double SY_evalBinary(SY_token *t, double x, double y)
+double exp_evalBinary(exp_token *t, double x, double y)
 {
     return t->val.funcVal.eval.b_eval(x, y);
 }
