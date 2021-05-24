@@ -1,7 +1,7 @@
-#include "shuntingyard.h"
+#include "expressions.h"
 
-#include "sy_util.h"
-#include "lib/sy_functions.h"
+#include "exp_util.h"
+#include "lib/functions.h"
 #include "lib/strstream.h"
 
 #include <string.h>
@@ -10,62 +10,62 @@
 
 avl *functions;
 avl *constants;
-SY_token *subtractionToken;
-SY_token *multiplicationToken;
-SY_token *lparenToken;
-SY_token *rparenToken;
+exp_token *subtractionToken;
+exp_token *multiplicationToken;
+exp_token *lparenToken;
+exp_token *rparenToken;
 
-void sy_init()
+void exp_init()
 {
     // create functions tree
     functions = avl_createEmptyRoot(strkeycmp);
-    functions = avl_insert(functions, "sin", SY_createDefaultUnaryFunction("sin", sin));
-    functions = avl_insert(functions, "cos", SY_createDefaultUnaryFunction("cos", cos));
-    functions = avl_insert(functions, "tan", SY_createDefaultUnaryFunction("tan", tan));
-    functions = avl_insert(functions, "asin", SY_createDefaultUnaryFunction("asin", asin));
-    functions = avl_insert(functions, "acos", SY_createDefaultUnaryFunction("acos", acos));
-    functions = avl_insert(functions, "atan", SY_createDefaultUnaryFunction("atan", atan));
-    functions = avl_insert(functions, "csc", SY_createDefaultUnaryFunction("csc", csc));
-    functions = avl_insert(functions, "sec", SY_createDefaultUnaryFunction("sec", sec));
-    functions = avl_insert(functions, "cot", SY_createDefaultUnaryFunction("cot", cot));
-    functions = avl_insert(functions, "acsc", SY_createDefaultUnaryFunction("acsc", acsc));
-    functions = avl_insert(functions, "asec", SY_createDefaultUnaryFunction("asec", asec));
-    functions = avl_insert(functions, "acot", SY_createDefaultUnaryFunction("acot", acot));
-    functions = avl_insert(functions, "abs", SY_createDefaultUnaryFunction("abs", absf));
-    functions = avl_insert(functions, "ln", SY_createDefaultUnaryFunction("ln", log));
-    functions = avl_insert(functions, "log2", SY_createDefaultUnaryFunction("log2", log2));
-    functions = avl_insert(functions, "log10", SY_createDefaultUnaryFunction("log10", log10));
-    functions = avl_insert(functions, "sqrt", SY_createDefaultUnaryFunction("sqrt", sqrt));
-    functions = avl_insert(functions, "exp", SY_createDefaultUnaryFunction("exp", exp));
+    functions = avl_insert(functions, "sin", exp_createDefaultUnaryFunction("sin", sin));
+    functions = avl_insert(functions, "cos", exp_createDefaultUnaryFunction("cos", cos));
+    functions = avl_insert(functions, "tan", exp_createDefaultUnaryFunction("tan", tan));
+    functions = avl_insert(functions, "asin", exp_createDefaultUnaryFunction("asin", asin));
+    functions = avl_insert(functions, "acos", exp_createDefaultUnaryFunction("acos", acos));
+    functions = avl_insert(functions, "atan", exp_createDefaultUnaryFunction("atan", atan));
+    functions = avl_insert(functions, "csc", exp_createDefaultUnaryFunction("csc", csc));
+    functions = avl_insert(functions, "sec", exp_createDefaultUnaryFunction("sec", sec));
+    functions = avl_insert(functions, "cot", exp_createDefaultUnaryFunction("cot", cot));
+    functions = avl_insert(functions, "acsc", exp_createDefaultUnaryFunction("acsc", acsc));
+    functions = avl_insert(functions, "asec", exp_createDefaultUnaryFunction("asec", asec));
+    functions = avl_insert(functions, "acot", exp_createDefaultUnaryFunction("acot", acot));
+    functions = avl_insert(functions, "abs", exp_createDefaultUnaryFunction("abs", absf));
+    functions = avl_insert(functions, "ln", exp_createDefaultUnaryFunction("ln", log));
+    functions = avl_insert(functions, "log2", exp_createDefaultUnaryFunction("log2", log2));
+    functions = avl_insert(functions, "log10", exp_createDefaultUnaryFunction("log10", log10));
+    functions = avl_insert(functions, "sqrt", exp_createDefaultUnaryFunction("sqrt", sqrt));
+    functions = avl_insert(functions, "exp", exp_createDefaultUnaryFunction("exp", exp));
 
-    subtractionToken = SY_createBinaryFunction("-", subtract, OPERATOR, 2, true);
-    multiplicationToken = SY_createBinaryFunction("*", multiply, OPERATOR, 3, true);
-    functions = avl_insert(functions, "+", SY_createBinaryFunction("+", add, OPERATOR, 2, true));
+    subtractionToken = exp_createBinaryFunction("-", subtract, OPERATOR, 2, true);
+    multiplicationToken = exp_createBinaryFunction("*", multiply, OPERATOR, 3, true);
+    functions = avl_insert(functions, "+", exp_createBinaryFunction("+", add, OPERATOR, 2, true));
     functions = avl_insert(functions, "-", subtractionToken);
     functions = avl_insert(functions, "*", multiplicationToken);
-    functions = avl_insert(functions, "/", SY_createBinaryFunction("/", divide, OPERATOR, 3, true));
-    functions = avl_insert(functions, "^", SY_createBinaryFunction("^", pow, OPERATOR, 4, false));
+    functions = avl_insert(functions, "/", exp_createBinaryFunction("/", divide, OPERATOR, 3, true));
+    functions = avl_insert(functions, "^", exp_createBinaryFunction("^", pow, OPERATOR, 4, false));
 
     // create constants tree
     constants = avl_createEmptyRoot(strkeycmp);
-    constants = avl_insert(constants, "pi", SY_createTokenConstantString("pi", 4.0 * atan(1.0), true));
-    constants = avl_insert(constants, "e", SY_createTokenConstantString("e", exp(1.0), true));
+    constants = avl_insert(constants, "pi", exp_createTokenConstantString("pi", 4.0 * atan(1.0), true));
+    constants = avl_insert(constants, "e", exp_createTokenConstantString("e", exp(1.0), true));
 
     // initialize other tokens
-    lparenToken = SY_createTokenLParen();
-    rparenToken = SY_createTokenRParen();
+    lparenToken = exp_createTokenLParen();
+    rparenToken = exp_createTokenRParen();
 }
 
-void sy_cleanup()
+void exp_cleanup()
 {
     avl_freeDeep(functions);
     avl_freeDeep(constants);
 
-    SY_freeToken(lparenToken);
-    SY_freeToken(rparenToken);
+    exp_freeToken(lparenToken);
+    exp_freeToken(rparenToken);
 }
 
-dynamicarray parseTokens(char *str)
+dynamicarray exp_parseTokens(char *str)
 {
     unsigned int n = strlen(str);
     strstream eqn = strstream_alloc(n);
@@ -80,7 +80,7 @@ dynamicarray parseTokens(char *str)
     {
         char c = eqn.str[i];
 
-        SY_token *obj = NULL;
+        exp_token *obj = NULL;
         objLength = 1;
 
         if (c == ' ' || c == '\t' || c == '\n' || c == ',')
@@ -108,14 +108,14 @@ dynamicarray parseTokens(char *str)
                     obj = subtractionToken;
                 }
             }
-            if (SY_charIsNumber(c) && curType != OPERATOR)
+            if (exp_charIsNumber(c) && curType != OPERATOR)
             {
                 // is number
                 bool acceptDecimal = c != '.';
                 curType = CONSTANT;
 
                 unsigned int nextI = i + 1;
-                while (nextI < n && SY_charIsNumber(eqn.str[nextI]))
+                while (nextI < n && exp_charIsNumber(eqn.str[nextI]))
                 {
                     if (eqn.str[nextI] == '-')
                     {
@@ -136,12 +136,12 @@ dynamicarray parseTokens(char *str)
                 if (objLength == 1 && c == '-')
                 {
                     // implicitly insert a -1
-                    obj = SY_createTokenConstant(-1.0);
+                    obj = exp_createTokenConstant(-1.0);
                 }
                 else
                 {
                     // parse from substring
-                    obj = SY_createTokenConstant(
+                    obj = exp_createTokenConstant(
                         atof(strstream_substrLength(&eqn, i, objLength)));
                 }
             }
@@ -150,7 +150,7 @@ dynamicarray parseTokens(char *str)
                 // not a numerical character
 
                 // search through function tree
-                obj = SY_findElement(i, &eqn, functions, &objLength);
+                obj = exp_findElement(i, &eqn, functions, &objLength);
                 if (objLength)
                 {
                     // found a function
@@ -159,11 +159,11 @@ dynamicarray parseTokens(char *str)
                 else
                 {
                     // search through constant tree
-                    obj = SY_findElement(i, &eqn, constants, &objLength);
+                    obj = exp_findElement(i, &eqn, constants, &objLength);
                     curType = CONSTANT;
                     if (!objLength)
                     {
-                        obj = SY_createTokenConstant(0.0);
+                        obj = exp_createTokenConstant(0.0);
                         objLength = 1;
                     }
                 }
@@ -186,9 +186,9 @@ dynamicarray parseTokens(char *str)
     return ret;
 }
 
-dynamicarray RPN(char *str)
+dynamicarray exp_RPN(char *str)
 {
-    dynamicarray tokens = parseTokens(str);
+    dynamicarray tokens = exp_parseTokens(str);
 
     unsigned int n = tokens.size;
     dynamicarray queue = dynarr_defaultAllocate();
@@ -196,9 +196,9 @@ dynamicarray RPN(char *str)
 
     for (unsigned int i = 0; i < n; i++)
     {
-        SY_token *t = tokens.list[i];
+        exp_token *t = tokens.list[i];
         tokentype type = t->type;
-        SY_token *lastStack = stack.size ? stack.list[stack.size - 1] : NULL;
+        exp_token *lastStack = stack.size ? stack.list[stack.size - 1] : NULL;
 
         switch (type)
         {
@@ -214,10 +214,10 @@ dynamicarray RPN(char *str)
             {
                 while (
                     lastStack->type != LPAREN &&
-                    (SY_isFunction(lastStack) ||
-                     SY_getPrecedence(lastStack) > SY_getPrecedence(t) ||
-                     (SY_getPrecedence(lastStack) == SY_getPrecedence(t) &&
-                      SY_isLeftAssociative(lastStack))))
+                    (exp_isFunction(lastStack) ||
+                     exp_getPrecedence(lastStack) > exp_getPrecedence(t) ||
+                     (exp_getPrecedence(lastStack) == exp_getPrecedence(t) &&
+                      exp_isLeftAssociative(lastStack))))
                 {
                     // pop from the stack to the queue
                     dynarr_addLast(&queue, dynarr_removeLast(&stack));
@@ -267,14 +267,14 @@ dynamicarray RPN(char *str)
     return queue;
 }
 
-// char *RPNstring(char *str);
+// char *exp_RPNstring(char *str);
 
-SY_tokenNode *getEquationTree(dynamicarray RPN)
+exp_tokenNode *exp_getEquationTree(dynamicarray RPN)
 {
     dynamicarray stack = dynarr_defaultAllocate();
 
     dynarr_iterator it = dynarr_iterator_new(&RPN);
-    SY_token *cur = NULL;
+    exp_token *cur = NULL;
 
     while ((cur = dynarr_iterator_next(&it)))
     {
@@ -282,13 +282,13 @@ SY_tokenNode *getEquationTree(dynamicarray RPN)
         if (cur->type == CONSTANT || cur->type == CONSTANTSTR)
         {
             // create a new number node
-            dynarr_addLast(&stack, SY_createNode(cur));
+            dynarr_addLast(&stack, exp_createNode(cur));
         }
         else
         {
             // create a function node
-            SY_tokenNode *func = SY_createNode(cur);
-            if (SY_isUnary(cur))
+            exp_tokenNode *func = exp_createNode(cur);
+            if (exp_isUnary(cur))
             {
                 // unary function, insert one child
                 if (stack.size)
@@ -315,18 +315,18 @@ SY_tokenNode *getEquationTree(dynamicarray RPN)
         }
     }
 
-    SY_tokenNode *ret = dynarr_removeLast(&stack);
+    exp_tokenNode *ret = dynarr_removeLast(&stack);
     dynarr_freeDeep(&stack);
 
     return ret;
 }
 
-double evalTree(SY_tokenNode *tree)
+double exp_evalTree(exp_tokenNode *tree)
 {
-    return tree ? SY_eval(tree->t, evalTree(tree->left), evalTree(tree->right)) : 0.0;
+    return tree ? exp_eval(tree->t, exp_evalTree(tree->left), exp_evalTree(tree->right)) : 0.0;
 }
 
-double SY_eval(SY_token *t, double x, double y)
+double exp_eval(exp_token *t, double x, double y)
 {
     if (!t)
     {
@@ -335,7 +335,7 @@ double SY_eval(SY_token *t, double x, double y)
 
     if (t->type == FUNCTION || t->type == OPERATOR)
     {
-        return SY_isUnary(t) ? SY_evalUnary(t, x) : SY_evalBinary(t, x, y);
+        return exp_isUnary(t) ? exp_evalUnary(t, x) : exp_evalBinary(t, x, y);
     }
     else if (t->type == CONSTANT)
     {
@@ -349,9 +349,9 @@ double SY_eval(SY_token *t, double x, double y)
     return 0.0;
 }
 
-bool SY_registerVariable(char *name, double value)
+bool exp_registerVariable(char *name, double value)
 {
-    SY_token *t = avl_get(constants, name);
+    exp_token *t = avl_get(constants, name);
     if (t)
     {
         if (t->val.namedConstVal.restricted)
@@ -366,16 +366,16 @@ bool SY_registerVariable(char *name, double value)
     else
     {
         // create a token
-        t = SY_createTokenConstantString(name, value, false);
+        t = exp_createTokenConstantString(name, value, false);
         constants = avl_insert(constants, name, t);
     }
 
     return true;
 }
 
-bool SY_clearVariable(char *name)
+bool exp_clearVariable(char *name)
 {
-    SY_token *t = avl_get(constants, name);
+    exp_token *t = avl_get(constants, name);
     if (t)
     {
         if (t->val.namedConstVal.restricted)
