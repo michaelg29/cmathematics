@@ -85,6 +85,37 @@ void graph_free(graph *g)
     }
 }
 
+graph graph_copy(graph *g)
+{
+    graph ret = {g->n, NULL, g->adjacencyMode};
+
+    // copy edges
+    if (g->adjacencyMode)
+    {
+        ret.adjacencyLists = malloc(g->n * sizeof(dynamicarray));
+        for (int i = 0; i < ret.n; i++)
+        {
+            ret.adjacencyLists[i] = dynarr_allocate(g->adjacencyLists[i].size);
+            for (int j = 0; j < g->adjacencyLists[i].size; j++)
+            {
+                edge *e = g->adjacencyLists[i].list[j];
+                dynarr_addLast(ret.adjacencyLists + i, createWeightedEdge(e->v1, e->v2, e->weight));
+            }
+        }
+    }
+    else
+    {
+        ret.adjacencyMatrix = malloc(g->n * sizeof(int *));
+        for (int i = 0; i < g->n; i++)
+        {
+            ret.adjacencyMatrix[i] = malloc(g->n * sizeof(int));
+            memcpy(ret.adjacencyMatrix[i], g->adjacencyMatrix[i], g->n * sizeof(int));
+        }
+    }
+
+    return ret;
+}
+
 // graph modifiers
 void graph_addVertices(graph *g, int n)
 {
@@ -291,6 +322,95 @@ void graph_dfs(graph *g, int src, int *d, int *f, int *p, int *time)
     f[src] = *time;
 }
 
+int graph_pathDfsStart(graph *g, int src, int dst, int *p)
+{
+    bool *visited = malloc(g->n * sizeof(bool));
+    for (int i = 0; i < g->n; i++)
+    {
+        visited[i] = 0;
+        p[i] = -1;
+    }
+
+    int ret = graph_pathDfs(g, src, dst, visited, p);
+
+    free(visited);
+
+    return ret;
+}
+
+int graph_pathDfs(graph *g, int src, int dst, bool *visited, int *p)
+{
+    if (!visited[src])
+    {
+        // source not visited yet
+
+        // mark the source as visited
+        visited[src] = true;
+
+        if (g->adjacencyMode)
+        {
+            edge *e = NULL;
+            dynarr_iterator it = dynarr_iterator_new(g->adjacencyLists + src);
+
+            while ((e = dynarr_iterator_next(&it)))
+            {
+                if (e->weight && !visited[e->v2])
+                {
+                    // edge from src to e->v2 has weight, e->v2 not discovered
+                    if (e->v2 == dst)
+                    {
+                        // found goal
+                        p[dst] = src;
+                        return e->weight;
+                    }
+                    else
+                    {
+                        // recurse along edge
+                        int weight = graph_pathDfs(g, e->v2, dst, visited, p);
+                        if (weight)
+                        {
+                            // found a path to the destination
+                            p[e->v2] = src;
+                            // return smaller weight
+                            return MIN(e->weight, weight);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < g->n; i++)
+            {
+                if (g->adjacencyMatrix[src][i] && !visited[i])
+                {
+                    if (i == dst)
+                    {
+                        // found goal
+                        p[dst] = src;
+                        return g->adjacencyMatrix[src][i];
+                    }
+                    else
+                    {
+                        // recurse along edge
+                        int weight = graph_pathDfs(g, i, dst, visited, p);
+                        if (weight)
+                        {
+                            // found a path to the destination
+                            p[i] = src;
+                            // return smaller weight
+                            return MIN(g->adjacencyMatrix[src][i], weight);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // found no path
+    return 0;
+}
+
 typedef struct
 {
     int v;       // vertex number
@@ -428,4 +548,102 @@ int *graph_dijkstra(graph *g, int src)
 
     // return predecessor array
     return p;
+}
+
+graph graph_fordFulkerson(graph *g, int src, int dst, int *maxFlowRet)
+{
+    graph ret = graph_copy(g);
+    graph resid = graph_copy(g);
+    int maxFlow = 0;
+
+    int *p = malloc(g->n * sizeof(int));
+    int pathFlow; // bottleneck of each path
+    while ((pathFlow = graph_pathDfsStart(&resid, src, dst, p)))
+    {
+        // while a path exists from the source to the destination (augmenting path)
+        for (int i = dst; i != src; i = p[i])
+        {
+            // edge from p[i] to i is in the augmenting path
+            if (g->adjacencyMode)
+            {
+                // find the forward edge
+                edge *e = NULL;
+                dynarr_iterator it = dynarr_iterator_new(resid.adjacencyLists + p[i]);
+
+                while ((e = dynarr_iterator_next(&it)))
+                {
+                    if (e->v2 == i)
+                    {
+                        // decrease remaining capacity on the forward edge
+                        e->weight -= pathFlow;
+                        break;
+                    }
+                }
+
+                // find residual edge
+                bool residualFound = false;
+                e = NULL;
+                it = dynarr_iterator_new(resid.adjacencyLists + i);
+
+                while ((e = dynarr_iterator_next(&it)))
+                {
+                    if (e->v2 == p[i])
+                    {
+                        residualFound = true;
+                        e->weight += pathFlow;
+                        break;
+                    }
+                }
+
+                if (!residualFound)
+                {
+                    dynarr_addLast(resid.adjacencyLists + i,
+                                   createWeightedEdge(i, p[i], pathFlow));
+                }
+            }
+            else
+            {
+                // decrease weight by path flow (remaining capacity)
+                resid.adjacencyMatrix[p[i]][i] -= pathFlow;
+                // add weight to the residual edge
+                resid.adjacencyMatrix[i][p[i]] += pathFlow;
+            }
+        }
+        maxFlow += pathFlow;
+    }
+    free(p);
+
+    // subtract remaining capacities from original capacities to get attained flow
+    for (int i = 0; i < ret.n; i++)
+    {
+        if (ret.adjacencyMode)
+        {
+            for (int j = 0; j < ret.adjacencyLists[i].size; j++)
+            {
+                edge *retEdge = ret.adjacencyLists[i].list[j];
+                edge *residEdge = resid.adjacencyLists[i].list[j];
+
+                retEdge->weight -= residEdge->weight;
+            }
+        }
+        else
+        {
+            for (int j = 0; j < ret.n; j++)
+            {
+                if (ret.adjacencyMatrix[i][j])
+                {
+                    ret.adjacencyMatrix[i][j] -= resid.adjacencyMatrix[i][j];
+                }
+            }
+        }
+    }
+
+    if (maxFlowRet)
+    {
+        *maxFlowRet = maxFlow;
+    }
+
+    graph_free(&resid);
+
+    return ret;
 }
