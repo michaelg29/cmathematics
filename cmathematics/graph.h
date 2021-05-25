@@ -1,4 +1,5 @@
 #include "lib/dynamicarray.h"
+#include "cmathematics.h"
 
 #define ADJ_MATRIX 0 // false
 #define ADJ_LISTS !0 // true
@@ -31,6 +32,7 @@ edge *createWeightedEdge(int v1, int v2, int weight);
 // graph constructor/destructor
 graph graph_new(char mode, int n);
 void graph_free(graph *g);
+graph graph_copy(graph *g);
 
 // graph modifiers
 void graph_addVertices(graph *g, int n);
@@ -45,6 +47,9 @@ char *graph_toString(graph *g);
 // DFS
 void graph_dfsStart(graph *g, int src, int *d, int *f, int *p);
 void graph_dfs(graph *g, int src, int *d, int *f, int *p, int *time);
+int graph_pathDfsStart(graph *g, int src, int dst, int *p);
+int graph_pathDfs(graph *g, int src, int dst, bool *visited, int *p);
 
 // algorithms
 int *graph_dijkstra(graph *g, int src);
+graph graph_fordFulkerson(graph *g, int src, int dst, int *maxFlowRet);
