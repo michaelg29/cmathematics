@@ -2,10 +2,6 @@
 #include <stdlib.h>
 
 #include "../cmathematics/cmathematics.h"
-#include "../cmathematics/vec.h"
-#include "../cmathematics/matrix.h"
-#include "../cmathematics/bigint.h"
-#include "../cmathematics/expressions.h"
 #include "../cmathematics/graph.h"
 
 int main()
