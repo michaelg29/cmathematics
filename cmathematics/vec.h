@@ -25,6 +25,12 @@ extern const vec VEC_UNDEFINED; // undefined vector (no dimension)
 vec allocateVec(unsigned int dim);
 
 /**
+ * frees a vector's memory
+ * @param v the vector
+ */
+void freeVec(vec *v);
+
+/**
  * construct a vector with a default value for all the values
  * @param dim the dimension of the vector
  * @param val the default value

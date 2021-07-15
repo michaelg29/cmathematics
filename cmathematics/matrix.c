@@ -623,7 +623,9 @@ vec matVecMultiplication(mat m, vec v)
     for (unsigned int r = 0; r < ret.dim; r++)
     {
         // dot product of the vector with the corresponding row
-        ret.elements[r] = dot(v, getMatRow(&m, r + 1));
+        vec rowVec = getMatRow(&m, r + 1);
+        ret.elements[r] = dot(v, rowVec);
+        freeVec(&rowVec);
     }
 
     return ret;
@@ -666,6 +668,18 @@ mat matMatMultiplication(mat m1, mat m2)
             ret.elements[r][c] = dot(m1Rows[r], m2Cols[c]);
         }
     }
+
+    for (unsigned int r = 0; r < m1.rows; r++)
+    {
+        freeVec(m1Rows + r);
+    }
+    for (unsigned int c = 0; c < m2.cols; c++)
+    {
+        freeVec(m2Cols + c);
+    }
+
+    free(m1Rows);
+    free(m2Cols);
 
     return ret;
 }

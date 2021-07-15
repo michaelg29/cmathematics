@@ -20,6 +20,17 @@ vec allocateVec(unsigned int dim)
     return ret;
 }
 
+
+/**
+ * frees a vector's memory
+ * @param v the vector
+ */
+void freeVec(vec *v) {
+    free(v->elements);
+    v->elements = NULL;
+    v->dim = 0;
+}
+
 /**
  * construct a vector with a default value for all the values
  * @param dim the dimension of the vector
