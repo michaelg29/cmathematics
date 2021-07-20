@@ -85,6 +85,10 @@ int main() {
     2) Modular Division
     3) Exponentiation
     4) Modular Exponentiation
+#### Encryption
+1) Algorithms
+    1) AES
+    2) RSA
 #### Graph Theory
 1) Algorithms
     1) Ford-Fulkerson
