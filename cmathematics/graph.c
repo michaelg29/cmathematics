@@ -455,7 +455,7 @@ int dijkstra_node_index(void *v)
 }
 
 // algorithms
-int *graph_dijkstra(graph *g, int src)
+int *graph_dijkstra(graph *g, int src, bool isTargeted, int target)
 {
     /*
         INITIALIZATION
@@ -491,6 +491,11 @@ int *graph_dijkstra(graph *g, int src)
     dijkstra_node *cur = NULL;
     while ((cur = mheap_pop(&q)))
     {
+        if (isTargeted && cur->v == target) {
+            // found shortest path to target from src
+            break;
+        }
+
         // relax edges from the popped node
         if (g->adjacencyMode)
         {
@@ -548,6 +553,14 @@ int *graph_dijkstra(graph *g, int src)
 
     // return predecessor array
     return p;
+}
+
+int *graph_targetedDijkstra(graph *g, int src, int target) {
+    return graph_dijkstra(g, src, true, target);
+}
+
+int *graph_generalDijkstra(graph *g, int src) {
+    return graph_dijkstra(g, src, false, 0);
 }
 
 graph graph_fordFulkerson(graph *g, int src, int dst, int *maxFlowRet)
