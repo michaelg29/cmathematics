@@ -1,5 +1,10 @@
 #include "cmathematics.h"
 
+/*
+ * Validation Tests:
+ * https://csrc.nist.gov/csrc/media/projects/cryptographic-algorithm-validation-program/documents/aes/aesavs.pdf
+ */
+
 #ifndef AES_H
 #define AES_H
 

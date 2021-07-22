@@ -40,6 +40,7 @@ unsigned char aes_mixColMat[BLOCK_SIDE][BLOCK_SIDE] = {
 // perform Galois Field multiplication of two bytes in GF(2^8)
 unsigned char galoisMul(unsigned char g1, unsigned char g2)
 {
+    // taken and documented from https://en.wikipedia.org/wiki/Rijndael_MixColumns
     unsigned char p = 0;
 
     for (int i = 0; i < 8; i++)
