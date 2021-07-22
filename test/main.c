@@ -2,39 +2,35 @@
 #include <stdlib.h>
 
 #include "../cmathematics/cmathematics.h"
-#include "../cmathematics/vec.h"
-#include "../cmathematics/matrix.h"
-#include "../cmathematics/bigint.h"
-#include "../cmathematics/expressions.h"
-#include "../cmathematics/graph.h"
+#include "../cmathematics/aes.h"
+
+char hex[16] = "0123456789ABCDEF";
+void printCharArr(unsigned char *arr, int len, bool asChar)
+{
+    printf("{ ");
+    for (int i = 0; i < len; i++)
+    {
+        printf("%c%c ", hex[arr[i] >> 4], hex[arr[i] & 0x0f]);
+    }
+    printf("}\n");
+}
 
 int main()
 {
     printf("Hello, world!\n");
 
-    graph g = graph_new(ADJ_LISTS, 6);
+    unsigned char *txt = "asidlhgfyiuyguaysdgbagasdcvetwee";
+    unsigned char *key = "abcdefghijklmnop";
+    unsigned char *cipher = NULL;
 
-    graph_addDirectedWeightedEdge(&g, 0, 1, 10);
-    graph_addDirectedWeightedEdge(&g, 0, 3, 8);
-    graph_addDirectedWeightedEdge(&g, 1, 2, 5);
-    graph_addDirectedWeightedEdge(&g, 1, 3, 2);
-    graph_addDirectedWeightedEdge(&g, 2, 5, 7);
-    graph_addDirectedWeightedEdge(&g, 3, 4, 10);
-    graph_addDirectedWeightedEdge(&g, 4, 2, 8);
-    graph_addDirectedWeightedEdge(&g, 4, 5, 10);
+    aes_encrypt(txt, 32, key, 16, &cipher);
 
-    char *str = graph_toString(&g);
-    printf("%s\n", str);
-    free(str);
-
-    int maxFlow = 0;
-    graph ffgraph = graph_fordFulkerson(&g, 0, 5, &maxFlow);
-    str = graph_toString(&ffgraph);
-    printf("%d\n%s\n", maxFlow, str);
-    free(str);
-
-    graph_free(&g);
-    graph_free(&ffgraph);
+    printf("Plaintext: ");
+    printCharArr(txt, 32, false);
+    printf("Key: ");
+    printCharArr(key, 16, false);
+    printf("Cipher: ");
+    printCharArr(cipher, 32, false);
 
     return 0;
 }

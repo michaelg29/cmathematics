@@ -39,11 +39,28 @@ typedef unsigned char bool;
 bool containsUint(unsigned int *arr, unsigned int noElements, unsigned int target);
 
 /**
- * method to print out an integer array
+ * method to reverse an array between two bounds
  * @param arr the array
- * @param noElements the number of elements in the array
+ * @param i the left bound
+ * @param f the right bound
  */
-void printUintArray(unsigned int *arr, unsigned int noElements);
+void reverseArray(unsigned char *arr, int i1, int i2);
+
+/**
+ * method to rotate an array to the left using the reversal algorithm
+ * @param arr the array
+ * @param d the number of positions to shift
+ * @param n the length of the array
+ */
+void leftRotate(unsigned char *arr, int d, int n);
+
+/**
+ * method to rotate an array to the right using the reversal algorithm
+ * @param arr the array
+ * @param d the number of positions to shift
+ * @param n the length of the array
+ */
+void rightRotate(unsigned char *arr, int d, int n);
 
 /**
  * method to divide and get the remainder

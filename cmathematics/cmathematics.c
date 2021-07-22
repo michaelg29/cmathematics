@@ -23,18 +23,47 @@ bool containsUint(unsigned int *arr, unsigned int noElements, unsigned int targe
 }
 
 /**
- * method to print out an integer array
+ * method to reverse an array between two bounds
  * @param arr the array
- * @param noElements the number of elements in the array
+ * @param i the left bound
+ * @param f the right bound
  */
-void printUintArray(unsigned int *arr, unsigned int noElements)
+void reverseArray(unsigned char *arr, int i1, int i2)
 {
-    printf("[");
-    for (unsigned int i = 0; i < noElements; i++)
+    while (i1 < i2)
     {
-        printf("%d ", arr[i]);
+        // swap corresponding elements across the middle
+        unsigned char tmp = arr[i1];
+        arr[i1] = arr[i2];
+        arr[i2] = tmp;
+        i1++;
+        i2--;
     }
-    printf("]\n");
+}
+
+/**
+ * method to rotate an array to the left using the reversal algorithm
+ * @param arr the array
+ * @param d the number of positions to shift
+ * @param n the length of the array
+ */
+void leftRotate(unsigned char *arr, int d, int n)
+{
+    reverseArray(arr, 0, d - 1);
+    reverseArray(arr, d, n - 1);
+    reverseArray(arr, 0, n - 1);
+}
+
+/**
+ * method to rotate an array to the right using the reversal algorithm
+ * @param arr the array
+ * @param d the number of positions to shift
+ * @param n the length of the array
+ */
+void rightRotate(unsigned char *arr, int d, int n)
+{
+    // complementary left rotation
+    leftRotate(arr, n - d, n);
 }
 
 /**
