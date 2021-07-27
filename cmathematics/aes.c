@@ -215,6 +215,8 @@ int aes_encrypt(unsigned char *in_text, int n,
         aes_encrypt_block(in_text + (i << 4), BLOCK_LEN, subkeys, nr, *out + (i << 4));
     }
 
+    free(subkeys);
+
     return outLen;
 }
 
