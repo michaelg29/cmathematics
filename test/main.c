@@ -22,15 +22,26 @@ int main()
     unsigned char *txt = "asidlhgfyiuyguaysdgbagasdcvetwee";
     unsigned char *key = "abcdefghijklmnop";
     unsigned char *cipher = NULL;
+    unsigned char *dec = NULL;
 
-    aes_encrypt(txt, 32, key, 16, &cipher);
+    int noBlocks = aes_encrypt(txt, 32, key, AES_128, &cipher);
+    int len = aes_decrypt(cipher, noBlocks, key, AES_128, &dec);
 
     printf("Plaintext: ");
     printCharArr(txt, 32, false);
-    printf("Key: ");
+    printf("Key:       ");
     printCharArr(key, 16, false);
-    printf("Cipher: ");
-    printCharArr(cipher, 32, false);
+    printf("Cipher:    ");
+    printCharArr(cipher, noBlocks * BLOCK_LEN, false);
+    printf("Decrypted: ");
+    printCharArr(dec, len, false);
+
+    // aes_mixCols(aes_inv_mixColMat); // gives identity matrix
+
+    free(txt);
+    free(key);
+    free(cipher);
+    free(dec);
 
     return 0;
 }
