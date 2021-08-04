@@ -19,29 +19,38 @@ int main()
 {
     printf("Hello, world!\n");
 
-    unsigned char *txt = "asidlhgfyiuyguaysdgbagasdcvetwee";
+    int N = 27;
+    unsigned char *txt = "asidlhgfyiuyguaysdgdcvetwee";
     unsigned char *key = "abcdefghijklmnop";
-    unsigned char *cipher = NULL;
-    unsigned char *dec = NULL;
+    unsigned char *iv = "zyxwvutsrqponmlk";
+    unsigned char *cipher[3] = {NULL, NULL, NULL};
+    unsigned char *dec[3] = {NULL, NULL, NULL};
+    unsigned char *names[3] = {"AES-ECB", "AES-CBC", "AES-CTR"};
 
-    int noBlocks = aes_encrypt(txt, 32, key, AES_128, &cipher);
-    int len = aes_decrypt(cipher, noBlocks, key, AES_128, &dec);
+    for (int i = 0; i < 3; i++)
+    {
+        int encryptedLen = aes_encrypt(txt, N, key, AES_128, i, iv, cipher + i);
+        int decryptedLen = aes_decrypt(cipher[i], encryptedLen, key, AES_128, i, iv, dec + i);
 
-    printf("Plaintext: ");
-    printCharArr(txt, 32, false);
-    printf("Key:       ");
-    printCharArr(key, 16, false);
-    printf("Cipher:    ");
-    printCharArr(cipher, noBlocks * BLOCK_LEN, false);
-    printf("Decrypted: ");
-    printCharArr(dec, len, false);
+        printf("\n\n=================%s=================\n", names[i]);
+        printf("Plaintext: ");
+        printCharArr(txt, N, false);
+        printf("Key:       ");
+        printCharArr(key, 16, false);
+        printf("Cipher:    ");
+        printCharArr(cipher[i], encryptedLen, false);
+        printf("Decrypted: ");
+        printCharArr(dec[i], decryptedLen, false);
+
+        free(cipher[i]);
+        free(dec[i]);
+    }
 
     // aes_mixCols(aes_inv_mixColMat); // gives identity matrix
 
     free(txt);
     free(key);
-    free(cipher);
-    free(dec);
+    free(iv);
 
     return 0;
 }

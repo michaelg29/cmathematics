@@ -62,6 +62,8 @@ void leftRotate(unsigned char *arr, int d, int n);
  */
 void rightRotate(unsigned char *arr, int d, int n);
 
+void randomCharArray(unsigned char *arr, int n);
+
 /**
  * method to divide and get the remainder
  * @param num the number to divide by

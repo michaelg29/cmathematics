@@ -149,6 +149,7 @@ void aes_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
 
 void aes_encrypt_block(unsigned char *in_text, int n,
                        unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE], int nr,
+                       unsigned char iv[16],
                        unsigned char out[BLOCK_LEN])
 {
     // represent the state and key as a 4x4 table (read into columns)
@@ -158,7 +159,16 @@ void aes_encrypt_block(unsigned char *in_text, int n,
     {
         for (int r = 0; r < BLOCK_SIDE; r++)
         {
-            state[r][c] = (i < n) ? in_text[i++] : 0;
+            // use PKCS5 padding
+            state[r][c] = (i < n) ? in_text[i] : BLOCK_LEN - n;
+
+            if (iv)
+            {
+                // XOR with the IV
+                state[r][c] ^= iv[i];
+            }
+
+            i++;
         }
     }
 
@@ -192,6 +202,8 @@ void aes_encrypt_block(unsigned char *in_text, int n,
 
 int aes_encrypt(unsigned char *in_text, int n,
                 unsigned char *in_key, int keylen,
+                unsigned char mode,
+                unsigned char iv[16],
                 unsigned char **out)
 {
     // determine number of rounds
@@ -211,37 +223,113 @@ int aes_encrypt(unsigned char *in_text, int n,
         malloc((nr + 1) * sizeof(unsigned char[BLOCK_SIDE][BLOCK_SIDE]));
     aes_generateKeySchedule(in_key, keylen, subkeys);
 
+    // allocate memory for CTR mode
+    unsigned char *counter = NULL;
+    unsigned char *tmp = NULL; // to write encrypted counter to
+    if (mode == AES_CTR)
+    {
+        counter = malloc(BLOCK_LEN * sizeof(unsigned char));
+        memcpy(counter, iv, BLOCK_LEN * sizeof(unsigned char));
+
+        tmp = malloc(BLOCK_LEN * sizeof(unsigned char));
+    }
+
     // divide input into blocks
-    int noBlocks = n >> 4; // n / BLOCK_LEN
-    int extra = n & 0x0f;  // n % BLOCK_LEN
+    int noBlocks = (n >> 4) + 1; // n / BLOCK_LEN + 1 (always pad)
+    int extra = n & 0x0f;        // n % BLOCK_LEN
 
     // allocate output
     int outLen = noBlocks * BLOCK_LEN;
-    if (extra)
+    if (mode == AES_CTR)
     {
-        *out = malloc((noBlocks + 1) * BLOCK_LEN * sizeof(unsigned char));
-        outLen += BLOCK_LEN;
-
-        // encrypt extra text
-        aes_encrypt_block(in_text + (noBlocks << 4), extra,
-                          subkeys, nr,
-                          *out + (noBlocks << 4));
+        // allocate for the length (not padded)
+        *out = malloc(n * sizeof(unsigned char));
     }
     else
     {
-        *out = malloc(noBlocks * BLOCK_LEN * sizeof(unsigned char));
+        *out = malloc(outLen * sizeof(unsigned char));
     }
 
-    // encrypt complete blocks
-    // i is the cursor position
+    // encrypt blocks
     for (int i = 0; i < noBlocks; i++)
     {
-        aes_encrypt_block(in_text + (i << 4), BLOCK_LEN, subkeys, nr, *out + (i << 4));
+        // length of current plaintext block
+        int len = (i < noBlocks - 1) ? BLOCK_LEN : extra;
+
+        //aes_encrypt_block(in_text + (i << 4), len, subkeys, nr, *out + (i << 4));
+
+        switch (mode)
+        {
+        case AES_CBC:
+            if (!i)
+            {
+                // use passed in iv for the first block
+                aes_encrypt_block(in_text + (i << 4), len,
+                                  subkeys, nr,
+                                  iv,
+                                  *out + (i << 4));
+            }
+            else
+            {
+                // use previous encrypted block as the iv
+                aes_encrypt_block(in_text + (i << 4), len,
+                                  subkeys, nr,
+                                  *out + ((i - 1) << 4), // get previously encrypted block
+                                  *out + (i << 4));
+            }
+            break;
+        case AES_CTR:
+            // encrypt counter and write to the complete tmp block
+            aes_encrypt_block(counter, BLOCK_LEN,
+                              subkeys, nr,
+                              NULL,
+                              tmp);
+
+            // XOR with plaintext block (may be incomplete)
+            for (int j = 0; j < len; j++)
+            {
+                (*out)[(i << 4) + j] = tmp[j] ^ in_text[(i << 4) + j];
+            }
+
+            // increment the counter by 1 (RTL)
+            for (int j = BLOCK_LEN - 1; j >= 0; j--)
+            {
+                if (counter[j] == ~0)
+                {
+                    // max value, will have overflow and carry
+                    counter[j] = 0;
+                }
+                else
+                {
+                    // increment by 1
+                    counter[j]++;
+                    break;
+                }
+            }
+
+            break;
+        default: // AES_ECB
+            // pass in the text and encrypt
+            aes_encrypt_block(in_text + (i << 4), len,
+                              subkeys, nr,
+                              NULL,
+                              *out + (i << 4));
+            break;
+        };
     }
 
     free(subkeys);
 
-    return noBlocks;
+    if (mode == AES_CTR)
+    {
+        free(counter);
+        free(tmp);
+        return n;
+    }
+    else
+    {
+        return outLen;
+    }
 }
 
 /*
@@ -299,6 +387,7 @@ void aes_inv_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
 
 void aes_decrypt_block(unsigned char *in_cipher,
                        unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE], int nr,
+                       unsigned char iv[16],
                        unsigned char out[BLOCK_LEN])
 {
     // read cipher into state matrix
@@ -332,19 +421,29 @@ void aes_decrypt_block(unsigned char *in_cipher,
     // INVERSE ROUND 0
     aes_inv_addRoundKey(state, subkeys[0]);
 
-    // copy  bytes of state into the output column by column
+    // copy bytes of state into the output column by column
     i = 0;
     for (int c = 0; c < BLOCK_SIDE; c++)
     {
         for (int r = 0; r < BLOCK_SIDE; r++)
         {
-            out[i++] = state[r][c];
+            out[i] = state[r][c];
+
+            if (iv)
+            {
+                // XOR with the IV
+                out[i] ^= iv[i];
+            }
+
+            i++;
         }
     }
 }
 
-int aes_decrypt(unsigned char *in_cipher, int noBlocks,
+int aes_decrypt(unsigned char *in_cipher, int n,
                 unsigned char *in_key, int keylen,
+                unsigned char mode,
+                unsigned char iv[16],
                 unsigned char **out)
 {
     // determine the number of rounds
@@ -364,20 +463,111 @@ int aes_decrypt(unsigned char *in_cipher, int noBlocks,
         malloc((nr + 1) * sizeof(unsigned char[BLOCK_SIDE][BLOCK_SIDE]));
     aes_generateKeySchedule(in_key, keylen, subkeys);
 
-    // allocate output memory
-    *out = malloc(noBlocks * BLOCK_LEN * sizeof(unsigned char));
+    // allocate memory for CTR variables
+    unsigned char *counter = NULL;
+    if (mode == AES_CTR)
+    {
+        counter = malloc(BLOCK_LEN * sizeof(unsigned char));
+        memcpy(counter, iv, BLOCK_LEN * sizeof(unsigned char));
+    }
 
-    // decrypt the cipher block by block
+    // allocate output memory
+    int noBlocks = n >> 4;
+    int extra = n & 0x0f;
+    if (extra)
+    {
+        noBlocks++;
+    }
+
+    unsigned char *paddedOut = NULL;
+    paddedOut = malloc(noBlocks * BLOCK_LEN * sizeof(unsigned char));
+
     for (int i = 0; i < noBlocks; i++)
     {
-        aes_decrypt_block(in_cipher + (i << 4),
-                          subkeys, nr,
-                          *out + (i << 4));
+        //aes_decrypt_block(in_cipher + (i << 4), subkeys, nr, paddedOut + (i << 4));
+        int len = BLOCK_LEN;
+        if (i == noBlocks - 1 && extra)
+        {
+            // incomplete block from CTR
+            len = extra;
+        }
+
+        switch (mode)
+        {
+        case AES_CBC:
+            if (!i)
+            {
+                aes_decrypt_block(in_cipher + (i << 4),
+                                  subkeys, nr,
+                                  iv,
+                                  paddedOut + (i << 4));
+            }
+            else
+            {
+                aes_decrypt_block(in_cipher + (i << 4),
+                                  subkeys, nr,
+                                  in_cipher + ((i - 1) << 4),
+                                  paddedOut + (i << 4));
+            }
+            break;
+        case AES_CTR:
+            // encrypt counter
+            aes_encrypt_block(counter, BLOCK_LEN,
+                              subkeys, nr,
+                              NULL,
+                              paddedOut + (i << 4));
+
+            // XOR with ciphertext block (may be incomplete)
+            for (int j = 0; j < len; j++)
+            {
+                paddedOut[(i << 4) + j] ^= in_cipher[(i << 4) + j];
+            }
+
+            // increment the counter by 1 (RTL)
+            for (int j = BLOCK_LEN - 1; j >= 0; j--)
+            {
+                if (counter[j] == ~0)
+                {
+                    // max value, will have overflow and carry
+                    counter[j] = 0;
+                }
+                else
+                {
+                    // increment by 1
+                    counter[j]++;
+                    break;
+                }
+            }
+            break;
+
+        default:
+            aes_decrypt_block(in_cipher + (i << 4), subkeys, nr, NULL, paddedOut + (i << 4));
+            break;
+        };
     }
 
     free(subkeys);
 
-    return noBlocks * BLOCK_LEN;
+    unsigned char noPadding = 0;
+
+    if (mode == AES_CTR)
+    {
+        // padding is considered as number of leftover characters in the incomplete block
+        noPadding = BLOCK_LEN - extra;
+        free(counter);
+    }
+    else
+    {
+        noPadding = paddedOut[noBlocks * BLOCK_LEN - 1]; // get last character
+    }
+
+    *out = malloc((noBlocks * BLOCK_LEN - noPadding) * sizeof(unsigned char));
+    memcpy(*out, paddedOut, (noBlocks * BLOCK_LEN - noPadding) * sizeof(unsigned char));
+
+    // free padded output
+    free(paddedOut);
+
+    return noBlocks * BLOCK_LEN - noPadding;
 }
 
 /*

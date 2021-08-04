@@ -1,6 +1,7 @@
 #include "cmathematics.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 /**
  * method to determine if an integer exists in an array
@@ -64,6 +65,15 @@ void rightRotate(unsigned char *arr, int d, int n)
 {
     // complementary left rotation
     leftRotate(arr, n - d, n);
+}
+
+void randomCharArray(unsigned char *arr, int n)
+{
+    srand(time(0));
+    for (int i = 0; i < n; i++)
+    {
+        arr[i] = rand() & 0xff; // cap at 255
+    }
 }
 
 /**

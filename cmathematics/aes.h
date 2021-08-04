@@ -17,6 +17,10 @@
 #define AES_192 192
 #define AES_256 256
 
+#define AES_ECB 0
+#define AES_CBC 1
+#define AES_CTR 2
+
 /*
     REFERENCE TABLES
 */
@@ -47,10 +51,13 @@ void aes_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE]);
 
 void aes_encrypt_block(unsigned char *in_text, int n,
                        unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE], int nr,
+                       unsigned char iv[16],
                        unsigned char out[BLOCK_LEN]);
 
 int aes_encrypt(unsigned char *in_text, int n,
                 unsigned char *in_key, int keylen,
+                unsigned char mode,
+                unsigned char iv[16],
                 unsigned char **out);
 
 /*
@@ -64,10 +71,13 @@ void aes_inv_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE]);
 
 void aes_decrypt_block(unsigned char *in_cipher,
                        unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE], int nr,
+                       unsigned char iv[16],
                        unsigned char out[BLOCK_LEN]);
 
-int aes_decrypt(unsigned char *in_cipher, int noBlocks,
+int aes_decrypt(unsigned char *in_cipher, int n,
                 unsigned char *in_key, int keylen,
+                unsigned char mode,
+                unsigned char iv[16],
                 unsigned char **out);
 
 /*
