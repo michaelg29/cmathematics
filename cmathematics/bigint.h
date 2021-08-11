@@ -30,7 +30,7 @@ extern const bigint BIGINT_NEG_ONE; // negative one integer
  * @param capacity the initial size of the array
  * @return the integer
  */
-bigint allocateBigint(unsigned int capacity);
+bigint bigint_allocate(unsigned int capacity);
 
 /**
  * copies an array of integers into a bigint structure
@@ -39,13 +39,13 @@ bigint allocateBigint(unsigned int capacity);
  * @param sign the sign of the bigint
  * @return the bigint structure
  */
-bigint copyIntArr(int *arr, unsigned int n, bool sign);
+bigint bigint_copyIntArr(int *arr, unsigned int n, bool sign);
 
 /**
  * free the memory of a big integer
  * @param i the integer
  */
-void freeBigint(bigint *i);
+void bigint_free(bigint *i);
 
 /**
  * convert string to a big integer by parsing each digit
@@ -58,7 +58,7 @@ void freeBigint(bigint *i);
  * @param str the string
  * @return the integer
  */
-bigint strToBigint(char *str);
+bigint bigint_fromString(char *str);
 
 /**
  * creates new positive big integer from an unsigned integer
@@ -72,32 +72,32 @@ bigint strToBigint(char *str);
  * @param i the integer
  * @return the integer
  */
-bigint newPositiveBigint(unsigned int i);
+bigint bigint_fromUint(unsigned int i);
 
 /**
  * creates new positive big integer from an unsigned long long
- * same process as newPositiveBigInt
+ * same process as bigint_fromUint
  * 
  * @param l the num
  * @return the big integer
  */
-bigint newLLPositiveBigInt(unsigned long long l);
+bigint bigint_fromULLint(unsigned long long l);
 
 /**
  * creates new big integer from an integer
- * calls newPositiveBigInt then applies sign after
+ * calls bigint_fromUint then applies sign after
  * @param i the integer
  * @return the big integer
  */
-bigint newBigint(int i);
+bigint bigint_fromInt(int i);
 
 /**
  * creates new big integer from a long long
- * calls newLLPositiveBigInt then applies sign after
+ * calls bigint_fromULLint then applies sign after
  * @param i the long long
  * @return the big integer
  */
-bigint newLLBigInt(long long l);
+bigint bigint_fromLLint(long long l);
 
 /**
  * multiplies two integers together and handles possible overflow
@@ -105,43 +105,20 @@ bigint newLLBigInt(long long l);
  * @param i2 the second integer
  * @return the big integer containing the product
  */
-bigint multiplyIntInt(unsigned int i1, unsigned int i2);
+bigint bigint_fromUiMult(unsigned int i1, unsigned int i2);
 
 /**
  * trims leading zeros in the array of digits
  * @param b the pointer to the integer to trim
  */
-void trimBigint(bigint *b);
-
-/**
- * get string representation of number
- * 
- * EXAMPLE
- * [456789780, 123] => "123456789780"
- * 
- * digitIdx strIdx  char    offset
- * 1        0       '3'     2
- *                  '2'     1
- *                  '1'     0 => "123"
- * 2        3       '0'     8
- *                  '8'     7
- *                  ...
- *                  '5'     1
- *                  '4'     0 => "456789780"
- *                               -----------
- *                               "123456789780"
- * 
- * @param i the pointer to the big integer
- * @return the string
- */
-char *bigintPtrToString(bigint *i);
+void bigint_trim(bigint *b);
 
 /**
  * get string representation of number
  * @param i the big integer
  * @return the string
  */
-char *bigintToString(bigint i);
+char *bigint_toString(bigint i);
 
 /**
  * comparison of two integers
@@ -149,7 +126,7 @@ char *bigintToString(bigint i);
  * @param i2 the second integer
  * @return -1 if i1 < i2, 0 if i1 = i2, 1 if i1 > i2
  */
-char compareBigint(bigint i1, bigint i2);
+char bigint_compare(bigint i1, bigint i2);
 
 /**
  * adds two integers
@@ -157,7 +134,7 @@ char compareBigint(bigint i1, bigint i2);
  * @param i2 the second integer
  * @return the sum
  */
-bigint addBigint(bigint i1, bigint i2);
+bigint bigint_add(bigint i1, bigint i2);
 
 /**
  * subtracts two integers
@@ -165,7 +142,7 @@ bigint addBigint(bigint i1, bigint i2);
  * @param i2 the integer to subtract
  * @return the difference
  */
-bigint subtractBigint(bigint i1, bigint i2);
+bigint bigint_subtract(bigint i1, bigint i2);
 
 /**
  * multiplies two bigints
@@ -173,7 +150,7 @@ bigint subtractBigint(bigint i1, bigint i2);
  * @param i2 the second integer
  * @return the product
  */
-bigint multiplyBigint(bigint i1, bigint i2);
+bigint bigint_multiply(bigint i1, bigint i2);
 
 /**
  * multiplies two specified ranges of integers using long (elementary) multiplication
@@ -186,9 +163,9 @@ bigint multiplyBigint(bigint i1, bigint i2);
  * @param outSize the variable to output the product size to
  * @return the integer array containing the product
  */
-int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
-                        int *i2, unsigned int i2i, unsigned int i2f,
-                        unsigned int *outSize);
+int *bigint_longMultiply(int *i1, unsigned int i1i, unsigned int i1f,
+                         int *i2, unsigned int i2i, unsigned int i2f,
+                         unsigned int *outSize);
 
 /**
  * multiplies two specified ranges of integers using long (elementary) multiplication
@@ -201,9 +178,9 @@ int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
  * @param outSize the variable to output the product size to
  * @return the integer array containing the product
  */
-int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
-                             int *i2, unsigned int i2size,
-                             unsigned int idxi, unsigned int idxf,
-                             unsigned int *outSize);
+int *bigint_karatsubaMultiply(int *i1, unsigned int i1size,
+                              int *i2, unsigned int i2size,
+                              unsigned int idxi, unsigned int idxf,
+                              unsigned int *outSize);
 
 #endif

@@ -14,7 +14,7 @@ const bigint BIGINT_NEG_ONE = {false, 1, 1, arrOne};
  * @param capacity the initial size of the array
  * @return the integer
  */
-bigint allocateBigint(unsigned int capacity)
+bigint bigint_allocate(unsigned int capacity)
 {
     bigint ret;
     ret.capacity = capacity;
@@ -32,9 +32,9 @@ bigint allocateBigint(unsigned int capacity)
  * @param sign the sign of the bigint
  * @return the bigint structure
  */
-bigint copyIntArr(int *arr, unsigned int n, bool sign)
+bigint bigint_copyIntArr(int *arr, unsigned int n, bool sign)
 {
-    bigint ret = allocateBigint(n);
+    bigint ret = bigint_allocate(n);
     ret.noDigits = n;
     ret.sign = sign;
 
@@ -47,7 +47,7 @@ bigint copyIntArr(int *arr, unsigned int n, bool sign)
  * free the memory of a big integer
  * @param i the integer
  */
-void freeBigint(bigint *i)
+void bigint_free(bigint *i)
 {
     i->capacity = 0;
     i->noDigits = 0;
@@ -67,7 +67,7 @@ void freeBigint(bigint *i)
  * @param str the string
  * @return the integer
  */
-bigint strToBigint(char *str)
+bigint bigint_fromString(char *str)
 {
     unsigned int len = strlen(str);  // length of raw string
     unsigned int effectiveLen = len; // length of string to parse after discarding negative sign and leading zeros
@@ -111,7 +111,7 @@ bigint strToBigint(char *str)
     }
 
     // allocate integer
-    bigint ret = allocateBigint(numDigits);
+    bigint ret = bigint_allocate(numDigits);
     // set determined values
     ret.noDigits = numDigits;
     ret.sign = sign;
@@ -148,7 +148,7 @@ bigint strToBigint(char *str)
         else
         {
             // invalid character
-            freeBigint(&ret);
+            bigint_free(&ret);
             return BIGINT_ZERO;
         }
     }
@@ -168,12 +168,12 @@ bigint strToBigint(char *str)
  * @param i the integer
  * @return the integer
  */
-bigint newPositiveBigint(unsigned int i)
+bigint bigint_fromUint(unsigned int i)
 {
     // get number of digits
     unsigned int noDigits = numDigits(i, BASE);
 
-    bigint ret = allocateBigint(noDigits);
+    bigint ret = bigint_allocate(noDigits);
     ret.noDigits = noDigits;
     for (unsigned int idx = 0; idx < noDigits; idx++)
     {
@@ -191,12 +191,12 @@ bigint newPositiveBigint(unsigned int i)
  * @param l the num
  * @return the big integer
  */
-bigint newLLPositiveBigInt(unsigned long long l)
+bigint bigint_fromULLint(unsigned long long l)
 {
     // get number of digits
     unsigned long long noDigits = numDigitsLL(l, BASE);
 
-    bigint ret = allocateBigint(noDigits);
+    bigint ret = bigint_allocate(noDigits);
     ret.noDigits = noDigits;
     for (unsigned int idx = 0; idx < noDigits; idx++)
     {
@@ -212,11 +212,11 @@ bigint newLLPositiveBigInt(unsigned long long l)
 
 /**
  * creates new big integer from an integer
- * calls newPositiveBigInt then applies sign after
+ * calls bigint_fromUint then applies sign after
  * @param i the integer
  * @return the big integer
  */
-bigint newBigint(int i)
+bigint bigint_fromInt(int i)
 {
     bool sign = true;
     if (i < 0)
@@ -226,7 +226,7 @@ bigint newBigint(int i)
     }
 
     // pass in positive component
-    bigint ret = newPositiveBigint(i);
+    bigint ret = bigint_fromUint(i);
     // set sign
     ret.sign = sign;
 
@@ -235,11 +235,11 @@ bigint newBigint(int i)
 
 /**
  * creates new big integer from a long long
- * calls newLLPositiveBigInt then applies sign after
+ * calls bigint_fromULLint then applies sign after
  * @param i the long long
  * @return the big integer
  */
-bigint newLLBigInt(long long l)
+bigint bigint_fromLLint(long long l)
 {
     bool sign = true;
     if (l < 0LL)
@@ -249,7 +249,7 @@ bigint newLLBigInt(long long l)
     }
 
     // pass in positive component
-    bigint ret = newLLPositiveBigInt(l);
+    bigint ret = bigint_fromULLint(l);
     // set sign
     ret.sign = sign;
 
@@ -262,9 +262,9 @@ bigint newLLBigInt(long long l)
  * @param i2 the second integer
  * @return the big integer containing the product
  */
-bigint multiplyIntInt(unsigned int i1, unsigned int i2)
+bigint bigint_fromUiMult(unsigned int i1, unsigned int i2)
 {
-    bigint ret = newLLPositiveBigInt((long long)i1 * (long long)i2);
+    bigint ret = bigint_fromLLint((long long)i1 * (long long)i2);
 
     // get product (account for overflow)
     return ret;
@@ -274,67 +274,59 @@ bigint multiplyIntInt(unsigned int i1, unsigned int i2)
  * trims leading zeros in the array of digits
  * @param b the pointer to the integer to trim
  */
-void trimBigint(bigint *b)
+void bigint_trim(bigint *b)
 {
     // determine how many digits to remove
     while (!b->digits[b->noDigits - 1])
     {
         b->noDigits--;
     }
+    int *oldDigits = b->digits;
 
     // copy over elements
-    int *newDigits = malloc(b->noDigits * sizeof(int));
-
-    for (unsigned int i = 0; i < b->noDigits; i++)
-    {
-        newDigits[i] = b->digits[i];
-    }
-
-    // temporary variable for swap
-    int *tmp = b->digits;
-    b->digits = newDigits;
-    newDigits = tmp;
+    b->digits = malloc(b->noDigits * sizeof(int));
+    memcpy(b->digits, oldDigits, b->noDigits * sizeof(int));
 
     // free old
-    free(newDigits);
-    free(tmp);
+    free(oldDigits);
 }
 
 /**
  * get string representation of number
- * 
- * EXAMPLE
- * [456789780, 123] => "123456789780"
- * 
- * digitIdx strIdx  char    offset
- * 1        0       '3'     2
- *                  '2'     1
- *                  '1'     0 => "123"
- * 2        3       '0'     8
- *                  '8'     7
- *                  ...
- *                  '5'     1
- *                  '4'     0 => "456789780"
- *                               -----------
- *                               "123456789780"
- * 
- * @param i the pointer to the big integer
+ * @param i the big integer
  * @return the string
  */
-char *bigintPtrToString(bigint *i)
+char *bigint_toString(bigint i)
 {
-    if (!i || !i->noDigits)
+    /*
+     * EXAMPLE
+     * [456789780, 123] => "123456789780"
+     * 
+     * digitIdx strIdx  char    offset
+     * 1        0       '3'     2
+     *                  '2'     1
+     *                  '1'     0 => "123"
+     * 2        3       '0'     8
+     *                  '8'     7
+     *                  ...
+     *                  '5'     1
+     *                  '4'     0 => "456789780"
+     *                               -----------
+     *                               "123456789780"
+     */
+
+    if (!i.noDigits)
     {
         // no digits
         return "0";
     }
 
-    unsigned int noChars = (i->noDigits - 1) * NO_BASE_DIGITS;
+    unsigned int noChars = (i.noDigits - 1) * NO_BASE_DIGITS;
     // may not need all characters for the last
-    unsigned int numDigitsLast = numDigits(i->digits[i->noDigits - 1], 10);
+    unsigned int numDigitsLast = numDigits(i.digits[i.noDigits - 1], 10);
     noChars += numDigitsLast;
 
-    if (!i->sign)
+    if (!i.sign)
     {
         // extra character for negative sign
         noChars++;
@@ -350,7 +342,7 @@ char *bigintPtrToString(bigint *i)
     }
 
     unsigned int strIdx = 0;
-    if (!i->sign)
+    if (!i.sign)
     {
         // set first char to negative sign
         ret[strIdx++] = '-';
@@ -359,7 +351,7 @@ char *bigintPtrToString(bigint *i)
     // highest magnitude digits are last in the array but first characters in string
     char offset = numDigitsLast;
     int strDigit;
-    for (int digitIdx = i->noDigits;
+    for (int digitIdx = i.noDigits;
          digitIdx; // digitIdx != 0
          digitIdx--)
     {
@@ -367,7 +359,7 @@ char *bigintPtrToString(bigint *i)
         char increment = offset;
 
         // get integer value
-        int digit = i->digits[digitIdx - 1];
+        int digit = i.digits[digitIdx - 1];
         while (offset--)
         {
             // get next lowest magnitude digit in base 10
@@ -388,22 +380,12 @@ char *bigintPtrToString(bigint *i)
 }
 
 /**
- * get string representation of number
- * @param i the big integer
- * @return the string
- */
-char *bigintToString(bigint i)
-{
-    return bigintPtrToString(&i);
-}
-
-/**
  * comparison of two integers
  * @param i1 the first integer
  * @param i2 the second integer
  * @return -1 if i1 < i2, 0 if i1 = i2, 1 if i1 > i2
  */
-char compareBigint(bigint i1, bigint i2)
+char bigint_compare(bigint i1, bigint i2)
 {
     if (i1.sign && !i2.sign) // i1 >= 0, i2 < 0 -> i1 > i2
     {
@@ -418,7 +400,7 @@ char compareBigint(bigint i1, bigint i2)
         // both negative, compare the positives, return opposite
         i1.sign = true;
         i2.sign = true;
-        char comparison = compareBigint(i1, i2);
+        char comparison = bigint_compare(i1, i2);
         return -comparison;
     }
 
@@ -459,23 +441,23 @@ char compareBigint(bigint i1, bigint i2)
  * @param i2 the second integer
  * @return the sum
  */
-bigint addBigint(bigint i1, bigint i2)
+bigint bigint_add(bigint i1, bigint i2)
 {
     if (i1.sign && !i2.sign) // i1 + -i2 = i1 - i2
     {
         i2.sign = true;
-        return subtractBigint(i1, i2);
+        return bigint_subtract(i1, i2);
     }
     else if (!i1.sign && i2.sign) // -i1 + i2 = i2 - i1
     {
         i1.sign = true;
-        return subtractBigint(i2, i1);
+        return bigint_subtract(i2, i1);
     }
 
     // extra digit in case of extra carry
     unsigned int noDigits = MAX(i1.noDigits, i2.noDigits) + 1;
 
-    bigint ret = allocateBigint(noDigits);
+    bigint ret = bigint_allocate(noDigits);
     // set determined values
     ret.noDigits = noDigits;
 
@@ -511,7 +493,7 @@ bigint addBigint(bigint i1, bigint i2)
     }
 
     // remove leading zeros
-    trimBigint(&ret);
+    bigint_trim(&ret);
 
     if (!i1.sign && !i2.sign) // -i1 + -i2 = -(i1 + i2)
     {
@@ -527,9 +509,9 @@ bigint addBigint(bigint i1, bigint i2)
  * @param i2 the integer to subtract
  * @return the difference
  */
-bigint subtractBigint(bigint i1, bigint i2)
+bigint bigint_subtract(bigint i1, bigint i2)
 {
-    char comparison = compareBigint(i1, i2);
+    char comparison = bigint_compare(i1, i2);
     if (!comparison)
     {
         // the numbers are the same
@@ -539,24 +521,24 @@ bigint subtractBigint(bigint i1, bigint i2)
     if (i1.sign && !i2.sign) // i1 - -i2 = i1 + i2
     {
         i2.sign = true;
-        return addBigint(i1, i2);
+        return bigint_add(i1, i2);
     }
     else if (!i1.sign && i2.sign) // -i1 - i2 = -i1 + -i2
     {
         i2.sign = false;
-        return addBigint(i1, i2);
+        return bigint_add(i1, i2);
     }
     else if (!i1.sign && !i2.sign) // -i1 - -i2 = -i1 + i2 = i2 - i1
     {
         i1.sign = true;
         i2.sign = true;
-        return subtractBigint(i2, i1);
+        return bigint_subtract(i2, i1);
     }
     else // both positive, find max
     {
         if (comparison < 0) // i2 > i1; i1 - i2 = -(i2 - i1)
         {
-            bigint res = subtractBigint(i2, i1);
+            bigint res = bigint_subtract(i2, i1);
             res.sign = !res.sign;
             return res;
         }
@@ -565,7 +547,7 @@ bigint subtractBigint(bigint i1, bigint i2)
     // know both are positive and i1 is larger
     unsigned int noDigits = i1.noDigits;
 
-    bigint ret = allocateBigint(noDigits);
+    bigint ret = bigint_allocate(noDigits);
     // set determined values
     ret.noDigits = noDigits;
 
@@ -602,7 +584,7 @@ bigint subtractBigint(bigint i1, bigint i2)
     }
 
     // remove leading zeros
-    trimBigint(&ret);
+    bigint_trim(&ret);
 
     return ret;
 }
@@ -613,7 +595,7 @@ bigint subtractBigint(bigint i1, bigint i2)
  * @param i2 the second integer
  * @return the product
  */
-bigint multiplyBigint(bigint i1, bigint i2)
+bigint bigint_multiply(bigint i1, bigint i2)
 {
     // compute the sign using XNOR
     bool sign = !(i1.sign ^ i2.sign);
@@ -623,7 +605,7 @@ bigint multiplyBigint(bigint i1, bigint i2)
     */
 
     // if either is zero, return zero
-    if (!(compareBigint(i1, BIGINT_ZERO) && compareBigint(i2, BIGINT_ZERO)))
+    if (!(bigint_compare(i1, BIGINT_ZERO) && bigint_compare(i2, BIGINT_ZERO)))
     {
         return BIGINT_ZERO;
     }
@@ -631,11 +613,11 @@ bigint multiplyBigint(bigint i1, bigint i2)
     // if either number has a magnitude of 1, copy the other digits
     if (i1.noDigits == 1 && i1.digits[0] == 1)
     {
-        return copyIntArr(i2.digits, i2.noDigits, sign);
+        return bigint_copyIntArr(i2.digits, i2.noDigits, sign);
     }
     else if (i2.noDigits == 1 && i2.digits[0] == 1)
     {
-        return copyIntArr(i1.digits, i1.noDigits, sign);
+        return bigint_copyIntArr(i1.digits, i1.noDigits, sign);
     }
 
     /*
@@ -659,7 +641,7 @@ bigint multiplyBigint(bigint i1, bigint i2)
         determine which algorithm to use
 
         long multiplication: O(n * m), n >= m
-        karatsuba multiplication: O(max(n, m)^(lg 3)) ~= O(max^1.585) ~= O(n^1.5)
+        karatsuba multiplication: O(max(n, m)^(lg 3)) ~= O(n^1.585) ~= O(n^1.5)
 
         Use long multiplication when
             n * m <= n^1.5
@@ -673,23 +655,23 @@ bigint multiplyBigint(bigint i1, bigint i2)
         minNoDigits <= sqrt(maxNoDigits))
     {
         // perform long multiplication
-        retArr = longMultiplyIntArr(i1.digits, 0, i1.noDigits,
+        retArr = bigint_longMultiply(i1.digits, 0, i1.noDigits,
                                     i2.digits, 0, i2.noDigits,
                                     &noDigits);
     }
     else
     {
         // perform karatsuba multiplication
-        retArr = karatsubaMultiplyIntArr(i1.digits, i1.noDigits,
+        retArr = bigint_karatsubaMultiply(i1.digits, i1.noDigits,
                                          i2.digits, i2.noDigits,
                                          0, maxNoDigits,
                                          &noDigits);
     }
 
-    bigint ret = copyIntArr(retArr, noDigits, sign);
+    bigint ret = bigint_copyIntArr(retArr, noDigits, sign);
 
     // remove leading zeros
-    trimBigint(&ret);
+    bigint_trim(&ret);
 
     // free tempoary array
     if (retArr)
@@ -711,9 +693,9 @@ bigint multiplyBigint(bigint i1, bigint i2)
  * @param outSize the variable to output the product size to
  * @return the integer array containing the product
  */
-int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
-                        int *i2, unsigned int i2i, unsigned int i2f,
-                        unsigned int *outSize)
+int *bigint_longMultiply(int *i1, unsigned int i1i, unsigned int i1f,
+                         int *i2, unsigned int i2i, unsigned int i2f,
+                         unsigned int *outSize)
 {
     unsigned int i1range = i1f - i1i;
     unsigned int i2range = i2f - i2i;
@@ -744,7 +726,7 @@ int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
             // get product (account for overflow)
             // prod[0] = addition to digit[i + j]
             // prod[1] = addition to carry
-            bigint prod = multiplyIntInt(i1[i1i + i], i2[i2i + j]);
+            bigint prod = bigint_fromUiMult(i1[i1i + i], i2[i2i + j]);
 
             // calculate contribution
             unsigned int addition = 0;
@@ -809,10 +791,10 @@ int *longMultiplyIntArr(int *i1, unsigned int i1i, unsigned int i1f,
  * @param outSize the variable to output the product size to
  * @return the integer array containing the product
  */
-int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
-                             int *i2, unsigned int i2size,
-                             unsigned int idxi, unsigned int idxf,
-                             unsigned int *outSize)
+int *bigint_karatsubaMultiply(int *i1, unsigned int i1size,
+                              int *i2, unsigned int i2size,
+                              unsigned int idxi, unsigned int idxf,
+                              unsigned int *outSize)
 {
     // if either index out of bounds, return all zeros
     if (idxi >= i1size || idxi >= i2size || idxi >= idxf)
@@ -831,7 +813,7 @@ int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
     {
         // if padded final index goes beyond the inputs, output the maximum index of the array
         // ie. take the minimum of the size and the padded index
-        return longMultiplyIntArr(i1, idxi, MIN(i1size, idxf),
+        return bigint_longMultiply(i1, idxi, MIN(i1size, idxf),
                                   i2, idxi, MIN(i2size, idxf),
                                   outSize);
     }
@@ -894,9 +876,9 @@ int *karatsubaMultiplyIntArr(int *i1, unsigned int i1size,
         md  = x0y1 + x1y0 = (x0y0 + x0y1 + x1y0 + x1y1) - x0y0 - x1y1 = md' - hi - lo > 0
     */
     unsigned int hiSize, loSize, mdSize;
-    int *hi = karatsubaMultiplyIntArr(i1, i1size, i2, i2size, half, idxf, &hiSize);
-    int *lo = karatsubaMultiplyIntArr(i1, i1size, i2, i2size, idxi, half, &loSize);
-    int *md = karatsubaMultiplyIntArr(i1sum, sumTermSize, i2sum, sumTermSize, 0, sumTermSize, &mdSize);
+    int *hi = bigint_karatsubaMultiply(i1, i1size, i2, i2size, half, idxf, &hiSize);
+    int *lo = bigint_karatsubaMultiply(i1, i1size, i2, i2size, idxi, half, &loSize);
+    int *md = bigint_karatsubaMultiply(i1sum, sumTermSize, i2sum, sumTermSize, 0, sumTermSize, &mdSize);
 
     /*
         combine results of sub-problems

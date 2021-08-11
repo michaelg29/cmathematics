@@ -78,3 +78,5 @@ karatsuba(x, 3, y, 3, 0, 4)
         0                           = 0             = 0
     }
     
+int *bigint_leftShift(int *i, int n, int d, int *newSize);
+int *bigint_rightShift(int *i, int n, int d, int *newSize);
