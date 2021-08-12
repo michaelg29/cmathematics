@@ -947,3 +947,134 @@ int *bigint_karatsubaMultiply(int *i1, unsigned int i1size,
     *outSize = noDigits;
     return ret;
 }
+
+/**
+ * multiply the integer by the base a number of times
+ * @param i the integer
+ * @param n the size of the array
+ * @param d the number of times to multiply by the base
+ * @param newSize the location to store the size of the new array
+ * @return the pointer to the reallocated array
+ */
+int *bigint_leftShiftArr(int *i, int n, int d, int *newSize)
+{
+    if (d < 0)
+    {
+        // becomes a right shift
+        return bigint_rightShiftArr(i, n, -d, newSize);
+    }
+    if (!d)
+    {
+        // return original
+        *newSize = n;
+        return i;
+    }
+
+    // get number of leading zeros
+    int noLeadingZeros = 0;
+    int idx = n - 1;
+    while (idx >= 0 && !i[idx--])
+    {
+        noLeadingZeros++;
+    }
+
+    if (noLeadingZeros == n)
+    {
+        // bigint is 0, result will be zero
+        free(i);
+        *newSize = 0;
+        return NULL;
+    }
+
+    // allocate return array
+    *newSize = n - noLeadingZeros + d;
+    int *ret = malloc(*newSize * sizeof(int));
+    // copy over digits
+    memcpy(ret + d, i, (n - noLeadingZeros) * sizeof(int));
+    // set lower digits to 0
+    memset(ret, 0, d * sizeof(int));
+
+    free(i);
+
+    return ret;
+}
+
+/**
+ * multiply an integer by the base
+ * @param i the integer
+ * @param d the number of times to multiply by the base
+ * @return the result of the multiplication
+ */
+bigint bigint_baseMult(bigint i, int d)
+{
+    i.digits = bigint_leftShiftArr(i.digits, i.noDigits, d, &i.noDigits);
+    return i;
+}
+
+/**
+ * divide the integer by the base a number of times
+ * @param i the integer
+ * @param n the size of the array
+ * @param d the number of times to divide by the base
+ * @param newSize the location to store the size of the new array
+ * @return the pointer to the reallocated array
+ */
+int *bigint_rightShiftArr(int *i, int n, int d, int *newSize)
+{
+    if (d < 0)
+    {
+        // becomes a left shift
+        return bigint_leftShiftArr(i, n, -d, newSize);
+    }
+    if (!d)
+    {
+        // return original
+        *newSize = n;
+        return i;
+    }
+    if (d >= n)
+    {
+        // result will be zero
+        free(i);
+        *newSize = 0;
+        return NULL;
+    }
+
+    // get number of leading zeros
+    int noLeadingZeros = 0;
+    int idx = n - 1;
+    while (idx >= 0 && !i[idx--])
+    {
+        noLeadingZeros++;
+    }
+
+    if (noLeadingZeros == n)
+    {
+        // bigint is 0, result will be zero
+        free(i);
+        *newSize = 0;
+        return NULL;
+    }
+
+    // allocate return array
+    *newSize = n - noLeadingZeros - d;
+    int *ret = malloc(*newSize * sizeof(int));
+    // copy over digits
+    memcpy(ret, i + d, (n - noLeadingZeros - d) * sizeof(int));
+
+    free(i);
+
+    return ret;
+}
+
+/**
+ * divide an integer by the base
+ * @param i the integer
+ * @param d the number of times to divide by the base
+ * @return the result of the division
+ */
+bigint bigint_baseDivide(bigint i, int d)
+{
+    i.digits = bigint_rightShiftArr(i.digits, i.noDigits, d, &i.noDigits);
+    return i;
+}

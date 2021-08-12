@@ -183,4 +183,40 @@ int *bigint_karatsubaMultiply(int *i1, unsigned int i1size,
                               unsigned int idxi, unsigned int idxf,
                               unsigned int *outSize);
 
+/**
+ * left shift an integer array
+ * @param i the integer
+ * @param n the size of the array
+ * @param d the number of times to left shift
+ * @param newSize the location to store the size of the new array
+ * @return the pointer to the reallocated array
+ */
+int *bigint_leftShiftArr(int *i, int n, int d, int *newSize);
+
+/**
+ * multiply an integer by the base
+ * @param i the integer
+ * @param d the number of times to multiply by the base
+ * @return the result of the multiplication
+ */
+bigint bigint_baseMult(bigint i, int d);
+
+/**
+ * divide the integer by the base a number of times
+ * @param i the integer
+ * @param n the size of the array
+ * @param d the number of times to divide by the base
+ * @param newSize the location to store the size of the new array
+ * @return the pointer to the reallocated array
+ */
+int *bigint_rightShiftArr(int *i, int n, int d, int *newSize);
+
+/**
+ * divide an integer by the base
+ * @param i the integer
+ * @param d the number of times to divide by the base
+ * @return the result of the division
+ */
+bigint bigint_baseDivide(bigint i, int d);
+
 #endif
