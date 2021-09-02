@@ -1,56 +1,68 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../cmathematics/cmathematics.h"
 #include "../cmathematics/aes.h"
+#include "../cmathematics/sha3.h"
 
 char hex[16] = "0123456789ABCDEF";
-void printCharArr(unsigned char *arr, int len, bool asChar)
+void printCharArr(unsigned char *arr, int len, bool hasSpace)
 {
     printf("{ ");
     for (int i = 0; i < len; i++)
     {
-        printf("%c%c ", hex[arr[i] >> 4], hex[arr[i] & 0x0f]);
+        printf("%c%c%s", hex[arr[i] >> 4], hex[arr[i] & 0x0f], hasSpace ? " " : "");
     }
-    printf("}\n");
+    printf("%s}\n", hasSpace ? "" : " ");
+}
+
+unsigned char *scanHex(char *str, int n) {
+    int bytes = n >> 1;
+    unsigned char *ret = malloc(bytes);
+    memset(ret, 0, bytes);
+
+    for (int i = 0, i2 = 0; i < bytes; i++, i2 += 2) {
+        // get value
+        for (int j = 0; j < 2; j++) {
+            ret[i] <<= 4;
+            unsigned char c = str[i2 + j];
+            if (c >= '0' && c <= '9') {
+                ret[i] += c - '0';
+            }
+            else if (c >= 'a' && c <= 'f') {
+                ret[i] += c - 'a' + 10;
+            }
+            else if (c >= 'A' && c <= 'F') {
+                ret[i] += c - 'A' + 10;
+            }
+            else {
+                free(ret);
+                return NULL;
+            }
+        }
+    }
+
+    return ret;
 }
 
 int main()
 {
     printf("Hello, world!\n");
 
-    int N = 27;
-    unsigned char *txt = "asidlhgfyiuyguaysdgdcvetwee";
-    unsigned char *key = "abcdefghijklmnop";
-    unsigned char *iv = "zyxwvutsrqponmlk";
-    unsigned char *cipher[3] = {NULL, NULL, NULL};
-    unsigned char *dec[3] = {NULL, NULL, NULL};
-    unsigned char *names[3] = {"AES-ECB", "AES-CBC", "AES-CTR"};
-
-    for (int i = 0; i < 3; i++)
-    {
-        int encryptedLen = aes_encrypt(txt, N, key, AES_128, i, iv, cipher + i);
-        int decryptedLen = aes_decrypt(cipher[i], encryptedLen, key, AES_128, i, iv, dec + i);
-
-        printf("\n\n=================%s=================\n", names[i]);
-        printf("Plaintext: ");
-        printCharArr(txt, N, false);
-        printf("Key:       ");
-        printCharArr(key, 16, false);
-        printf("Cipher:    ");
-        printCharArr(cipher[i], encryptedLen, false);
-        printf("Decrypted: ");
-        printCharArr(dec[i], decryptedLen, false);
-
-        free(cipher[i]);
-        free(dec[i]);
+    const int N = 352;
+    unsigned char *msg = scanHex("1F42ADD25C0A80A4C82AAE3A0E302ABF9261DCA7E7884FD869D96ED4CE88AAAA25304D2D79E1FA5CC1FA2C95899229BC87431AD06DA524F2140E70BD0536E9685EE78089590A012384709182357091283479AB93489182CD7397F12B261DCA7E7884FD869D96ED4CE88A261DCA7E7884FD869D96ED4CE88A261DCA7E7884FD869D96ED4CE88A261DCA7E7884FD869D96ED4CE88A261DCA7E7884FD869D96ED4CE88A261DCA7E7884FD869D96ED4CE88A", N);
+    if (msg) {
+        unsigned char *hash = NULL;
+        int len = sha3_hash(msg, N >> 1, SHA3_256, &hash);
+        printf("%d\n", len);
+        printCharArr(hash, len, false);
+        free(hash);
     }
-
-    // aes_mixCols(aes_inv_mixColMat); // gives identity matrix
-
-    free(txt);
-    free(key);
-    free(iv);
+    else {
+        printf("Invalid string\n");
+    }
+    free(msg);
 
     return 0;
 }
