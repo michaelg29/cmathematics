@@ -1,7 +1,7 @@
 #include "cmathematics.h"
 
 #ifndef SHA3_H
-#define SHA3_h
+#define SHA3_H
 
 #define SHA3_L 6
 #define SHA3_NR (12 + 2 * SHA3_L)

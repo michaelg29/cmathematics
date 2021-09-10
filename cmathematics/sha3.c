@@ -40,17 +40,7 @@ unsigned long long sha3_rotWord(unsigned long long w, unsigned int d)
 {
     d = d & 0x3f; // d mod 64
 
-    unsigned long long max = ~0l;
-
-    unsigned long long wrapPortion = (max << (64 - d)) & w; // get the d msb's
-    unsigned long long shiftPortion = (max >> d) & w;       // get the (64 - d) lsb's
-
-    // shift to put in place
-    wrapPortion >>= 64 - d;
-    shiftPortion <<= d;
-
-    // return the addition
-    return wrapPortion | shiftPortion;
+    return (w << d) | (w >> (64 - d));
 }
 
 void sha3_keccak_f(unsigned long long A[5][5])
@@ -137,7 +127,8 @@ int sha3_hash(unsigned char *in, int n, int mode, unsigned char **out)
 
     // allocate output
     *out = malloc(ret_len * sizeof(unsigned char));
-    if (!(*out)) {
+    if (!(*out))
+    {
         return 0;
     }
 
