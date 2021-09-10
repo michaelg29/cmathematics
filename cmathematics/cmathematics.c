@@ -73,6 +73,27 @@ void rightRotate(unsigned char *arr, int d, int n)
     leftRotate(arr, n - d, n);
 }
 
+unsigned long long rotateLL(unsigned long long w, unsigned int d)
+{
+    d &= 0x3f; // mod 64
+
+    return (w << d) | (w >> (64 - d));
+}
+
+unsigned int rotateI(unsigned int w, unsigned int d)
+{
+    d &= 0x1f; // mod 32
+
+    return (w << d) | (w >> (32 - d));
+}
+
+unsigned char rotateC(unsigned char w, unsigned int d)
+{
+    d &= 0x8; // mod 8
+
+    return (w << d) | (w >> (8 - d));
+}
+
 void randomCharArray(unsigned char *arr, int n)
 {
     srand(time(0));

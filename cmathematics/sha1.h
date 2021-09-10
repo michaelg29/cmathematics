@@ -23,8 +23,6 @@ typedef struct sha1_context
     unsigned char state[SHA1_BLOCK_LEN];
 } sha1_context;
 
-unsigned int sha1_rotWord(unsigned int w, unsigned d);
-
 void sha1_initContext(sha1_context *ctx);
 void sha1_update(sha1_context *ctx, unsigned char *in, int n);
 void sha1_digest(sha1_context *ctx, unsigned char **out);

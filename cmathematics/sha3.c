@@ -36,13 +36,6 @@ unsigned long long sha3_roundConsts[SHA3_NR] = {
     0x0000000080000001,
     0x8000000080008008};
 
-unsigned long long sha3_rotWord(unsigned long long w, unsigned int d)
-{
-    d = d & 0x3f; // d mod 64
-
-    return (w << d) | (w >> (64 - d));
-}
-
 void sha3_keccak_f(unsigned long long A[5][5])
 {
     for (int i = 0; i < SHA3_NR; i++)
@@ -64,7 +57,7 @@ void sha3_keccak_f(unsigned long long A[5][5])
         // calculate D
         for (int x = 0; x < 5; x++)
         {
-            D[x] = C[(x + 4) % 5] ^ sha3_rotWord(C[(x + 1) % 5], 1);
+            D[x] = C[(x + 4) % 5] ^ rotateLL(C[(x + 1) % 5], 1);
         }
 
         // put result into A
@@ -84,7 +77,7 @@ void sha3_keccak_f(unsigned long long A[5][5])
         {
             for (int y = 0; y < 5; y++)
             {
-                B[y][(2 * x + 3 * y) % 5] = sha3_rotWord(A[x][y], sha3_rotConst[x][y]);
+                B[y][(2 * x + 3 * y) % 5] = rotateLL(A[x][y], sha3_rotConst[x][y]);
             }
         }
 

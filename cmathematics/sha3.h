@@ -14,8 +14,6 @@
 extern unsigned int sha3_rotConst[5][5];
 extern unsigned long long sha3_roundConsts[SHA3_NR];
 
-unsigned long long sha3_rotWord(unsigned long long w, unsigned int d);
-
 void sha3_keccak_f(unsigned long long A[5][5]);
 int sha3_hash(unsigned char *in, int n, int mode, unsigned char **out);
 

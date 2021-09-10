@@ -16,13 +16,6 @@ unsigned int sha1_k[4] = {
     0x8F1BBCDC,
     0xCA62C1D6};
 
-unsigned int sha1_rotWord(unsigned int w, unsigned d)
-{
-    d &= 0x1f; // mod 32
-
-    return (w << d) | (w >> (32 - d));
-}
-
 void sha1_initContext(sha1_context *ctx)
 {
     ctx->msgLen = 0;
@@ -144,13 +137,16 @@ void sha1_f(unsigned int h[5], unsigned char state[SHA1_BLOCK_LEN])
         if (t >= 16)
         {
             // calculate new word
-            W[s] = sha1_rotWord(
+            W[s] = rotateI(
                 W[(s + 13) & 0xf] ^ W[(s + 8) & 0xf] ^ W[(s + 2) & 0xf] ^ W[s],
                 1);
+            // W[s] = sha1_rotWord(
+            //     W[(s + 13) & 0xf] ^ W[(s + 8) & 0xf] ^ W[(s + 2) & 0xf] ^ W[s],
+            //     1);
         }
 
         // calculate temporary value
-        unsigned int tmp = sha1_rotWord(A, 5) + E + W[s];
+        unsigned int tmp = rotateI(A, 5) + E + W[s];
         // now add K_t + f_t(B, C, D)
         if (t < 20)
         {
@@ -171,7 +167,7 @@ void sha1_f(unsigned int h[5], unsigned char state[SHA1_BLOCK_LEN])
 
         E = D;
         D = C;
-        C = sha1_rotWord(B, 30);
+        C = rotateI(B, 30);
         B = A;
         A = tmp;
     }

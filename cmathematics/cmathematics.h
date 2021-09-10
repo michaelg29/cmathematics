@@ -65,6 +65,10 @@ void leftRotate(unsigned char *arr, int d, int n);
  */
 void rightRotate(unsigned char *arr, int d, int n);
 
+unsigned long long rotateLL(unsigned long long w, unsigned int d);
+unsigned int rotateI(unsigned int w, unsigned int d);
+unsigned char rotateC(unsigned char w, unsigned int d);
+
 void randomCharArray(unsigned char *arr, int n);
 
 /**
