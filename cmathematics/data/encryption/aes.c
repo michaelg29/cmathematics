@@ -576,7 +576,17 @@ int aes_decrypt(unsigned char *in_cipher, int n,
 
 void aes_generateKeySchedule(unsigned char *in_key, int keylen, unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE])
 {
-    aes_generateKeySchedule128(in_key, subkeys);
+    switch (keylen) {
+        case AES_192:
+            aes_generateKeySchedule192(in_key, subkeys);
+            break;
+        case AES_256:
+            aes_generateKeySchedule256(in_key, subkeys);
+            break;
+        default: // default AES_128
+            aes_generateKeySchedule128(in_key, subkeys);
+            break;
+    };
 }
 
 void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[11][BLOCK_SIDE][BLOCK_SIDE])
@@ -624,5 +634,111 @@ void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[11]
 
         // increment round coefficient
         roundCoeff = galoisMul(roundCoeff, 0x02); // multiply by x
+    }
+}
+
+void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[13][BLOCK_SIDE][BLOCK_SIDE]) {
+    // write original key
+    int i;
+    for (i = 0; i < 6; i++) {
+        // round number is i / 4
+        int rd = i >> 2;
+        // column is the remainder of a division by 4
+        int c = i & 0b11;
+
+        for (int r = 0; r < BLOCK_SIDE; r++) {
+            subkeys[rd][r][c] = in_key[i * BLOCK_SIDE + r];
+        }
+    }
+
+    unsigned char roundCoeff = 0x01;
+
+    int prev_el_rd = 1, prev_el_c = 1;
+    for (i = 6; i < 52; i++) {
+        int rd = i >> 2;
+        int c = i & 0b11;
+
+        int xor_el_rd = (i - 6) >> 2;
+        int xor_el_c = (i - 6) & 0b11;
+
+        if (i % 6 == 0) {
+            // function g
+            unsigned char g[4] = {
+                aes_s_box[subkeys[prev_el_rd][1][prev_el_c]] ^ roundCoeff,
+                aes_s_box[subkeys[prev_el_rd][2][prev_el_c]],
+                aes_s_box[subkeys[prev_el_rd][3][prev_el_c]],
+                aes_s_box[subkeys[prev_el_rd][0][prev_el_c]]};
+
+            for (int r = 0; r < BLOCK_SIDE; r++)
+            {
+                subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ g[r];
+            }
+
+            roundCoeff = galoisMul(roundCoeff, 0x02);
+        }
+        else {
+            for (int r = 0; r < BLOCK_SIDE; r++) {
+                subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ subkeys[prev_el_rd][r][prev_el_c];
+            }
+        }
+
+        prev_el_rd = rd;
+        prev_el_c = c;
+    }
+}
+
+void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[15][BLOCK_SIDE][BLOCK_SIDE]) {
+    // write original key
+    int i;
+    for (i = 0; i < 8; i++) {
+        // round number is i / 4
+        int rd = i >> 2;
+        // column is the remainder of a division by 4
+        int c = i & 0b11;
+
+        for (int r = 0; r < BLOCK_SIDE; r++) {
+            subkeys[rd][r][c] = in_key[i * BLOCK_SIDE + r];
+        }
+    }
+
+    unsigned char roundCoeff = 0x01;
+
+    int prev_el_rd = 1, prev_el_c = 3;
+    for (i = 8; i < 60; i++) {
+        int rd = i >> 2;
+        int c = i & 0b11;
+
+        int xor_el_rd = rd - 2;
+        int xor_el_c = c;
+
+        if (!(i & 0b111)) {
+            // function g
+            unsigned char g[4] = {
+                aes_s_box[subkeys[prev_el_rd][1][prev_el_c]] ^ roundCoeff,
+                aes_s_box[subkeys[prev_el_rd][2][prev_el_c]],
+                aes_s_box[subkeys[prev_el_rd][3][prev_el_c]],
+                aes_s_box[subkeys[prev_el_rd][0][prev_el_c]]};
+
+            for (int r = 0; r < BLOCK_SIDE; r++)
+            {
+                subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ g[r];
+            }
+
+            roundCoeff = galoisMul(roundCoeff, 0x02);
+        }
+        else if (!(i & 0b11)) {
+            // function h
+            for (int r = 0; r < BLOCK_SIDE; r++) {
+                subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ aes_s_box[subkeys[prev_el_rd][r][prev_el_c]];
+            }
+        }
+        else {
+            for (int r = 0; r < BLOCK_SIDE; r++) {
+                subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ subkeys[prev_el_rd][r][prev_el_c];
+            }
+        }
+
+        prev_el_rd = rd;
+        prev_el_c = c;
     }
 }

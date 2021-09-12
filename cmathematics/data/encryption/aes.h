@@ -86,5 +86,7 @@ int aes_decrypt(unsigned char *in_cipher, int n,
 
 void aes_generateKeySchedule(unsigned char *in_key, int keylen, unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE]);
 void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[11][BLOCK_SIDE][BLOCK_SIDE]);
+void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[13][BLOCK_SIDE][BLOCK_SIDE]);
+void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[15][BLOCK_SIDE][BLOCK_SIDE]);
 
 #endif
