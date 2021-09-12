@@ -42,7 +42,7 @@ int main()
     sha1_digest(&ctx, &hash);
 
     out = printByteArr(hash, SHA1_OUT, " ", 1, 2);
-    printf("new%s\n", out);
+    printf("%s\n", out);
     free(out);
 
     free(msg);
