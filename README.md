@@ -85,13 +85,12 @@ int main() {
     2) Modular Division
     3) Exponentiation
     4) Modular Exponentiation
-#### Encryption
+#### Data
 1) Algorithms
-    1) AES
-    2) RSA
+    1) RSA
+    2) HMAC
+    3) PBKDF2
 #### Graph Theory
-1) Algorithms
-    1) Ford-Fulkerson
 #### Algebra/Calculus
 1) Functions
     1) Polynomials
