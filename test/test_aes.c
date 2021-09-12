@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "../cmathematics/cmathematics.h"
-#include "../cmathematics/aes.h"
+#include "../cmathematics/data/encryption/aes.h"
 
 char hex[16] = "0123456789ABCDEF";
 void printCharArr(unsigned char *arr, int len, bool asChar)

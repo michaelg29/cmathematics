@@ -1,6 +1,6 @@
 #include <stdarg.h>
 
-#include "cmathematics.h"
+#include "../cmathematics.h"
 
 #ifndef BIGINT_H
 #define BIGINT_H

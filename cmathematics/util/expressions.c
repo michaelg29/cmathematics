@@ -1,8 +1,8 @@
 #include "expressions.h"
 
 #include "exp_util.h"
-#include "lib/functions.h"
-#include "lib/strstream.h"
+#include "../lib/functions.h"
+#include "../lib/strstream.h"
 
 #include <string.h>
 #include <stdlib.h>

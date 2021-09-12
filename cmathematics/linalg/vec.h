@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "cmathematics.h"
+#include "../cmathematics.h"
 
 #ifndef VEC_H
 #define VEC_H

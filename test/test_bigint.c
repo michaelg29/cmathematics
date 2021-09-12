@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "../cmathematics/cmathematics.h"
-#include "../cmathematics/bigint.h"
+#include "../cmathematics/util/bigint.h"
 
 int main() {
     bigint i1 = bigint_fromString("134978536589136051298354084375028347509814357120834436128754692635894326592735617623458126348943987324562");

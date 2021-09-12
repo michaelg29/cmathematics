@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "../cmathematics/cmathematics.h"
-#include "../cmathematics/expressions.h"
+#include "../cmathematics/util/expressions.h"
 
 void printToken(void *el)
 {

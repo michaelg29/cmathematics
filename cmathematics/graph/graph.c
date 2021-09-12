@@ -1,6 +1,6 @@
 #include "graph.h"
-#include "lib/strstream.h"
-#include "lib/minheap.h"
+#include "../lib/strstream.h"
+#include "../lib/minheap.h"
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>

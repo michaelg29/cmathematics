@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "cmathematics.h"
+#include "../cmathematics.h"
 #include "vec.h"
 
 #ifndef MATRIX_H

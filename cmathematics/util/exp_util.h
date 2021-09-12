@@ -1,7 +1,7 @@
-#include "lib/strstream.h"
-#include "lib/dynamicarray.h"
-#include "lib/avl.h"
-#include "cmathematics.h"
+#include "../lib/strstream.h"
+#include "../lib/dynamicarray.h"
+#include "../lib/avl.h"
+#include "../cmathematics.h"
 
 #ifndef EXP_UTIL_H
 #define EXP_UTIL_H

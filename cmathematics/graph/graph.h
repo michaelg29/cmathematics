@@ -1,5 +1,5 @@
-#include "lib/dynamicarray.h"
-#include "cmathematics.h"
+#include "../lib/dynamicarray.h"
+#include "../cmathematics.h"
 
 #define ADJ_MATRIX 0 // false
 #define ADJ_LISTS !0 // true

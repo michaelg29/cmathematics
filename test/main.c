@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "../cmathematics/cmathematics.h"
-#include "../cmathematics/sha3.h"
-#include "../cmathematics/sha1.h"
+#include "../cmathematics/data/hashing/sha3.h"
+#include "../cmathematics/data/hashing/sha1.h"
 
 int main()
 {
@@ -42,7 +42,7 @@ int main()
     sha1_digest(&ctx, &hash);
 
     out = printByteArr(hash, SHA1_OUT, " ", 1, 2);
-    printf("%s\n", out);
+    printf("new%s\n", out);
     free(out);
 
     free(msg);

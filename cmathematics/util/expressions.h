@@ -1,6 +1,6 @@
-#include "lib/dynamicarray.h"
-#include "lib/strstream.h"
-#include "lib/avl.h"
+#include "../lib/dynamicarray.h"
+#include "../lib/strstream.h"
+#include "../lib/avl.h"
 
 #include "exp_util.h"
 

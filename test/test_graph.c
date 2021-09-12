@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "../cmathematics/cmathematics.h"
-#include "../cmathematics/graph.h"
+#include "../cmathematics/graph/graph.h"
 
 int main()
 {
