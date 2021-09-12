@@ -3,18 +3,29 @@ Mathematics library for C and C++
 
 Follows this tutorial playlist on [YouTube](https://www.youtube.com/playlist?list=PLysLvOneEETMjrK5N-PLIYhZKwmxjGs2-).
 
-### Description
-This library is a low level mathematics library for C and C++ that implements common mathematical concepts and ideas from algebra, calculus, statistics, and linear algebra. A complete list of implemented functions and concepts can be found [here](#complete-list-of-functions).
+## Description
+This is a mathematics library for C and C++ that implements common mathematical concepts and ideas from algebra, calculus, statistics, and linear algebra. A complete list of implemented functions and concepts can be found [here](#complete-list-of-functions).
 
 List of implemented concepts so far:
-1) Big Integers (*Note: a good reference book for integer representations is **Modern Computer Arithmetic** by Richard Brent and Paul Zimmerman*)
-2) Linear Algebra - Vectors, Matrices
-4) Graph Theory
+#### Data
+1) Encryption
+   1) AES
+2) Hashing
+   1) SHA1/SHA3
+#### Graph
+1) Graph representation
+2) Graph algorithms - Dijkstra, Ford Fulkerson
+#### Linear Algebra
+1) Vectors
+2) Matrices
+#### Utility
+1) Big Integers
+2) Expression evaluation
 
-### Documentation
+## Documentation
 Full documentation can be found in the header files in the `cmathematics` folder.
 
-### Use
+## Use
 Simply drag the `cmathematics` folder into your C or C++ project, not the include directory, and it can be used as if it were apart of the project.
 
 Example file structure:
@@ -31,27 +42,29 @@ PROJECT_DIR \
 Sample use in `main.c`:
 ```c
 #include "cmathematics/cmathematics.h"
-#include "cmathematics/vec.h"
+#include "cmathematics/linalg/vec.h"
 
 int main() {
-	vec v1 = vector(2.0f, 1.0f, 3.4f);
+    vec v1 = vector(2.0f, 1.0f, 3.4f);
     printVec(v1);
     
     return 0;
 }
 ```
 
-### Complete list of implemented functions
-#### Utility
-1) Big Integers
-    1) Parsing from string
-    2) Output to string
-    3) Comparison
-    4) Addition, subtraction
-    5) Multiplication (Long, Karatsuba)
-#### Algebra/Calculus
-1) Calculation
-    1) Shunting-Yard Algorithm/Expression evaluation
+## Complete list of implemented functions
+#### Data
+1) Encryption
+   1) AES
+2) Hashing
+   1) SHA1/SHA3
+#### Graph
+1) Representation
+    1) Adjacency Lists/Adjacency Matrices
+1) Algorithms
+    1) DFS
+    2) Dijkstra Shortest Path
+    3) Ford Fulkerson Max Flow
 #### Linear Algebra
 1) Vectors
 	1) Vector-Scalar operations (+, -, *, /, ^)
@@ -71,14 +84,17 @@ int main() {
         6) Augmentation (vectors and matrices)
         7) Cofactors/adjugates
         8) Matrix Inverses
-#### Graph Theory
-1) Representation
-    1) Adjacency Lists/Adjacency Matrices
-2) Algorithms
-    1) DFS
-    2) Dijkstra Shortest Path
+#### Utility
+1) Big Integers (*Note: a good reference book for integer representations is **Modern Computer Arithmetic** by Richard Brent and Paul Zimmerman*)
+    1) Parsing from string
+    2) Output to string
+    3) Comparison
+    4) Addition, subtraction
+    5) Multiplication (Long, Karatsuba)
+2) Expression evaluation
+    1) Shunting-Yard Algorithm
 
-### Todo
+## Todo
 #### Utility
 1) Big Integers
     1) Division
