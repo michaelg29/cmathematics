@@ -106,6 +106,7 @@ int main() {
     1) RSA
     2) HMAC
     3) PBKDF2
+    4) SHA2
 #### Graph Theory
 #### Algebra/Calculus
 1) Functions
