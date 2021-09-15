@@ -89,7 +89,7 @@ unsigned int rotateI(unsigned int w, unsigned int d)
 
 unsigned char rotateC(unsigned char w, unsigned int d)
 {
-    d &= 0x8; // mod 8
+    d &= 0x7; // mod 8
 
     return (w << d) | (w >> (8 - d));
 }
