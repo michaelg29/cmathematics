@@ -4,11 +4,11 @@
 #include <stdio.h>
 
 unsigned int sha3_rotConst[5][5] = {
-    {0, 36, 3, 105, 210},
-    {1, 300, 10, 45, 66},
-    {190, 6, 171, 15, 253},
-    {28, 55, 153, 21, 120},
-    {91, 276, 231, 136, 78}};
+    {0, 1, 190, 28, 91},
+    {36, 300, 6, 55, 276},
+    {3, 10, 171, 153, 231},
+    {105, 45, 15, 21, 136},
+    {210, 66, 253, 120, 78}};
 
 unsigned long long sha3_roundConsts[SHA3_NR] = {
     0x0000000000000001,
@@ -50,7 +50,7 @@ void sha3_keccak_f(unsigned long long A[5][5])
             C[x] = 0L;
             for (int y = 0; y < 5; y++)
             {
-                C[x] ^= A[x][y];
+                C[x] ^= A[y][x];
             }
         }
 
@@ -65,7 +65,7 @@ void sha3_keccak_f(unsigned long long A[5][5])
         {
             for (int y = 0; y < 5; y++)
             {
-                A[x][y] ^= D[x];
+                A[y][x] ^= D[x];
             }
         }
 
@@ -77,7 +77,7 @@ void sha3_keccak_f(unsigned long long A[5][5])
         {
             for (int y = 0; y < 5; y++)
             {
-                B[y][(2 * x + 3 * y) % 5] = rotateLL(A[x][y], sha3_rotConst[x][y]);
+                B[(2 * x + 3 * y) % 5][y] = rotateLL(A[y][x], sha3_rotConst[y][x]);
             }
         }
 
@@ -86,8 +86,8 @@ void sha3_keccak_f(unsigned long long A[5][5])
         {
             for (int y = 0; y < 5; y++)
             {
-                A[x][y] = B[x][y] ^
-                          ((~B[(x + 1) % 5][y]) & B[(x + 2) % 5][y]);
+                A[y][x] = B[y][x] ^
+                          ((~B[y][(x + 1) % 5]) & B[y][(x + 2) % 5]);
             }
         }
 
@@ -96,139 +96,156 @@ void sha3_keccak_f(unsigned long long A[5][5])
     }
 }
 
-int sha3_hash(unsigned char *in, int n, int mode, unsigned char **out)
-{
-    // determine parameters
-    int r, ret_len;
-
-    switch (mode)
-    {
+void sha3_initContext(sha3_context *ctx, int mode) {
+    switch (mode) {
     case SHA3_128:
-        r = 1344;
+        ctx->r = 1344;
         break;
     case SHA3_256:
-        r = 1088;
+        ctx->r = 1088;
         break;
     default: // SHA3_512
         mode = SHA3_512;
-        r = 576;
+        ctx->r = 576;
         break;
     }
 
-    ret_len = mode >> 3; // => bytes
-    r >>= 3;             // => bytes
+    ctx->ret_len = mode >> 3; // => bytes
+    ctx->r >>= 3; // => bytes
 
-    // allocate output
-    *out = malloc(ret_len * sizeof(unsigned char));
-    if (!(*out))
-    {
-        return 0;
+    ctx->stateCursor = 0;
+    memset(ctx->A, 0, 5 * 5 * sizeof(unsigned long long));
+}
+
+void sha3_update(sha3_context *ctx, unsigned char *in, int n)
+{
+    // absorb new bytes
+
+    int cursor = 0; // cursor in message
+
+    int resLen = ctx->stateCursor + n;
+    int noBlocks = resLen / ctx->r; // determine number of complete blocks
+    int extra = (resLen % ctx->r);
+    if (!noBlocks) {
+        // extra is only in the first block with occupied bytes
+        extra -= ctx->stateCursor;
+    }
+    if (extra) {
+        noBlocks++;
     }
 
-    // state variables
-    unsigned long long A[5][5];
-    memset(A, 0, 5 * 5 * sizeof(unsigned long long));
-
-    int cursor = 0;           // cursor in the message
-    int noBlocks = n / r + 1; // always pad
-
-    // ABSORBING PHASE
-    for (int i = 0; i < noBlocks; i++)
-    {
+    for (int i = 0; i < noBlocks; i++) {
         // block variables
-        int blockCursor = 0;                             // cursor in the block
-        int noBytesInBlock = MIN(r, MAX(n - cursor, 0)); // only take in between 0 and r bytes per block
-        int noPadding = r - noBytesInBlock;              // number of bytes to pad to get a complete block
-        int padIdx = 0;                                  // current number of bytes already padded
+        int blockCursor = ctx->stateCursor; // cursor in the block
+
+        // know we will complete the block
+        int noBytesInBlock = ctx->r - ctx->stateCursor;
+        if (i == noBlocks - 1 && extra) {
+            // writing incomplete block
+            noBytesInBlock = extra;
+        }
+        int yInit = ctx->stateCursor / (5 * 8); // initial y coordinate
+
+        int rowPos = ctx->stateCursor % (5 * 8); // position along the row in bytes
+        int xInit = rowPos / 8; // initial x coordinate
+        int bInit = rowPos % 8; // initial byte in the word
+        bool firstByte = true;
 
         // XOR block into the state
-        for (int y = 0; y < 5; y++)
+        for (int y = yInit; y < 5; y++)
         {
-            for (int x = 0; x < 5; x++)
+            for (int x = xInit; x < 5; x++)
             {
-                unsigned long long tmp = 0L;
                 // write into tmp
-                if (blockCursor < r) // have not written the complete block yet
+                if (blockCursor < ctx->r &&
+                    blockCursor < noBytesInBlock + ctx->stateCursor) // have not written the complete block yet
                 {
-                    int noBytesInWord = MIN(8, MAX(noBytesInBlock - blockCursor, 0));
-                    if (noBytesInWord)
-                    {
-                        // write bytes from message
-                        memcpy(&tmp, in + cursor + blockCursor, noBytesInWord);
+                    unsigned long long tmp = 0L;
+
+                    int noBytesInWord = MIN(8, (noBytesInBlock + ctx->stateCursor) - blockCursor);
+                    if (firstByte) {
+                        // consider bInit
+                        noBytesInWord -= bInit;
+                    }
+                    // write bytes from message
+                    memcpy(&tmp, in + cursor + blockCursor - ctx->stateCursor, noBytesInWord);
+                    if (bInit) {
+                        tmp <<= (bInit << 3); // left shift by bits to account for initial cursor position
+                        // will start at beginning of next byte
+                        bInit = 0;
                     }
 
-                    // determine if need padding in this word
-                    if (noBytesInWord != 8)
-                    {
-                        // must pad with 01, then 1000*01
-                        if (!padIdx)
-                        {
-                            // first padding byte, pad 011 = 6
-                            tmp |= (unsigned long long)(0x06) << (noBytesInWord << 3); // noBytes to noBits
-                        }
-                        if (padIdx >= noPadding - 8)
-                        {
-                            // pad the last byte
-                            tmp |= (unsigned long long)(0x01) << 0x3f; // 0b1000000*0
-                        }
-                        // otherwise, leave as zeros
+                    // xor tmp into the state
+                    ctx->A[y][x] ^= tmp;
 
-                        padIdx += 8 - noBytesInWord;
-                    }
+                    // advance block cursor
+                    blockCursor += noBytesInWord;
+                    firstByte = false;
                 }
-
-                // xor tmp into the state
-                A[x][y] ^= tmp;
-
-                // advance block cursor
-                blockCursor += 8;
+                else {
+                    break;
+                }
             }
+        }
+
+        if (blockCursor == ctx->r) {
+            // KECCAK-f on complete block
+            sha3_keccak_f(ctx->A);
+
+            // return state cursor to beginning
+            ctx->stateCursor = 0;
+        }
+        else {
+            // advance state cursor
+            ctx->stateCursor = blockCursor;
         }
 
         // advance message cursor
         cursor += noBytesInBlock;
-
-        // KECCAK-f
-        sha3_keccak_f(A);
     }
+}
 
+void sha3_digest(sha3_context *ctx, unsigned char **out) {
+    // PADDING
+    int x, y, b, rowPos;
+    unsigned long long tmp;
+
+    // pad initial byte (0b011 = 6)
+    y = ctx->stateCursor / (5 * 8); // initial y coordinate
+    rowPos = ctx->stateCursor % (5 * 8); // position along the row in bytes
+    x = rowPos / 8; // initial x coordinate
+    b = rowPos % 8; // initial byte in the word
+    tmp = (0x06ULL) << (b << 3); // byte position => bit position
+    ctx->A[y][x] ^= tmp; // XOR into state
+
+    // pad final byte (0b10*0)
+    y = (ctx->r - 1) / (5 * 8); // final y coordinate
+    rowPos = (ctx->r - 1) % (5 * 8); // position along the row in bytes
+    x = rowPos / 8; // final x coordinate
+    tmp = (0x01ULL) << 0x3f;
+    ctx->A[y][x] ^= tmp; // XOR into state
+    
     // SQUEEZING PHASE
-    cursor = 0; // cursor for the output string
-
-    while (cursor < ret_len)
-    {
-        // block variables
-        int blockCursor = 0; // cursor in the block
-
-        for (int y = 0; y < 5; y++)
-        {
-            for (int x = 0; x < 5; x++)
-            {
-                if (blockCursor < r && cursor + blockCursor < ret_len)
-                {
-                    // copy from state to the output
-                    memcpy(*out + cursor + blockCursor, A[x] + y, sizeof(unsigned long long));
-
-                    blockCursor += 8;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            if (blockCursor >= r || cursor + blockCursor >= ret_len)
-            {
-                // either completed block or the output
-                break;
-            }
-        }
-
-        cursor += r;
-
-        // KECCAK-f
-        sha3_keccak_f(A);
+    int cursor = 0; // cursor for the output string
+    // allocate output
+    *out = malloc(ctx->ret_len * sizeof(unsigned char));
+    if (!(*out)) {
+        return;
     }
 
-    return ret_len;
+    // squeezing rounds
+    while (cursor < ctx->ret_len)
+    {
+        // KECCAK-f
+        sha3_keccak_f(ctx->A);
+
+        // block variables
+        int noBytesInBlock = MIN(ctx->r, MAX(ctx->ret_len - cursor, 0)); // number of bytes to copy to output
+
+        // copy
+        memcpy(*out + cursor, ctx->A, noBytesInBlock);
+
+        // advance cursor
+        cursor += noBytesInBlock;
+    }
 }
