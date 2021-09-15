@@ -18,7 +18,7 @@ unsigned int sha1_k[4] = {
 
 void sha1_initContext(sha1_context *ctx)
 {
-    ctx->msgLen = 0;
+    ctx->msgLen = 0ULL;
     memcpy(ctx->h, sha1_h, 5 * sizeof(unsigned int));
     ctx->stateCursor = 0;
 }
@@ -123,11 +123,10 @@ void sha1_f(unsigned int h[5], unsigned char state[SHA1_BLOCK_LEN])
     }
 
     // initialize function variables
-    unsigned int A = h[0];
-    unsigned int B = h[1];
-    unsigned int C = h[2];
-    unsigned int D = h[3];
-    unsigned int E = h[4];
+    unsigned int h2[5];
+    for (int i = 0; i < 5; i++) {
+        h2[i] = h[i];
+    }
 
     // go through rounds
     for (int t = 0; t < SHA1_NR; t++)
@@ -140,41 +139,36 @@ void sha1_f(unsigned int h[5], unsigned char state[SHA1_BLOCK_LEN])
             W[s] = rotateI(
                 W[(s + 13) & 0xf] ^ W[(s + 8) & 0xf] ^ W[(s + 2) & 0xf] ^ W[s],
                 1);
-            // W[s] = sha1_rotWord(
-            //     W[(s + 13) & 0xf] ^ W[(s + 8) & 0xf] ^ W[(s + 2) & 0xf] ^ W[s],
-            //     1);
         }
 
         // calculate temporary value
-        unsigned int tmp = rotateI(A, 5) + E + W[s];
-        // now add K_t + f_t(B, C, D)
+        unsigned int tmp = rotateI(h[0], 5) + h[4] + W[s];
+        // now add K_t + f_t(h[1], h[2], h[3])
         if (t < 20)
         {
-            tmp += sha1_k[0] + ((B & C) | (~B & D));
+            tmp += sha1_k[0] + ((h[1] & h[2]) | (~h[1] & h[3]));
         }
         else if (t < 40)
         {
-            tmp += sha1_k[1] + (B ^ C ^ D);
+            tmp += sha1_k[1] + (h[1] ^ h[2] ^ h[3]);
         }
         else if (t < 60)
         {
-            tmp += sha1_k[2] + ((B & C) | (B & D) | (C & D));
+            tmp += sha1_k[2] + ((h[1] & h[2]) | (h[1] & h[3]) | (h[2] & h[3]));
         }
         else
         {
-            tmp += sha1_k[3] + (B ^ C ^ D);
+            tmp += sha1_k[3] + (h[1] ^ h[2] ^ h[3]);
         }
 
-        E = D;
-        D = C;
-        C = rotateI(B, 30);
-        B = A;
-        A = tmp;
+        h[4] = h[3];
+        h[3] = h[2];
+        h[2] = rotateI(h[1], 30);
+        h[1] = h[0];
+        h[0] = tmp;
     }
 
-    h[0] += A;
-    h[1] += B;
-    h[2] += C;
-    h[3] += D;
-    h[4] += E;
+    for (int i = 0; i < 5; i++) {
+        h[i] += h2[i];
+    }
 }
