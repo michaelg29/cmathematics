@@ -57,7 +57,7 @@ void sha3_keccak_f(unsigned long long A[5][5])
         // calculate D
         for (int x = 0; x < 5; x++)
         {
-            D[x] = C[(x + 4) % 5] ^ rotateLL(C[(x + 1) % 5], 1);
+            D[x] = C[(x + 4) % 5] ^ leftRotateLL(C[(x + 1) % 5], 1);
         }
 
         // put result into A
@@ -77,7 +77,7 @@ void sha3_keccak_f(unsigned long long A[5][5])
         {
             for (int y = 0; y < 5; y++)
             {
-                B[(2 * x + 3 * y) % 5][y] = rotateLL(A[y][x], sha3_rotConst[y][x]);
+                B[(2 * x + 3 * y) % 5][y] = leftRotateLL(A[y][x], sha3_rotConst[y][x]);
             }
         }
 

@@ -136,13 +136,13 @@ void sha1_f(unsigned int h[5], unsigned char state[SHA1_BLOCK_LEN])
         if (t >= 16)
         {
             // calculate new word
-            W[s] = rotateI(
+            W[s] = leftRotateI(
                 W[(s + 13) & 0xf] ^ W[(s + 8) & 0xf] ^ W[(s + 2) & 0xf] ^ W[s],
                 1);
         }
 
         // calculate temporary value
-        unsigned int tmp = rotateI(h[0], 5) + h[4] + W[s];
+        unsigned int tmp = leftRotateI(h[0], 5) + h[4] + W[s];
         // now add K_t + f_t(h[1], h[2], h[3])
         if (t < 20)
         {
@@ -163,7 +163,7 @@ void sha1_f(unsigned int h[5], unsigned char state[SHA1_BLOCK_LEN])
 
         h[4] = h[3];
         h[3] = h[2];
-        h[2] = rotateI(h[1], 30);
+        h[2] = leftRotateI(h[1], 30);
         h[1] = h[0];
         h[0] = tmp;
     }
