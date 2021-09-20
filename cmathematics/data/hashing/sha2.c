@@ -104,7 +104,7 @@ void sha224_initContext(sha224_context *ctx)
     ctx->stateCursor = 0;
 }
 
-void sha224_update(sha224_context *ctx, unsigned char *in, unsigned long long n)
+void sha224_update(sha224_context *ctx, unsigned char *in, int n)
 {
     sha224256_update(ctx, in, n);
 }
@@ -122,7 +122,7 @@ void sha256_initContext(sha256_context *ctx)
     ctx->stateCursor = 0;
 }
 
-void sha256_update(sha256_context *ctx, unsigned char *in, unsigned long long n)
+void sha256_update(sha256_context *ctx, unsigned char *in, int n)
 {
     sha224256_update(ctx, in, n);
 }
@@ -132,7 +132,7 @@ void sha256_digest(sha256_context *ctx, unsigned char **out)
     sha224256_digest(ctx, out, SHA256_OUT);
 }
 
-void sha224256_update(sha224256_context *ctx, unsigned char *in, unsigned long long n)
+void sha224256_update(sha224256_context *ctx, unsigned char *in, int n)
 {
     int msgCursor = 0;
 
@@ -288,7 +288,7 @@ void sha384_initContext(sha384_context *ctx)
     ctx->stateCursor = 0;
 }
 
-void sha384_update(sha384_context *ctx, unsigned char *in, unsigned long long n)
+void sha384_update(sha384_context *ctx, unsigned char *in, int n)
 {
     sha384512_update(ctx, in, n);
 }
@@ -307,7 +307,7 @@ void sha512_initContext(sha512_context *ctx)
     ctx->stateCursor = 0;
 }
 
-void sha512_update(sha512_context *ctx, unsigned char *in, unsigned long long n)
+void sha512_update(sha512_context *ctx, unsigned char *in, int n)
 {
     sha384512_update(ctx, in, n);
 }
@@ -317,7 +317,7 @@ void sha512_digest(sha512_context *ctx, unsigned char **out)
     sha384512_digest(ctx, out, SHA512_OUT);
 }
 
-void sha384512_update(sha384512_context *ctx, unsigned char *in, unsigned long long n)
+void sha384512_update(sha384512_context *ctx, unsigned char *in, int n)
 {
     int msgCursor = 0;
 
