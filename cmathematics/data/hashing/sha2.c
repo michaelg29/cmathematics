@@ -347,13 +347,14 @@ void sha384512_update(sha384512_context *ctx, unsigned char *in, int n)
 
     // add length in bits
     unsigned long long carry = n << 3; // => bits
-    unsigned long long nextCarry = n >> (64 - 3); // => extra
+    unsigned long long nextCarry = 0ULL; // => extra
     for (int i = 0; i < 2; i++)
     {
         if (carry)
         {
             unsigned long long initial = ctx->msgLen[i];
             ctx->msgLen[i] += carry;
+            carry = 0ULL;
             if (ctx->msgLen[i] < initial)
             {
                 carry = 1ULL;
@@ -361,7 +362,7 @@ void sha384512_update(sha384512_context *ctx, unsigned char *in, int n)
         }
 
         carry += nextCarry;
-        nextCarry = 0;
+        nextCarry = 0ULL;
     }
 }
 
@@ -388,14 +389,14 @@ void sha384512_digest(sha384512_context *ctx, unsigned char **out, int outLen)
     }
     // set last 128 bits as length
     unsigned long long size[2] = { ctx->msgLen[0], ctx->msgLen[1] };
-    for (int i = SHA384512_BLOCK_LEN - 1, sizeIdx = 1, byteCounter = 0; byteCounter < 16; i--, byteCounter++)
+    for (int i = SHA384512_BLOCK_LEN - 1, sizeIdx = 0, byteCounter = 0; byteCounter < 16; i--, byteCounter++)
     {
         // set LSByte on rightmost slot
         ctx->state[i] = size[sizeIdx]; // gets LSByte of long long
         size[sizeIdx] >>= 8;           // remove LSByte
         if (i == SHA384512_BLOCK_LEN - sizeof(unsigned long long))
         {
-            sizeIdx--;
+            sizeIdx++;
         }
     }
 
@@ -436,7 +437,6 @@ void sha384512_f(unsigned long long h[8], unsigned char state[SHA224256_BLOCK_LE
             W[i] <<= 8;               // increase magnitude by 1 byte
             W[i] |= state[i * sizeof(unsigned long long) + j]; // copy in byte
         }
-        //printf("W[%2d] = %08lx\n", i, W[i]);
     }
 
     // initialize working variables
