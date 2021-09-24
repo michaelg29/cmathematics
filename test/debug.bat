@@ -2,6 +2,7 @@ cd ../cmathematics
 gcc -g -o ../test/a.exe ../test/main.c ^
     cmathematics.c ^
     data/encryption/aes.c ^
+    data/hashing/sha.c ^
     data/hashing/sha1.c ^
     data/hashing/sha2.c ^
     data/hashing/sha3.c ^

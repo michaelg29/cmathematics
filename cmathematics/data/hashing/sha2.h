@@ -1,20 +1,17 @@
 #include "../../cmathematics.h"
 
+#include "sha.h"
+
 #ifndef SHA2_H
 #define SHA2_H
-
-#define SHA224 224
-#define SHA256 256
-#define SHA384 384
-#define SHA512 512
 
 #define SHA224256_BLOCK_LEN 64
 #define SHA384512_BLOCK_LEN 128
 
-#define SHA224_OUT SHA224 >> 3
-#define SHA256_OUT SHA256 >> 3
-#define SHA384_OUT SHA384 >> 3
-#define SHA512_OUT SHA512 >> 3
+#define SHA224_OUT 224 >> 3
+#define SHA256_OUT 256 >> 3
+#define SHA384_OUT 384 >> 3
+#define SHA512_OUT 512 >> 3
 
 #define SHA224256_NR 64
 #define SHA384512_NR 80

@@ -1,5 +1,7 @@
 #include "../../cmathematics.h"
 
+#include "sha.h"
+
 #ifndef SHA1_H
 #define SHA1_H
 

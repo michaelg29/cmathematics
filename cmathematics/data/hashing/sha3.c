@@ -1,4 +1,6 @@
+#include "sha.h"
 #include "sha3.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -99,18 +101,21 @@ void sha3_keccak_f(unsigned long long A[5][5])
 void sha3_initContext(sha3_context *ctx, int mode) {
     switch (mode) {
     case SHA3_128:
+        ctx->ret_len = 128;
         ctx->r = 1344;
         break;
     case SHA3_256:
+        ctx->ret_len = 256;
         ctx->r = 1088;
         break;
     default: // SHA3_512
         mode = SHA3_512;
+        ctx->ret_len = 512;
         ctx->r = 576;
         break;
     }
 
-    ctx->ret_len = mode >> 3; // => bytes
+    ctx->ret_len >>= 3; // => bytes
     ctx->r >>= 3; // => bytes
 
     ctx->stateCursor = 0;

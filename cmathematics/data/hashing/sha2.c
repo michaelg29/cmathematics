@@ -1,3 +1,4 @@
+#include "sha.h"
 #include "sha2.h"
 
 #include <stdio.h>

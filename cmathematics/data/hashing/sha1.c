@@ -1,4 +1,6 @@
+#include "sha.h"
 #include "sha1.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
