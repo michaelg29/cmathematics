@@ -154,7 +154,6 @@ void sha3_update(sha3_context *ctx, unsigned char *in, int n)
         int rowPos = ctx->stateCursor % (5 * 8); // position along the row in bytes
         int xInit = rowPos / 8; // initial x coordinate
         int bInit = rowPos % 8; // initial byte in the word
-        bool firstByte = true;
 
         // XOR block into the state
         for (int y = yInit; y < 5; y++)
@@ -168,10 +167,6 @@ void sha3_update(sha3_context *ctx, unsigned char *in, int n)
                     unsigned long long tmp = 0L;
 
                     int noBytesInWord = MIN(8, (noBytesInBlock + ctx->stateCursor) - blockCursor);
-                    if (firstByte) {
-                        // consider bInit
-                        noBytesInWord -= bInit;
-                    }
                     // write bytes from message
                     memcpy(&tmp, in + cursor + blockCursor - ctx->stateCursor, noBytesInWord);
                     if (bInit) {
@@ -185,7 +180,6 @@ void sha3_update(sha3_context *ctx, unsigned char *in, int n)
 
                     // advance block cursor
                     blockCursor += noBytesInWord;
-                    firstByte = false;
                 }
                 else {
                     break;
@@ -229,7 +223,7 @@ void sha3_digest(sha3_context *ctx, unsigned char **out) {
     x = rowPos / 8; // final x coordinate
     tmp = (0x01ULL) << 0x3f;
     ctx->A[y][x] ^= tmp; // XOR into state
-    
+
     // SQUEEZING PHASE
     int cursor = 0; // cursor for the output string
     // allocate output
