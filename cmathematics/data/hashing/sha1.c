@@ -32,7 +32,7 @@ void sha1_update(sha1_context *ctx, unsigned char *in, int n)
     while (msgCursor < n)
     {
         // determine if end of block or end of message comes first
-        int noBytesInBlock = MIN(SHA1_BLOCK_LEN - ctx->stateCursor, n - msgCursor);
+        int noBytesInBlock = MIN(sha_blockLen[SHA1] - ctx->stateCursor, n - msgCursor);
 
         // copy bytes
         memcpy(ctx->state + ctx->stateCursor, in + msgCursor, noBytesInBlock);
@@ -41,7 +41,7 @@ void sha1_update(sha1_context *ctx, unsigned char *in, int n)
         msgCursor += noBytesInBlock;
         ctx->stateCursor += noBytesInBlock;
 
-        if (ctx->stateCursor == SHA1_BLOCK_LEN)
+        if (ctx->stateCursor == sha_blockLen[SHA1])
         {
             // reached the end of the block
 
@@ -63,10 +63,10 @@ void sha1_digest(sha1_context *ctx, unsigned char **out)
     // first bit 1
     ctx->state[ctx->stateCursor++] = 0x80;
     // rest of bits to 0
-    memset(ctx->state + ctx->stateCursor, 0, MAX(SHA1_BLOCK_LEN - ctx->stateCursor, 0));
+    memset(ctx->state + ctx->stateCursor, 0, MAX(sha_blockLen[SHA1] - ctx->stateCursor, 0));
 
     // output size
-    if (ctx->stateCursor >= (SHA1_BLOCK_LEN - sizeof(unsigned long long)))
+    if (ctx->stateCursor >= (sha_blockLen[SHA1] - sizeof(unsigned long long)))
     {
         // need new block to write message length
 
@@ -75,7 +75,7 @@ void sha1_digest(sha1_context *ctx, unsigned char **out)
 
         // reset state
         ctx->stateCursor = 0;
-        memset(ctx->state, 0, SHA1_BLOCK_LEN);
+        memset(ctx->state, 0, sha_blockLen[SHA1]);
     }
     // set last 64 bits as length of message
     unsigned long long size = ctx->msgLen;
@@ -93,7 +93,7 @@ void sha1_digest(sha1_context *ctx, unsigned char **out)
     ctx->stateCursor = 0;
 
     // output is the array ctx->h
-    *out = malloc(SHA1_OUT * sizeof(unsigned char));
+    *out = malloc(sha_retLen[SHA1] * sizeof(unsigned char));
     if (!(*out))
     {
         // ensure memory was allocated
@@ -111,7 +111,7 @@ void sha1_digest(sha1_context *ctx, unsigned char **out)
     }
 }
 
-void sha1_f(unsigned int h[5], unsigned char state[SHA1_BLOCK_LEN])
+void sha1_f(unsigned int h[5], unsigned char state[64])
 {
     // initialize W
     unsigned int W[16];

@@ -21,7 +21,15 @@
 #define SHA3_256_STR "SHA3-256"
 #define SHA3_512_STR "SHA3-512"
 
+extern int sha_blockLen[8];
+extern int sha_retLen[8];
+
 int sha_getModeNum(char *mode);
+
+int sha_getBlockLen(char *mode);
+int sha_getBlockLenIdx(int mode);
+int sha_getRetLen(char *mode);
+int sha_getRetLenIdx(int mode);
 
 void *sha_initContextStr(char *mode);
 void *sha_initContext(int mode);
@@ -29,8 +37,8 @@ void *sha_initContext(int mode);
 void sha_updateStr(char *mode, void *ctx, unsigned char *in, int n);
 void sha_update(int mode, void *ctx, unsigned char *in, int n);
 
-int sha_digestStr(char *mode, void *ctx, unsigned char **out);
-int sha_digest(int mode, void *ctx, unsigned char **out);
+void sha_digestStr(char *mode, void *ctx, unsigned char **out);
+void sha_digest(int mode, void *ctx, unsigned char **out);
 
 void sha_free(void *ctx);
 

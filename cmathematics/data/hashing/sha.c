@@ -6,6 +6,28 @@
 #include <stdlib.h>
 #include <string.h>
 
+int sha_blockLen[8] = {
+    64,
+    64,
+    64,
+    128,
+    128,
+    1344 >> 3,
+    1088 >> 3,
+    576 >> 3
+};
+
+int sha_retLen[8] = {
+    160 >> 3,
+    224 >> 3,
+    256 >> 3,
+    384 >> 3,
+    512 >> 3,
+    128 >> 3,
+    256 >> 3,
+    512 >> 3
+};
+
 int sha_getModeNum(char *mode)
 {
     if (!strcmp(mode, SHA1_STR)) {
@@ -32,6 +54,36 @@ int sha_getModeNum(char *mode)
     else { // default SHA3_512
         return SHA3_512;
     }
+}
+
+int sha_getBlockLen(char *mode)
+{
+    return sha_blockLen[sha_getModeNum(mode)];
+}
+
+int sha_getBlockLenIdx(int mode)
+{
+    if (mode < SHA1 || mode > SHA3_512)
+    {
+        mode = SHA3_512;
+    }
+
+    return sha_blockLen[mode];
+}
+
+int sha_getRetLen(char *mode)
+{
+    return sha_retLen[sha_getModeNum(mode)];
+}
+
+int sha_getRetLenIdx(int mode)
+{
+    if (mode < SHA1 || mode > SHA3_512)
+    {
+        mode = SHA3_512;
+    }
+
+    return sha_retLen[mode];
 }
 
 void *sha_initContextStr(char *mode)
@@ -79,12 +131,21 @@ void *sha_initContext(int mode)
     };
 }
 
+#include <stdio.h>
 void sha_updateStr(char *mode, void *ctx, unsigned char *in, int n)
 {
-    sha_update(sha_getModeNum(mode), ctx, in, n);
+    //printf("%s\n", mode);
+    int i = sha_getModeNum(mode);
+    //printf("%d\n", i);
+    sha_update(i, ctx, in, n);
 }
 
 void sha_update(int mode, void *ctx, unsigned char *in, int n) {
+    // char *test = malloc(n + 1);
+    // memcpy(test, in, n);
+    // test[n] = '\0';
+    // printf("%s\n", test);
+
     switch (mode)
     {
         case SHA1:
@@ -114,39 +175,39 @@ void sha_update(int mode, void *ctx, unsigned char *in, int n) {
     };
 }
 
-int sha_digestStr(char *mode, void *ctx, unsigned char **out)
+void sha_digestStr(char *mode, void *ctx, unsigned char **out)
 {
-    return sha_digest(sha_getModeNum(mode), ctx, out);
+    sha_digest(sha_getModeNum(mode), ctx, out);
 }
 
-int sha_digest(int mode, void *ctx, unsigned char **out)
+void sha_digest(int mode, void *ctx, unsigned char **out)
 {
     switch (mode)
     {
         case SHA1:
             sha1_digest(ctx, out);
-            return SHA1_OUT;
+            return;
         case SHA224:
             sha224_digest(ctx, out);
-            return SHA224_OUT;
+            return;
         case SHA256:
             sha256_digest(ctx, out);
-            return SHA256_OUT;
+            return;
         case SHA384:
             sha384_digest(ctx, out);
-            return SHA384_OUT;
+            return;
         case SHA512:
             sha512_digest(ctx, out);
-            return SHA512_OUT;
+            return;
         case SHA3_128:
             sha3_digest(ctx, out);
-            return ((sha3_context*)ctx)->ret_len;
+            return;
         case SHA3_256:
             sha3_digest(ctx, out);
-            return ((sha3_context*)ctx)->ret_len;
+            return;
         default: // SHA3_512
             sha3_digest(ctx, out);
-            return ((sha3_context*)ctx)->ret_len;
+            return;
     };
 }
 

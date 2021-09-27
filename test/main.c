@@ -32,10 +32,11 @@ int main()
     for (int i = 0; i < 8; i++) {
         void *ctx = sha_initContextStr(modes[i]);
         sha_updateStr(modes[i], ctx, msg, 9);
-        int retSize = sha_digestStr(modes[i], ctx, &hash);
+        sha_updateStr(modes[i], ctx, msg + 2, 7);
+        sha_digestStr(modes[i], ctx, &hash);
         sha_free(ctx);
 
-        out = printByteArr(hash, retSize, NULL, 0, 0);
+        out = printByteArr(hash, sha_retLen[i], NULL, 0, 0);
         printf("%8s: %s\n", modes[i], out);
         free(out);
         free(hash);

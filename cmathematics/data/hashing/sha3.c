@@ -99,24 +99,8 @@ void sha3_keccak_f(unsigned long long A[5][5])
 }
 
 void sha3_initContext(sha3_context *ctx, int mode) {
-    switch (mode) {
-    case SHA3_128:
-        ctx->ret_len = 128;
-        ctx->r = 1344;
-        break;
-    case SHA3_256:
-        ctx->ret_len = 256;
-        ctx->r = 1088;
-        break;
-    default: // SHA3_512
-        mode = SHA3_512;
-        ctx->ret_len = 512;
-        ctx->r = 576;
-        break;
-    }
-
-    ctx->ret_len >>= 3; // => bytes
-    ctx->r >>= 3; // => bytes
+    ctx->ret_len = sha_getRetLenIdx(mode);
+    ctx->r = sha_getBlockLenIdx(mode);
 
     ctx->stateCursor = 0;
     memset(ctx->A, 0, 5 * 5 * sizeof(unsigned long long));
@@ -223,7 +207,7 @@ void sha3_digest(sha3_context *ctx, unsigned char **out) {
     x = rowPos / 8; // final x coordinate
     tmp = (0x01ULL) << 0x3f;
     ctx->A[y][x] ^= tmp; // XOR into state
-
+    
     // SQUEEZING PHASE
     int cursor = 0; // cursor for the output string
     // allocate output
