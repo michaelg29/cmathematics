@@ -10,12 +10,16 @@
 
 #define AES_IRREDUCIBLE 0x1B
 
-#define BLOCK_LEN 16
-#define BLOCK_SIDE 4
+#define AES_BLOCK_LEN 16
+#define AES_BLOCK_SIDE 4
 
 #define AES_128 128
 #define AES_192 192
 #define AES_256 256
+
+#define AES_128_NR 10
+#define AES_192_NR 12
+#define AES_256_NR 14
 
 #define AES_ECB 0
 #define AES_CBC 1
@@ -30,8 +34,8 @@ extern unsigned char aes_s_box[256];
 extern unsigned char aes_inv_s_box[256];
 
 // constant matrix for mix columns
-extern unsigned char aes_mixColMat[BLOCK_SIDE][BLOCK_SIDE];
-extern unsigned char aes_inv_mixColMat[BLOCK_SIDE][BLOCK_SIDE];
+extern unsigned char aes_mixColMat[AES_BLOCK_SIDE][AES_BLOCK_SIDE];
+extern unsigned char aes_inv_mixColMat[AES_BLOCK_SIDE][AES_BLOCK_SIDE];
 
 /*
     UTILITY METHODS
@@ -44,49 +48,49 @@ unsigned char galoisMul(unsigned char g1, unsigned char g2);
     AES ENCRYPTION LAYERS
 */
 
-void aes_addRoundKey(unsigned char state[BLOCK_SIDE][BLOCK_SIDE], unsigned char subkey[BLOCK_SIDE][BLOCK_SIDE]);
-void aes_byteSub(unsigned char state[BLOCK_SIDE][BLOCK_SIDE]);
-void aes_shiftRows(unsigned char state[BLOCK_SIDE][BLOCK_SIDE]);
-void aes_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE]);
+void aes_addRoundKey(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE], unsigned char subkey[AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_byteSub(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_shiftRows(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_mixCols(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
 
 void aes_encrypt_block(unsigned char *in_text, int n,
-                       unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE], int nr,
-                       unsigned char iv[16],
-                       unsigned char out[BLOCK_LEN]);
+                       unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
+                       unsigned char iv[AES_BLOCK_LEN],
+                       unsigned char out[AES_BLOCK_LEN]);
 
 int aes_encrypt(unsigned char *in_text, int n,
                 unsigned char *in_key, int keylen,
                 unsigned char mode,
-                unsigned char iv[16],
+                unsigned char iv[AES_BLOCK_LEN],
                 unsigned char **out);
 
 /*
     AES DECRYPTION LAYERS
 */
 
-void aes_inv_addRoundKey(unsigned char state[BLOCK_SIDE][BLOCK_SIDE], unsigned char subkey[BLOCK_SIDE][BLOCK_SIDE]);
-void aes_inv_byteSub(unsigned char state[BLOCK_SIDE][BLOCK_SIDE]);
-void aes_inv_shiftRows(unsigned char state[BLOCK_SIDE][BLOCK_SIDE]);
-void aes_inv_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE]);
+void aes_inv_addRoundKey(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE], unsigned char subkey[AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_inv_byteSub(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_inv_shiftRows(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_inv_mixCols(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
 
 void aes_decrypt_block(unsigned char *in_cipher,
-                       unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE], int nr,
-                       unsigned char iv[16],
-                       unsigned char out[BLOCK_LEN]);
+                       unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
+                       unsigned char iv[AES_BLOCK_LEN],
+                       unsigned char out[AES_BLOCK_LEN]);
 
 int aes_decrypt(unsigned char *in_cipher, int n,
                 unsigned char *in_key, int keylen,
                 unsigned char mode,
-                unsigned char iv[16],
+                unsigned char iv[AES_BLOCK_LEN],
                 unsigned char **out);
 
 /*
     KEY SCHEDULING
 */
 
-void aes_generateKeySchedule(unsigned char *in_key, int keylen, unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE]);
-void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[11][BLOCK_SIDE][BLOCK_SIDE]);
-void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[13][BLOCK_SIDE][BLOCK_SIDE]);
-void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[15][BLOCK_SIDE][BLOCK_SIDE]);
+void aes_generateKeySchedule(unsigned char *in_key, int keylen, unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[AES_128_NR + 1][AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[AES_192_NR + 1][AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
+void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[AES_256_NR + 1][AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
 
 #endif

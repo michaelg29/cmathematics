@@ -45,13 +45,13 @@ unsigned char aes_inv_s_box[256] = {
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d};
 
 // constant matrix for mix columns
-unsigned char aes_mixColMat[BLOCK_SIDE][BLOCK_SIDE] = {
+unsigned char aes_mixColMat[AES_BLOCK_SIDE][AES_BLOCK_SIDE] = {
     {0x02, 0x03, 0x01, 0x01},
     {0x01, 0x02, 0x03, 0x01},
     {0x01, 0x01, 0x02, 0x03},
     {0x03, 0x01, 0x01, 0x02}};
 
-unsigned char aes_inv_mixColMat[BLOCK_SIDE][BLOCK_SIDE] = {
+unsigned char aes_inv_mixColMat[AES_BLOCK_SIDE][AES_BLOCK_SIDE] = {
     {0x0E, 0x0B, 0x0D, 0x09},
     {0x09, 0x0E, 0x0B, 0x0D},
     {0x0D, 0x09, 0x0E, 0x0B},
@@ -91,52 +91,52 @@ unsigned char galoisMul(unsigned char g1, unsigned char g2)
     AES ENCRYPTION LAYERS
 */
 
-void aes_addRoundKey(unsigned char state[BLOCK_SIDE][BLOCK_SIDE], unsigned char subkey[BLOCK_SIDE][BLOCK_SIDE])
+void aes_addRoundKey(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE], unsigned char subkey[AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
     // add in GF(2^8) corresponding bytes of the subkey and state
-    for (int r = 0; r < BLOCK_SIDE; r++)
+    for (int r = 0; r < AES_BLOCK_SIDE; r++)
     {
-        for (int c = 0; c < BLOCK_SIDE; c++)
+        for (int c = 0; c < AES_BLOCK_SIDE; c++)
         {
             state[r][c] ^= subkey[r][c];
         }
     }
 }
 
-void aes_byteSub(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
+void aes_byteSub(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
     // substitute each byte using the s-box
-    for (int r = 0; r < BLOCK_SIDE; r++)
+    for (int r = 0; r < AES_BLOCK_SIDE; r++)
     {
-        for (int c = 0; c < BLOCK_SIDE; c++)
+        for (int c = 0; c < AES_BLOCK_SIDE; c++)
         {
             state[r][c] = aes_s_box[state[r][c]];
         }
     }
 }
 
-void aes_shiftRows(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
+void aes_shiftRows(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
     // rotate each row according to its position
-    for (int r = 0; r < BLOCK_SIDE; r++)
+    for (int r = 0; r < AES_BLOCK_SIDE; r++)
     {
-        leftRotate(state[r], r, BLOCK_SIDE);
+        leftRotate(state[r], r, AES_BLOCK_SIDE);
     }
 }
 
-void aes_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
+void aes_mixCols(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
-    unsigned char out[BLOCK_SIDE][BLOCK_SIDE];
+    unsigned char out[AES_BLOCK_SIDE][AES_BLOCK_SIDE];
 
     // matrix multiplication in GF(2^8)
     // * => galoisMul, + => ^
-    for (int r = 0; r < BLOCK_SIDE; r++)
+    for (int r = 0; r < AES_BLOCK_SIDE; r++)
     {
-        for (int c = 0; c < BLOCK_SIDE; c++)
+        for (int c = 0; c < AES_BLOCK_SIDE; c++)
         {
             out[r][c] = 0x00;
             // dot product of row r of the mixColMat and the col c of the state
-            for (int i = 0; i < BLOCK_SIDE; i++)
+            for (int i = 0; i < AES_BLOCK_SIDE; i++)
             {
                 out[r][c] ^= galoisMul(aes_mixColMat[r][i], state[i][c]);
             }
@@ -144,23 +144,23 @@ void aes_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
     }
 
     // copy memory to the state
-    memcpy(state, out, BLOCK_SIDE * BLOCK_SIDE * sizeof(unsigned char));
+    memcpy(state, out, AES_BLOCK_SIDE * AES_BLOCK_SIDE * sizeof(unsigned char));
 }
 
 void aes_encrypt_block(unsigned char *in_text, int n,
-                       unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE], int nr,
-                       unsigned char iv[16],
-                       unsigned char out[BLOCK_LEN])
+                       unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
+                       unsigned char iv[AES_BLOCK_SIDE],
+                       unsigned char out[AES_BLOCK_LEN])
 {
     // represent the state and key as a 4x4 table (read into columns)
-    unsigned char state[BLOCK_SIDE][BLOCK_SIDE];
+    unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE];
     int i = 0;
-    for (int c = 0; c < BLOCK_SIDE; c++)
+    for (int c = 0; c < AES_BLOCK_SIDE; c++)
     {
-        for (int r = 0; r < BLOCK_SIDE; r++)
+        for (int r = 0; r < AES_BLOCK_SIDE; r++)
         {
             // use PKCS5 padding
-            state[r][c] = (i < n) ? in_text[i] : BLOCK_LEN - n;
+            state[r][c] = (i < n) ? in_text[i] : AES_BLOCK_LEN - n;
 
             if (iv)
             {
@@ -191,9 +191,9 @@ void aes_encrypt_block(unsigned char *in_text, int n,
 
     // copy bytes of state into the output column by column
     i = 0;
-    for (int c = 0; c < BLOCK_SIDE; c++)
+    for (int c = 0; c < AES_BLOCK_SIDE; c++)
     {
-        for (int r = 0; r < BLOCK_SIDE; r++)
+        for (int r = 0; r < AES_BLOCK_SIDE; r++)
         {
             out[i++] = state[r][c];
         }
@@ -203,24 +203,24 @@ void aes_encrypt_block(unsigned char *in_text, int n,
 int aes_encrypt(unsigned char *in_text, int n,
                 unsigned char *in_key, int keylen,
                 unsigned char mode,
-                unsigned char iv[16],
+                unsigned char iv[AES_BLOCK_SIDE],
                 unsigned char **out)
 {
     // determine number of rounds
-    int nr = 10; // AES_128 by default
+    int nr = AES_128_NR; // AES_128 by default
     switch (keylen)
     {
     case AES_192:
-        nr = 12;
+        nr = AES_192_NR;
         break;
     case AES_256:
-        nr = 14;
+        nr = AES_256_NR;
         break;
     };
 
     // generate key schedule
-    unsigned char(*subkeys)[BLOCK_SIDE][BLOCK_SIDE] =
-        malloc((nr + 1) * sizeof(unsigned char[BLOCK_SIDE][BLOCK_SIDE]));
+    unsigned char(*subkeys)[AES_BLOCK_SIDE][AES_BLOCK_SIDE] =
+        malloc((nr + 1) * sizeof(unsigned char[AES_BLOCK_SIDE][AES_BLOCK_SIDE]));
     aes_generateKeySchedule(in_key, keylen, subkeys);
 
     // allocate memory for CTR mode
@@ -228,18 +228,18 @@ int aes_encrypt(unsigned char *in_text, int n,
     unsigned char *tmp = NULL; // to write encrypted counter to
     if (mode == AES_CTR)
     {
-        counter = malloc(BLOCK_LEN * sizeof(unsigned char));
-        memcpy(counter, iv, BLOCK_LEN * sizeof(unsigned char));
+        counter = malloc(AES_BLOCK_LEN * sizeof(unsigned char));
+        memcpy(counter, iv, AES_BLOCK_LEN * sizeof(unsigned char));
 
-        tmp = malloc(BLOCK_LEN * sizeof(unsigned char));
+        tmp = malloc(AES_BLOCK_LEN * sizeof(unsigned char));
     }
 
     // divide input into blocks
-    int noBlocks = (n >> 4) + 1; // n / BLOCK_LEN + 1 (always pad)
-    int extra = n & 0x0f;        // n % BLOCK_LEN
+    int noBlocks = (n >> 4) + 1; // n / AES_BLOCK_LEN + 1 (always pad)
+    int extra = n & 0x0f;        // n % AES_BLOCK_LEN
 
     // allocate output
-    int outLen = noBlocks * BLOCK_LEN;
+    int outLen = noBlocks * AES_BLOCK_LEN;
     if (mode == AES_CTR)
     {
         // allocate for the length (not padded)
@@ -254,7 +254,7 @@ int aes_encrypt(unsigned char *in_text, int n,
     for (int i = 0; i < noBlocks; i++)
     {
         // length of current plaintext block
-        int len = (i < noBlocks - 1) ? BLOCK_LEN : extra;
+        int len = (i < noBlocks - 1) ? AES_BLOCK_LEN : extra;
 
         //aes_encrypt_block(in_text + (i << 4), len, subkeys, nr, *out + (i << 4));
 
@@ -280,7 +280,7 @@ int aes_encrypt(unsigned char *in_text, int n,
             break;
         case AES_CTR:
             // encrypt counter and write to the complete tmp block
-            aes_encrypt_block(counter, BLOCK_LEN,
+            aes_encrypt_block(counter, AES_BLOCK_LEN,
                               subkeys, nr,
                               NULL,
                               tmp);
@@ -292,7 +292,7 @@ int aes_encrypt(unsigned char *in_text, int n,
             }
 
             // increment the counter by 1 (RTL)
-            for (int j = BLOCK_LEN - 1; j >= 0; j--)
+            for (int j = AES_BLOCK_LEN - 1; j >= 0; j--)
             {
                 if (counter[j] == ~0)
                 {
@@ -336,45 +336,45 @@ int aes_encrypt(unsigned char *in_text, int n,
     AES DECRYPTION LAYERS
 */
 
-void aes_inv_addRoundKey(unsigned char state[BLOCK_SIDE][BLOCK_SIDE], unsigned char subkey[BLOCK_SIDE][BLOCK_SIDE])
+void aes_inv_addRoundKey(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE], unsigned char subkey[AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
     aes_addRoundKey(state, subkey);
 }
 
-void aes_inv_byteSub(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
+void aes_inv_byteSub(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
     // substitute each byte in the state using the inverse s-box
-    for (int i = 0; i < BLOCK_SIDE; i++)
+    for (int i = 0; i < AES_BLOCK_SIDE; i++)
     {
-        for (int j = 0; j < BLOCK_SIDE; j++)
+        for (int j = 0; j < AES_BLOCK_SIDE; j++)
         {
             state[i][j] = aes_inv_s_box[state[i][j]];
         }
     }
 }
 
-void aes_inv_shiftRows(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
+void aes_inv_shiftRows(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
     // rotate each row according to its position
-    for (int i = 0; i < BLOCK_SIDE; i++)
+    for (int i = 0; i < AES_BLOCK_SIDE; i++)
     {
-        rightRotate(state[i], i, BLOCK_SIDE);
+        rightRotate(state[i], i, AES_BLOCK_SIDE);
     }
 }
 
-void aes_inv_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
+void aes_inv_mixCols(unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
-    unsigned char out[BLOCK_SIDE][BLOCK_SIDE];
+    unsigned char out[AES_BLOCK_SIDE][AES_BLOCK_SIDE];
 
     // matrix multiplication in GF(2^8)
     // * => galoisMul, + => ^
-    for (int r = 0; r < BLOCK_SIDE; r++)
+    for (int r = 0; r < AES_BLOCK_SIDE; r++)
     {
-        for (int c = 0; c < BLOCK_SIDE; c++)
+        for (int c = 0; c < AES_BLOCK_SIDE; c++)
         {
             out[r][c] = 0x00;
             // dot product between the row r of the invMixColMat and col c of the state
-            for (int i = 0; i < BLOCK_SIDE; i++)
+            for (int i = 0; i < AES_BLOCK_SIDE; i++)
             {
                 out[r][c] ^= galoisMul(aes_inv_mixColMat[r][i], state[i][c]);
             }
@@ -382,21 +382,21 @@ void aes_inv_mixCols(unsigned char state[BLOCK_SIDE][BLOCK_SIDE])
     }
 
     // copy memory to the state
-    memcpy(state, out, BLOCK_SIDE * BLOCK_SIDE * sizeof(unsigned char));
+    memcpy(state, out, AES_BLOCK_SIDE * AES_BLOCK_SIDE * sizeof(unsigned char));
 }
 
 void aes_decrypt_block(unsigned char *in_cipher,
-                       unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE], int nr,
-                       unsigned char iv[16],
-                       unsigned char out[BLOCK_LEN])
+                       unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
+                       unsigned char iv[AES_BLOCK_SIDE],
+                       unsigned char out[AES_BLOCK_LEN])
 {
     // read cipher into state matrix
-    unsigned char state[BLOCK_SIDE][BLOCK_SIDE];
+    unsigned char state[AES_BLOCK_SIDE][AES_BLOCK_SIDE];
 
     int i = 0;
-    for (int c = 0; c < BLOCK_SIDE; c++)
+    for (int c = 0; c < AES_BLOCK_SIDE; c++)
     {
-        for (int r = 0; r < BLOCK_SIDE; r++)
+        for (int r = 0; r < AES_BLOCK_SIDE; r++)
         {
             state[r][c] = in_cipher[i];
 
@@ -423,9 +423,9 @@ void aes_decrypt_block(unsigned char *in_cipher,
 
     // copy bytes of state into the output column by column
     i = 0;
-    for (int c = 0; c < BLOCK_SIDE; c++)
+    for (int c = 0; c < AES_BLOCK_SIDE; c++)
     {
-        for (int r = 0; r < BLOCK_SIDE; r++)
+        for (int r = 0; r < AES_BLOCK_SIDE; r++)
         {
             out[i] = state[r][c];
 
@@ -443,32 +443,32 @@ void aes_decrypt_block(unsigned char *in_cipher,
 int aes_decrypt(unsigned char *in_cipher, int n,
                 unsigned char *in_key, int keylen,
                 unsigned char mode,
-                unsigned char iv[16],
+                unsigned char iv[AES_BLOCK_SIDE],
                 unsigned char **out)
 {
     // determine the number of rounds
-    int nr = 10; // AES_128 by default
+    int nr = AES_128_NR; // AES_128 by default
     switch (keylen)
     {
     case AES_192:
-        nr = 12;
+        nr = AES_192_NR;
         break;
     case AES_256:
-        nr = 14;
+        nr = AES_256_NR;
         break;
     }
 
     // generate key schedule
-    unsigned char(*subkeys)[BLOCK_SIDE][BLOCK_SIDE] =
-        malloc((nr + 1) * sizeof(unsigned char[BLOCK_SIDE][BLOCK_SIDE]));
+    unsigned char(*subkeys)[AES_BLOCK_SIDE][AES_BLOCK_SIDE] =
+        malloc((nr + 1) * sizeof(unsigned char[AES_BLOCK_SIDE][AES_BLOCK_SIDE]));
     aes_generateKeySchedule(in_key, keylen, subkeys);
 
     // allocate memory for CTR variables
     unsigned char *counter = NULL;
     if (mode == AES_CTR)
     {
-        counter = malloc(BLOCK_LEN * sizeof(unsigned char));
-        memcpy(counter, iv, BLOCK_LEN * sizeof(unsigned char));
+        counter = malloc(AES_BLOCK_LEN * sizeof(unsigned char));
+        memcpy(counter, iv, AES_BLOCK_LEN * sizeof(unsigned char));
     }
 
     // allocate output memory
@@ -480,12 +480,12 @@ int aes_decrypt(unsigned char *in_cipher, int n,
     }
 
     unsigned char *paddedOut = NULL;
-    paddedOut = malloc(noBlocks * BLOCK_LEN * sizeof(unsigned char));
+    paddedOut = malloc(noBlocks * AES_BLOCK_LEN * sizeof(unsigned char));
 
     for (int i = 0; i < noBlocks; i++)
     {
         //aes_decrypt_block(in_cipher + (i << 4), subkeys, nr, paddedOut + (i << 4));
-        int len = BLOCK_LEN;
+        int len = AES_BLOCK_LEN;
         if (i == noBlocks - 1 && extra)
         {
             // incomplete block from CTR
@@ -512,7 +512,7 @@ int aes_decrypt(unsigned char *in_cipher, int n,
             break;
         case AES_CTR:
             // encrypt counter
-            aes_encrypt_block(counter, BLOCK_LEN,
+            aes_encrypt_block(counter, AES_BLOCK_LEN,
                               subkeys, nr,
                               NULL,
                               paddedOut + (i << 4));
@@ -524,7 +524,7 @@ int aes_decrypt(unsigned char *in_cipher, int n,
             }
 
             // increment the counter by 1 (RTL)
-            for (int j = BLOCK_LEN - 1; j >= 0; j--)
+            for (int j = AES_BLOCK_LEN - 1; j >= 0; j--)
             {
                 if (counter[j] == ~0)
                 {
@@ -553,28 +553,28 @@ int aes_decrypt(unsigned char *in_cipher, int n,
     if (mode == AES_CTR)
     {
         // padding is considered as number of leftover characters in the incomplete block
-        noPadding = BLOCK_LEN - extra;
+        noPadding = AES_BLOCK_LEN - extra;
         free(counter);
     }
     else
     {
-        noPadding = paddedOut[noBlocks * BLOCK_LEN - 1]; // get last character
+        noPadding = paddedOut[noBlocks * AES_BLOCK_LEN - 1]; // get last character
     }
 
-    *out = malloc((noBlocks * BLOCK_LEN - noPadding) * sizeof(unsigned char));
-    memcpy(*out, paddedOut, (noBlocks * BLOCK_LEN - noPadding) * sizeof(unsigned char));
+    *out = malloc((noBlocks * AES_BLOCK_LEN - noPadding) * sizeof(unsigned char));
+    memcpy(*out, paddedOut, (noBlocks * AES_BLOCK_LEN - noPadding) * sizeof(unsigned char));
 
     // free padded output
     free(paddedOut);
 
-    return noBlocks * BLOCK_LEN - noPadding;
+    return noBlocks * AES_BLOCK_LEN - noPadding;
 }
 
 /*
     KEY SCHEDULING
 */
 
-void aes_generateKeySchedule(unsigned char *in_key, int keylen, unsigned char subkeys[][BLOCK_SIDE][BLOCK_SIDE])
+void aes_generateKeySchedule(unsigned char *in_key, int keylen, unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
     switch (keylen) {
         case AES_192:
@@ -589,13 +589,13 @@ void aes_generateKeySchedule(unsigned char *in_key, int keylen, unsigned char su
     };
 }
 
-void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[11][BLOCK_SIDE][BLOCK_SIDE])
+void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[AES_128_NR + 1][AES_BLOCK_SIDE][AES_BLOCK_SIDE])
 {
     // round 0 takes in the original key
     int i = 0;
-    for (int c = 0; c < BLOCK_SIDE; c++)
+    for (int c = 0; c < AES_BLOCK_SIDE; c++)
     {
-        for (int r = 0; r < BLOCK_SIDE; r++)
+        for (int r = 0; r < AES_BLOCK_SIDE; r++)
         {
             subkeys[0][r][c] = in_key[i++];
         }
@@ -619,14 +619,14 @@ void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[11]
             aes_s_box[subkeys[i - 1][3][3]],
             aes_s_box[subkeys[i - 1][0][3]]};
 
-        for (int r = 0; r < BLOCK_SIDE; r++)
+        for (int r = 0; r < AES_BLOCK_SIDE; r++)
         {
             subkeys[i][r][0] = subkeys[i - 1][r][0] ^ g[r];
         }
 
-        for (int c = 1; c < BLOCK_SIDE; c++)
+        for (int c = 1; c < AES_BLOCK_SIDE; c++)
         {
-            for (int r = 0; r < BLOCK_SIDE; r++)
+            for (int r = 0; r < AES_BLOCK_SIDE; r++)
             {
                 subkeys[i][r][c] = subkeys[i - 1][r][c] ^ subkeys[i][r][c - 1];
             }
@@ -637,7 +637,7 @@ void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[11]
     }
 }
 
-void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[13][BLOCK_SIDE][BLOCK_SIDE]) {
+void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[AES_192_NR + 1][AES_BLOCK_SIDE][AES_BLOCK_SIDE]) {
     // write original key
     int i;
     for (i = 0; i < 6; i++) {
@@ -646,8 +646,8 @@ void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[13]
         // column is the remainder of a division by 4
         int c = i & 0b11;
 
-        for (int r = 0; r < BLOCK_SIDE; r++) {
-            subkeys[rd][r][c] = in_key[i * BLOCK_SIDE + r];
+        for (int r = 0; r < AES_BLOCK_SIDE; r++) {
+            subkeys[rd][r][c] = in_key[i * AES_BLOCK_SIDE + r];
         }
     }
 
@@ -669,7 +669,7 @@ void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[13]
                 aes_s_box[subkeys[prev_el_rd][3][prev_el_c]],
                 aes_s_box[subkeys[prev_el_rd][0][prev_el_c]]};
 
-            for (int r = 0; r < BLOCK_SIDE; r++)
+            for (int r = 0; r < AES_BLOCK_SIDE; r++)
             {
                 subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ g[r];
             }
@@ -677,7 +677,7 @@ void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[13]
             roundCoeff = galoisMul(roundCoeff, 0x02);
         }
         else {
-            for (int r = 0; r < BLOCK_SIDE; r++) {
+            for (int r = 0; r < AES_BLOCK_SIDE; r++) {
                 subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ subkeys[prev_el_rd][r][prev_el_c];
             }
         }
@@ -687,7 +687,7 @@ void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[13]
     }
 }
 
-void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[15][BLOCK_SIDE][BLOCK_SIDE]) {
+void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[AES_256_NR + 1][AES_BLOCK_SIDE][AES_BLOCK_SIDE]) {
     // write original key
     int i;
     for (i = 0; i < 8; i++) {
@@ -696,8 +696,8 @@ void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[15]
         // column is the remainder of a division by 4
         int c = i & 0b11;
 
-        for (int r = 0; r < BLOCK_SIDE; r++) {
-            subkeys[rd][r][c] = in_key[i * BLOCK_SIDE + r];
+        for (int r = 0; r < AES_BLOCK_SIDE; r++) {
+            subkeys[rd][r][c] = in_key[i * AES_BLOCK_SIDE + r];
         }
     }
 
@@ -719,7 +719,7 @@ void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[15]
                 aes_s_box[subkeys[prev_el_rd][3][prev_el_c]],
                 aes_s_box[subkeys[prev_el_rd][0][prev_el_c]]};
 
-            for (int r = 0; r < BLOCK_SIDE; r++)
+            for (int r = 0; r < AES_BLOCK_SIDE; r++)
             {
                 subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ g[r];
             }
@@ -728,12 +728,12 @@ void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[15]
         }
         else if (!(i & 0b11)) {
             // function h
-            for (int r = 0; r < BLOCK_SIDE; r++) {
+            for (int r = 0; r < AES_BLOCK_SIDE; r++) {
                 subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ aes_s_box[subkeys[prev_el_rd][r][prev_el_c]];
             }
         }
         else {
-            for (int r = 0; r < BLOCK_SIDE; r++) {
+            for (int r = 0; r < AES_BLOCK_SIDE; r++) {
                 subkeys[rd][r][c] = subkeys[xor_el_rd][r][xor_el_c] ^ subkeys[prev_el_rd][r][prev_el_c];
             }
         }
