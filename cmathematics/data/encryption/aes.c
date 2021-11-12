@@ -200,29 +200,12 @@ void aes_encrypt_block(unsigned char *in_text, int n,
     }
 }
 
-int aes_encrypt(unsigned char *in_text, int n,
-                unsigned char *in_key, int keylen,
-                unsigned char mode,
-                unsigned char iv[AES_BLOCK_SIDE],
-                unsigned char **out)
+int aes_encrypt_withSchedule(unsigned char *in_text, int n,
+                             unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
+                             unsigned char mode,
+                             unsigned char iv[AES_BLOCK_LEN],
+                             unsigned char **out)
 {
-    // determine number of rounds
-    int nr = AES_128_NR; // AES_128 by default
-    switch (keylen)
-    {
-    case AES_192:
-        nr = AES_192_NR;
-        break;
-    case AES_256:
-        nr = AES_256_NR;
-        break;
-    };
-
-    // generate key schedule
-    unsigned char(*subkeys)[AES_BLOCK_SIDE][AES_BLOCK_SIDE] =
-        malloc((nr + 1) * sizeof(unsigned char[AES_BLOCK_SIDE][AES_BLOCK_SIDE]));
-    aes_generateKeySchedule(in_key, keylen, subkeys);
-
     // allocate memory for CTR mode
     unsigned char *counter = NULL;
     unsigned char *tmp = NULL; // to write encrypted counter to
@@ -318,8 +301,6 @@ int aes_encrypt(unsigned char *in_text, int n,
         };
     }
 
-    free(subkeys);
-
     if (mode == AES_CTR)
     {
         free(counter);
@@ -330,6 +311,40 @@ int aes_encrypt(unsigned char *in_text, int n,
     {
         return outLen;
     }
+}
+
+int aes_encrypt(unsigned char *in_text, int n,
+                unsigned char *in_key, int keylen,
+                unsigned char mode,
+                unsigned char iv[AES_BLOCK_SIDE],
+                unsigned char **out)
+{
+    // determine number of rounds
+    int nr = AES_128_NR; // AES_128 by default
+    switch (keylen)
+    {
+    case AES_192:
+        nr = AES_192_NR;
+        break;
+    case AES_256:
+        nr = AES_256_NR;
+        break;
+    };
+
+    // generate key schedule
+    unsigned char(*subkeys)[AES_BLOCK_SIDE][AES_BLOCK_SIDE] =
+        malloc((nr + 1) * sizeof(unsigned char[AES_BLOCK_SIDE][AES_BLOCK_SIDE]));
+    aes_generateKeySchedule(in_key, keylen, subkeys);
+
+    int ret = aes_encrypt_withSchedule(in_text, n,
+                                       subkeys, nr,
+                                       mode,
+                                       iv,
+                                       out);
+    
+    free(subkeys);
+
+    return ret;
 }
 
 /*
@@ -440,29 +455,12 @@ void aes_decrypt_block(unsigned char *in_cipher,
     }
 }
 
-int aes_decrypt(unsigned char *in_cipher, int n,
-                unsigned char *in_key, int keylen,
-                unsigned char mode,
-                unsigned char iv[AES_BLOCK_SIDE],
-                unsigned char **out)
+int aes_decrypt_withSchedule(unsigned char *in_cipher, int n,
+                             unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
+                             unsigned char mode,
+                             unsigned char iv[AES_BLOCK_LEN],
+                             unsigned char **out)
 {
-    // determine the number of rounds
-    int nr = AES_128_NR; // AES_128 by default
-    switch (keylen)
-    {
-    case AES_192:
-        nr = AES_192_NR;
-        break;
-    case AES_256:
-        nr = AES_256_NR;
-        break;
-    }
-
-    // generate key schedule
-    unsigned char(*subkeys)[AES_BLOCK_SIDE][AES_BLOCK_SIDE] =
-        malloc((nr + 1) * sizeof(unsigned char[AES_BLOCK_SIDE][AES_BLOCK_SIDE]));
-    aes_generateKeySchedule(in_key, keylen, subkeys);
-
     // allocate memory for CTR variables
     unsigned char *counter = NULL;
     if (mode == AES_CTR)
@@ -546,8 +544,6 @@ int aes_decrypt(unsigned char *in_cipher, int n,
         };
     }
 
-    free(subkeys);
-
     unsigned char noPadding = 0;
 
     if (mode == AES_CTR)
@@ -568,6 +564,40 @@ int aes_decrypt(unsigned char *in_cipher, int n,
     free(paddedOut);
 
     return noBlocks * AES_BLOCK_LEN - noPadding;
+}
+
+int aes_decrypt(unsigned char *in_cipher, int n,
+                unsigned char *in_key, int keylen,
+                unsigned char mode,
+                unsigned char iv[AES_BLOCK_SIDE],
+                unsigned char **out)
+{
+    // determine the number of rounds
+    int nr = AES_128_NR; // AES_128 by default
+    switch (keylen)
+    {
+    case AES_192:
+        nr = AES_192_NR;
+        break;
+    case AES_256:
+        nr = AES_256_NR;
+        break;
+    }
+
+    // generate key schedule
+    unsigned char(*subkeys)[AES_BLOCK_SIDE][AES_BLOCK_SIDE] =
+        malloc((nr + 1) * sizeof(unsigned char[AES_BLOCK_SIDE][AES_BLOCK_SIDE]));
+    aes_generateKeySchedule(in_key, keylen, subkeys);
+
+     int ret = aes_decrypt_withSchedule(in_cipher, n,
+                                       subkeys, nr,
+                                       mode,
+                                       iv,
+                                       out);
+
+    free(subkeys);
+
+    return ret;
 }
 
 /*

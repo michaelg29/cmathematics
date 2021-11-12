@@ -13,14 +13,17 @@
 #define AES_BLOCK_LEN 16
 #define AES_BLOCK_SIDE 4
 
+// AES key lengths
 #define AES_128 128
 #define AES_192 192
 #define AES_256 256
 
+// number of rounds based on the key length
 #define AES_128_NR 10
 #define AES_192_NR 12
 #define AES_256_NR 14
 
+// AES modes
 #define AES_ECB 0
 #define AES_CBC 1
 #define AES_CTR 2
@@ -58,6 +61,12 @@ void aes_encrypt_block(unsigned char *in_text, int n,
                        unsigned char iv[AES_BLOCK_LEN],
                        unsigned char out[AES_BLOCK_LEN]);
 
+int aes_encrypt_withSchedule(unsigned char *in_text, int n,
+                             unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
+                             unsigned char mode,
+                             unsigned char iv[AES_BLOCK_LEN],
+                             unsigned char **out);
+
 int aes_encrypt(unsigned char *in_text, int n,
                 unsigned char *in_key, int keylen,
                 unsigned char mode,
@@ -77,6 +86,12 @@ void aes_decrypt_block(unsigned char *in_cipher,
                        unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
                        unsigned char iv[AES_BLOCK_LEN],
                        unsigned char out[AES_BLOCK_LEN]);
+
+int aes_decrypt_withSchedule(unsigned char *in_cipher, int n,
+                             unsigned char subkeys[][AES_BLOCK_SIDE][AES_BLOCK_SIDE], int nr,
+                             unsigned char mode,
+                             unsigned char iv[AES_BLOCK_LEN],
+                             unsigned char **out);
 
 int aes_decrypt(unsigned char *in_cipher, int n,
                 unsigned char *in_key, int keylen,
