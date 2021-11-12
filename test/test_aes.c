@@ -4,15 +4,11 @@
 #include "../cmathematics/cmathematics.h"
 #include "../cmathematics/data/encryption/aes.h"
 
-char hex[16] = "0123456789ABCDEF";
 void printCharArr(unsigned char *arr, int len, bool asChar)
 {
-    printf("{ ");
-    for (int i = 0; i < len; i++)
-    {
-        printf("%c%c ", hex[arr[i] >> 4], hex[arr[i] & 0x0f]);
-    }
-    printf("}\n");
+    unsigned char *out = printByteArr(arr, len, " ", 1, 1);
+    printf("{ %s }\n", out);
+    free(out);
 }
 
 int main()
