@@ -11,7 +11,8 @@ List of implemented concepts so far:
 1) Encryption
    1) AES
 2) Hashing
-   1) SHA1/SHA3
+   1) SHA1/SHA2/SHA3
+   2) HMAC-SHA, PBKDF2-HMAC-SHA
 #### Graph
 1) Graph representation
 2) Graph algorithms - Dijkstra, Ford Fulkerson
@@ -57,7 +58,9 @@ int main() {
 1) Encryption
    1) AES
 2) Hashing
-   1) SHA1/SHA3
+   1) SHA1/SHA2/SHA3
+   2) HMAC-SHA
+   3) PBKDF2-HMAC-SHA
 #### Graph
 1) Representation
     1) Adjacency Lists/Adjacency Matrices
@@ -104,9 +107,6 @@ int main() {
 #### Data
 1) Algorithms
     1) RSA
-    2) HMAC
-    3) PBKDF2
-    4) SHA2
 #### Graph Theory
 #### Algebra/Calculus
 1) Functions
