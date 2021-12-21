@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "../../lib/arrays.h"
+
 unsigned int sha3_rotConst[5][5] = {
     {0, 1, 190, 28, 91},
     {36, 300, 6, 55, 276},

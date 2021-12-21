@@ -33,38 +33,6 @@ extern char hex[16];
 #define MIN(i1, i2) (i1 < i2 ? i1 : i2)
 
 /**
- * method to reverse an array between two bounds
- * @param arr the array
- * @param i the left bound
- * @param f the right bound
- */
-void reverseArray(unsigned char *arr, int i1, int i2);
-
-/**
- * method to rotate an array to the left using the reversal algorithm
- * @param arr the array
- * @param d the number of positions to shift
- * @param n the length of the array
- */
-void leftRotate(unsigned char *arr, int d, int n);
-
-/**
- * method to rotate an array to the right using the reversal algorithm
- * @param arr the array
- * @param d the number of positions to shift
- * @param n the length of the array
- */
-void rightRotate(unsigned char *arr, int d, int n);
-
-unsigned long long rightRotateLL(unsigned long long w, unsigned int d);
-unsigned int rightRotateI(unsigned int w, unsigned int d);
-unsigned char rightRotateC(unsigned char w, unsigned int d);
-
-unsigned long long leftRotateLL(unsigned long long w, unsigned int d);
-unsigned int leftRotateI(unsigned int w, unsigned int d);
-unsigned char leftRotateC(unsigned char w, unsigned int d);
-
-/**
  * method to divide and get the remainder
  * @param num the number to divide by
  * @param divisor the divisor

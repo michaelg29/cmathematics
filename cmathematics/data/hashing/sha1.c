@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../../lib/arrays.h"
+
 unsigned int sha1_h[5] = {
     0x67452301,
     0xEFCDAB89,

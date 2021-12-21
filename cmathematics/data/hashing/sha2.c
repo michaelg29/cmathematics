@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../lib/arrays.h"
+
 unsigned int sha224_h[8] = {
     0xc1059ed8UL,
     0x367cd507UL,

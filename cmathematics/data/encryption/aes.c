@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../lib/arrays.h"
+
 /*
     REFERENCE TABLES
 */
