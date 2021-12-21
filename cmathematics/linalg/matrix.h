@@ -404,4 +404,4 @@ mat inverseMat(mat *m);
  */
 mat inverseMatRREF(mat *m);
 
-#endif
+#endif // MATRIX_H

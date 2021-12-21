@@ -29,4 +29,4 @@ void sha1_digest(sha1_context *ctx, unsigned char **out);
 
 void sha1_f(unsigned int h[5], unsigned char state[64]);
 
-#endif
+#endif // SHA1_H

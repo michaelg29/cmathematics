@@ -8,4 +8,4 @@ void pbkdf2_hmac_sha(unsigned char *pwd, int pwdLen,
                      int c, char *sha_mode,
                      int dkLen, unsigned char **out);
 
-#endif
+#endif // PBKDF_H

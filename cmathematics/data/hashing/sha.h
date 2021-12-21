@@ -42,4 +42,4 @@ void sha_digest(int mode, void *ctx, unsigned char **out);
 
 void sha_free(void *ctx);
 
-#endif
+#endif // SHA_H

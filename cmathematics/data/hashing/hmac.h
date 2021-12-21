@@ -8,4 +8,4 @@ int hmac_sha(unsigned char *key, int keyLen,
              char *sha_mode,
              unsigned char **out);
 
-#endif
+#endif // HMAC_H

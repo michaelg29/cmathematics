@@ -276,4 +276,4 @@ vec vecNormalized(vec v);
  */
 void vecNormalize(vec *v);
 
-#endif
+#endif // VEC_H

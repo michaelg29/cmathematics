@@ -27,4 +27,4 @@ void sha3_digest(sha3_context *ctx, unsigned char **out);
 
 void sha3_keccak_f(unsigned long long A[5][5]);
 
-#endif
+#endif // SHA3_H

@@ -69,4 +69,4 @@ void sha384512_update(sha384512_context *ctx, unsigned char *in, int n);
 void sha384512_digest(sha384512_context *ctx, unsigned char **out, int outLen);
 void sha384512_f(unsigned long long h[8], unsigned char state[128]);
 
-#endif
+#endif // SHA2_H

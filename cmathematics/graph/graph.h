@@ -1,6 +1,9 @@
 #include "../lib/dynamicarray.h"
 #include "../cmathematics.h"
 
+#ifndef GRAPH_H
+#define GRAPH_H
+
 #define ADJ_MATRIX 0 // false
 #define ADJ_LISTS !0 // true
 
@@ -55,3 +58,5 @@ int *graph_dijkstra(graph *g, int src, bool isTargeted, int target);
 int *graph_targetedDijkstra(graph *g, int src, int target);
 int *graph_generalDijkstra(graph *g, int src);
 graph graph_fordFulkerson(graph *g, int src, int dst, int *maxFlowRet);
+
+#endif // GRAPH_H

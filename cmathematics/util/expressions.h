@@ -21,4 +21,4 @@ double exp_eval(exp_token *t, double x, double y);
 bool exp_registerVariable(char *name, double value);
 bool exp_clearVariable(char *name);
 
-#endif
+#endif // EXPRESSIONS_H

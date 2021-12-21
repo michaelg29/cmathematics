@@ -128,4 +128,4 @@ unsigned char *scanHex(char *str, int bytes);
  */
 unsigned char *printByteArr(unsigned char *arr, int noBytes, unsigned char *delim, int delimN, int wordSize);
 
-#endif
+#endif // CMATHEMATICS_H

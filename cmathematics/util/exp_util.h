@@ -101,4 +101,4 @@ double exp_evalUnary(exp_token *t, double x);
 double exp_evalBinary(exp_token *t, double x, double y);
 double exp_eval(exp_token *t, double x, double y);
 
-#endif
+#endif // EXP_UTIL_H

@@ -219,4 +219,4 @@ int *bigint_rightShiftArr(int *i, int n, int d, int *newSize);
  */
 bigint bigint_baseDivide(bigint i, int d);
 
-#endif
+#endif // BIGINT_H
