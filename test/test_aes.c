@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "../cmathematics/cmathematics.h"
+#include "../cmathematics/util/numio.h"
 #include "../cmathematics/data/encryption/aes.h"
 
 void printCharArr(unsigned char *arr, int len, bool asChar)

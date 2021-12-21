@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "../cmathematics/cmathematics.h"
+#include "../cmathematics/util/numio.h"
 #include "../cmathematics/data/hashing/sha.h"
 #include "../cmathematics/data/hashing/sha1.h"
 #include "../cmathematics/data/hashing/sha2.h"
