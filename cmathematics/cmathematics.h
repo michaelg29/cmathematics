@@ -33,15 +33,6 @@ extern char hex[16];
 #define MIN(i1, i2) (i1 < i2 ? i1 : i2)
 
 /**
- * method to determine if an integer exists in an array
- * @param arr the array
- * @param noElements the number of elements in the array
- * @param target the target element
- * @return if the element exists in the array
- */
-bool containsUint(unsigned int *arr, unsigned int noElements, unsigned int target);
-
-/**
  * method to reverse an array between two bounds
  * @param arr the array
  * @param i the left bound
@@ -72,8 +63,6 @@ unsigned char rightRotateC(unsigned char w, unsigned int d);
 unsigned long long leftRotateLL(unsigned long long w, unsigned int d);
 unsigned int leftRotateI(unsigned int w, unsigned int d);
 unsigned char leftRotateC(unsigned char w, unsigned int d);
-
-void randomCharArray(unsigned char *arr, int n);
 
 /**
  * method to divide and get the remainder

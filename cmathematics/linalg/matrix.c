@@ -3,6 +3,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "../lib/arrays.h"
+
 const mat MAT_UNDEFINED = {0, 0, NULL}; // undefined vector (no dimension)
 
 /**
@@ -1120,7 +1122,7 @@ float _determinantExclusion(mat *m,
         {
             if (skipCols[*noSkipCols - 1] != 0)
             {
-                while (containsUint(skipCols, *noSkipCols, c))
+                while (arrContains(skipCols, *noSkipCols, c))
                 {
                     c--;
                 }
@@ -1137,7 +1139,7 @@ float _determinantExclusion(mat *m,
     for (unsigned int c = 1; c <= m->cols; c++)
     {
         // skip excluded cols
-        if (containsUint(skipCols, *noSkipCols, c))
+        if (arrContains(skipCols, *noSkipCols, c))
         {
             continue;
         }

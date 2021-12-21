@@ -10,26 +10,6 @@
 char hex[16] = "0123456789ABCDEF";
 
 /**
- * method to determine if an integer exists in an array
- * @param arr the array
- * @param noElements the number of elements in the array
- * @param target the target element
- * @return if the element exists in the array
- */
-bool containsUint(unsigned int *arr, unsigned int noElements, unsigned int target)
-{
-    for (unsigned int i = 0; i < noElements; i++)
-    {
-        if (arr[i] == target)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/**
  * method to reverse an array between two bounds
  * @param arr the array
  * @param i the left bound
@@ -113,15 +93,6 @@ unsigned char leftRotateC(unsigned char w, unsigned int d)
     d &= 0x7; // mod 8
 
     return (w << d) | (w >> (8 - d));
-}
-
-void randomCharArray(unsigned char *arr, int n)
-{
-    srand(time(0));
-    for (int i = 0; i < n; i++)
-    {
-        arr[i] = rand() & 0xff; // cap at 255
-    }
 }
 
 /**

@@ -9,6 +9,7 @@ gcc -g -o ../test/a.exe ../test/main.c ^
     data/hashing/sha2.c ^
     data/hashing/sha3.c ^
     graph/graph.c ^
+    lib/arrays.c ^
     lib/avl.c ^
     lib/dynamicarray.c ^
     lib/functions.c ^
