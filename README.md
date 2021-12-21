@@ -112,3 +112,4 @@ int main() {
 1) Functions
     1) Polynomials
     2) Differentiation
+    3) Newton's Root Approximation
