@@ -19,6 +19,7 @@ gcc -g -o ../test/a.exe ../test/main.c ^
     linalg/vec.c ^
     util/bigint.c ^
     util/exp_util.c ^
-    util/expressions.c
+    util/expressions.c ^
+    util/numio.c
 cd ../test
 gdb a.exe
