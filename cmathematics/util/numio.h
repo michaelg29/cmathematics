@@ -23,4 +23,7 @@ unsigned char *scanHex(char *str, int bytes);
  */
 unsigned char *printByteArr(unsigned char *arr, int noBytes, unsigned char *delim, int delimN, int wordSize);
 
+unsigned int smallEndianValue(unsigned char *str, int n);
+char *smallEndianStr(unsigned int val);
+
 #endif // NUMIO_H

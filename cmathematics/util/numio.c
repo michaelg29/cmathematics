@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "../cmathematics.h"
 #include "../lib/strstream.h"
 
 // array containing hexadecimal digits in order
@@ -102,4 +103,33 @@ unsigned char *printByteArr(unsigned char *arr, int noBytes, unsigned char *deli
     }
 
     return ret.str;
+}
+
+unsigned int smallEndianValue(unsigned char *str, int n)
+{
+    n = MIN(n, sizeof(unsigned int));
+
+    unsigned int ret = 0;
+
+    while (n--) {
+        ret <<= 8;
+        ret |= str[n];
+    }
+
+    return ret;
+}
+
+char *smallEndianStr(unsigned int val)
+{
+    char *ret = malloc(sizeof(unsigned int) + 1);
+    memset(ret, 0, sizeof(unsigned int));
+
+    // <= because want last character to be 0
+    for (int i = 0; i <= sizeof(unsigned int); i++)
+    {
+        ret[i] = (unsigned char)val;
+        val >>= 8;
+    }
+
+    return ret;
 }
