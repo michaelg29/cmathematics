@@ -26,4 +26,7 @@ unsigned char *printByteArr(unsigned char *arr, int noBytes, unsigned char *deli
 unsigned int smallEndianValue(unsigned char *str, int n);
 char *smallEndianStr(unsigned int val);
 
+unsigned int largeEndianValue(unsigned char *str, int n);
+char *largeEndianStr(unsigned int val);
+
 #endif // NUMIO_H
