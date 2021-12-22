@@ -108,4 +108,6 @@ void aes_generateKeySchedule128(unsigned char *in_key, unsigned char subkeys[AES
 void aes_generateKeySchedule192(unsigned char *in_key, unsigned char subkeys[AES_192_NR + 1][AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
 void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[AES_256_NR + 1][AES_BLOCK_SIDE][AES_BLOCK_SIDE]);
 
+void aes_incrementCounter(unsigned char iv[AES_BLOCK_LEN], unsigned int inc);
+
 #endif // AES_H

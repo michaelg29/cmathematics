@@ -774,3 +774,19 @@ void aes_generateKeySchedule256(unsigned char *in_key, unsigned char subkeys[AES
         prev_el_c = c;
     }
 }
+
+void aes_incrementCounter(unsigned char iv[AES_BLOCK_LEN], unsigned int inc)
+{
+    unsigned char carry = 0;
+
+    for (int i = AES_BLOCK_LEN - 1; i >= 0; i--)
+    {
+        unsigned int sum = iv[i] + (unsigned char)(inc) + carry;
+        inc >>= 8;
+        carry = 0;
+
+        iv[i] = (unsigned char)sum;
+
+        carry = (unsigned char)(sum >> 8);
+    }
+}
