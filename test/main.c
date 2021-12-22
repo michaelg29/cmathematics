@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "../cmathematics/cmathematics.h"
+#include "../cmathematics/lib/arrays.h"
 #include "../cmathematics/util/numio.h"
+#include "../cmathematics/data/encryption/aes.h"
 
 int main() {
     char in[4] = "abcd";
@@ -12,6 +15,27 @@ int main() {
 
     char *out = smallEndianStr(val);
     printf("%s, %d\n", out, strlen(out));
+    free(out);
+
+    srand(time(0));
+    //unsigned char *iv = newRandomBytes(16);
+    unsigned char iv[16];
+    memset(iv, 0xFF, 16);
+    //unsigned int inc = ~0;
+    unsigned int inc = 1;
+
+    out = printByteArr(iv, 16, " ", 1, 1);
+    printf("{%s}\n", out);
+    free(out);
+
+    out = largeEndianStr(inc);
+    out = printByteArr(out, 4, " ", 1, 1);
+    printf("{                                    %s}\n", out);
+    free(out);
+
+    aes_incrementCounter(iv, inc);
+    out = printByteArr(iv, 16, " ", 1, 1);
+    printf("{%s}\n", out);
     free(out);
 
     return 0;
