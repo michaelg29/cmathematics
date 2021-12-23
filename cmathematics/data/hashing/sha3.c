@@ -152,7 +152,7 @@ void sha3_update(sha3_context *ctx, unsigned char *in, int n)
                 {
                     unsigned long long tmp = 0L;
 
-                    int noBytesInWord = MIN(8, (noBytesInBlock + ctx->stateCursor) - blockCursor);
+                    int noBytesInWord = MIN(8 - bInit, (noBytesInBlock + ctx->stateCursor) - blockCursor);
                     // write bytes from message
                     memcpy(&tmp, in + cursor + blockCursor - ctx->stateCursor, noBytesInWord);
                     if (bInit) {
