@@ -121,11 +121,10 @@ unsigned int smallEndianValue(unsigned char *str, int n)
 
 char *smallEndianStr(unsigned int val)
 {
-    char *ret = malloc(sizeof(unsigned int) + 1);
+    char *ret = malloc(sizeof(unsigned int));
     memset(ret, 0, sizeof(unsigned int));
 
-    // <= because want last character to be 0
-    for (int i = 0; i <= sizeof(unsigned int); i++)
+    for (int i = 0; i < sizeof(unsigned int); i++)
     {
         ret[i] = (unsigned char)val;
         val >>= 8;
@@ -151,7 +150,7 @@ unsigned int largeEndianValue(unsigned char *str, int n)
 
 char *largeEndianStr(unsigned int val)
 {
-    char *ret = malloc(sizeof(unsigned int) + 1);
+    char *ret = malloc(sizeof(unsigned int));
     memset(ret, 0, sizeof(unsigned int));
 
     // <= because want last character to be 0
@@ -160,7 +159,6 @@ char *largeEndianStr(unsigned int val)
         ret[i] = (unsigned char)val;
         val >>= 8;
     }
-    ret[sizeof(unsigned int)] = '\0';
 
     return ret;
 }
