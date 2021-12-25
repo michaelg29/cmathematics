@@ -1,25 +1,27 @@
-cd ../cmathematics
-gcc -o ../test/a.exe ../test/main.c ^
-    cmathematics.c ^
-    data/encryption/aes.c ^
-    data/hashing/hmac.c ^
-    data/hashing/pbkdf.c ^
-    data/hashing/sha.c ^
-    data/hashing/sha1.c ^
-    data/hashing/sha2.c ^
-    data/hashing/sha3.c ^
-    graph/graph.c ^
-    lib/arrays.c ^
-    lib/avl.c ^
-    lib/dynamicarray.c ^
-    lib/functions.c ^
-    lib/minheap.c ^
-    lib/strstream.c ^
-    linalg/matrix.c ^
-    linalg/vec.c ^
-    util/bigint.c ^
-    util/exp_util.c ^
-    util/expressions.c ^
-    util/numio.c
-cd ../test
-a.exe
+gcc -o C:/src/cmathematics/test/run/main ^
+	C:/src/cmathematics/test/main.c ^
+	C:/src/cmathematics/cmathematics/cmathematics.c ^
+	C:/src/cmathematics/cmathematics/data/encryption/aes.c ^
+	C:/src/cmathematics/cmathematics/data/hashing/hmac.c ^
+	C:/src/cmathematics/cmathematics/data/hashing/pbkdf.c ^
+	C:/src/cmathematics/cmathematics/data/hashing/sha.c ^
+	C:/src/cmathematics/cmathematics/data/hashing/sha1.c ^
+	C:/src/cmathematics/cmathematics/data/hashing/sha2.c ^
+	C:/src/cmathematics/cmathematics/data/hashing/sha3.c ^
+	C:/src/cmathematics/cmathematics/graph/graph.c ^
+	C:/src/cmathematics/cmathematics/lib/arrays.c ^
+	C:/src/cmathematics/cmathematics/lib/avl.c ^
+	C:/src/cmathematics/cmathematics/lib/dynamicarray.c ^
+	C:/src/cmathematics/cmathematics/lib/functions.c ^
+	C:/src/cmathematics/cmathematics/lib/minheap.c ^
+	C:/src/cmathematics/cmathematics/lib/strstream.c ^
+	C:/src/cmathematics/cmathematics/linalg/matrix.c ^
+	C:/src/cmathematics/cmathematics/linalg/vec.c ^
+	C:/src/cmathematics/cmathematics/util/bigint.c ^
+	C:/src/cmathematics/cmathematics/util/expressions.c ^
+	C:/src/cmathematics/cmathematics/util/exp_util.c ^
+	C:/src/cmathematics/cmathematics/util/numio.c
+cd C:/src/cmathematics/test/run
+C:/src/cmathematics/test/run/main
+cd C:\src\cmathematics\test
+pause
