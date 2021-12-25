@@ -299,8 +299,7 @@ void avl_recalcHeight(avl *root)
 {
     if (root)
     {
-        int maxHeight = (avl_height(root->left) > avl_height(root->right)) ? avl_height(root->left) : avl_height(root->right);
-        root->height = 1 + maxHeight;
+        root->height = 1 + MAX(avl_height(root->left), avl_height(root->right));
     }
 }
 
@@ -399,6 +398,14 @@ void avl_deleteNodeDeep(avl *node)
     free(node);
 }
 
+// free value and node memory
+void avl_deleteNodeVal(avl *node)
+{
+    free(node->val);
+
+    free(node);
+}
+
 // free subtree memory
 void avl_free(avl *root)
 {
@@ -409,6 +416,12 @@ void avl_free(avl *root)
 void avl_freeDeep(avl *root)
 {
     avl_postorderTraverse(root, avl_deleteNodeDeep);
+}
+
+// free subtree memory, including values
+void avl_freeVal(avl *root)
+{
+    avl_postorderTraverse(root, avl_deleteNodeVal);
 }
 
 /*

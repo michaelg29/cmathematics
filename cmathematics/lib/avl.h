@@ -1,6 +1,9 @@
 #ifndef AVL_H
 #define AVL_H
 
+// max function macro
+#define MAX(a, b) (a > b ? a : b)
+
 // avl structure
 typedef struct avl
 {
@@ -71,10 +74,14 @@ void avl_postorderTraverse(avl *root, void (*visit)(avl *node));
 void avl_deleteNode(avl *node);
 // free key, value, and node memory
 void avl_deleteNodeDeep(avl *node);
+// free value and node memory
+void avl_deleteNodeVal(avl *node);
 // free subtree memory
 void avl_free(avl *root);
 // free subtree memory, including keys and values
 void avl_freeDeep(avl *root);
+// free subtree memory, including values
+void avl_freeVal(avl *root);
 
 /*
     default key comparisons
