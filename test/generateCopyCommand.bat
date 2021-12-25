@@ -1,0 +1,1 @@
+python generation/generateCopyCommand.py librarymanifest.json

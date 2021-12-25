@@ -1,0 +1,37 @@
+{
+    "dstRoot": "C:/src/cmathematics",
+    "copyManifest": [
+        {
+            "src": "C:/src/yt-challenges/22 - Generic Lists",
+            "dst": "cmathematics/lib",
+            "inclusions": [
+                "dynamicarray.h",
+                "dynamicarray.c"
+            ]
+        },
+        {
+            "src": "C:/src/yt-challenges/26 - AVL Trees",
+            "dst": "cmathematics/lib",
+            "inclusions": [
+                "avl.h",
+                "avl.c"
+            ]
+        },
+        {
+            "src": "C:/src/yt-challenges/27 - String Streams",
+            "dst": "cmathematics/lib",
+            "inclusions": [
+                "strstream.h",
+                "strstream.c"
+            ]
+        },
+        {
+            "src": "C:/src/yt-challenges/23 - Generic Min Heaps",
+            "dst": "cmathematics/lib",
+            "inclusions": [
+                "minheap.h",
+                "minheap.c"
+            ]
+        }
+    ]
+}

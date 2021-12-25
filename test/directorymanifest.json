@@ -1,0 +1,14 @@
+{
+    "root": "C:/src/cmathematics",
+    "runDir": "test/run",
+    "directories": [
+        "test",
+        "cmathematics",
+        "cmathematics/data/encryption",
+        "cmathematics/data/hashing",
+        "cmathematics/graph",
+        "cmathematics/lib",
+        "cmathematics/linalg",
+        "cmathematics/util"
+    ]
+}
