@@ -1,9 +1,6 @@
 #ifndef AVL_H
 #define AVL_H
 
-// max function macro
-#define MAX(a, b) (a > b ? a : b)
-
 // avl structure
 typedef struct avl
 {

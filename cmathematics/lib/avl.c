@@ -299,7 +299,9 @@ void avl_recalcHeight(avl *root)
 {
     if (root)
     {
-        root->height = 1 + MAX(avl_height(root->left), avl_height(root->right));
+        int left_height = avl_height(root->left);
+        int right_height = avl_height(root->right);
+        root->height = 1 + left_height > right_height ? left_height : right_height;
     }
 }
 
