@@ -44,9 +44,9 @@ void randomBytes(char *out, int n)
         return;
     }
 
-    while (n--)
+    while (n)
     {
-        out[n - 1] = rand() & 0xff; // cap at 255
+        out[--n] = rand() & 0xff; // cap at 255
     }
 }
 
