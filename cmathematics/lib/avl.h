@@ -71,12 +71,16 @@ void avl_postorderTraverse(avl *root, void (*visit)(avl *node));
 void avl_deleteNode(avl *node);
 // free key, value, and node memory
 void avl_deleteNodeDeep(avl *node);
+// free value and key memory
+void avl_deleteNodeKey(avl *node);
 // free value and node memory
 void avl_deleteNodeVal(avl *node);
 // free subtree memory
 void avl_free(avl *root);
 // free subtree memory, including keys and values
 void avl_freeDeep(avl *root);
+// free subtree memory, including keys
+void avl_freeKey(avl *root);
 // free subtree memory, including values
 void avl_freeVal(avl *root);
 

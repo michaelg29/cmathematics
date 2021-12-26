@@ -400,6 +400,14 @@ void avl_deleteNodeDeep(avl *node)
     free(node);
 }
 
+// free value and key memory
+void avl_deleteNodeKey(avl *node)
+{
+    free(node->key);
+
+    free(node);
+}
+
 // free value and node memory
 void avl_deleteNodeVal(avl *node)
 {
@@ -418,6 +426,12 @@ void avl_free(avl *root)
 void avl_freeDeep(avl *root)
 {
     avl_postorderTraverse(root, avl_deleteNodeDeep);
+}
+
+// free subtree memory, including keys
+void avl_freeKey(avl *root)
+{
+    avl_postorderTraverse(root, avl_deleteNodeKey);
 }
 
 // free subtree memory, including values
