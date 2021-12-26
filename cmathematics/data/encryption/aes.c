@@ -321,6 +321,12 @@ int aes_encrypt(unsigned char *in_text, int n,
                 unsigned char iv[AES_BLOCK_SIDE],
                 unsigned char **out)
 {
+    if (!n)
+    {
+        *out = NULL;
+        return 0;
+    }
+
     // determine number of rounds
     int nr = AES_128_NR; // AES_128 by default
     switch (keylen)
@@ -574,6 +580,12 @@ int aes_decrypt(unsigned char *in_cipher, int n,
                 unsigned char iv[AES_BLOCK_SIDE],
                 unsigned char **out)
 {
+    if (!n)
+    {
+        *out = NULL;
+        return 0;
+    }
+
     // determine the number of rounds
     int nr = AES_128_NR; // AES_128 by default
     switch (keylen)
