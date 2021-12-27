@@ -557,7 +557,8 @@ int aes_decrypt_withSchedule(unsigned char *in_cipher, int n,
     if (mode == AES_CTR)
     {
         // padding is considered as number of leftover characters in the incomplete block
-        noPadding = AES_BLOCK_LEN - extra;
+        // if no extra, no padding because do not allocate an extra block in CTR mode
+        noPadding = extra ? AES_BLOCK_LEN - extra : 0;
         free(counter);
     }
     else
