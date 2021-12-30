@@ -208,6 +208,12 @@ int aes_encrypt_withSchedule(unsigned char *in_text, int n,
                              unsigned char iv[AES_BLOCK_LEN],
                              unsigned char **out)
 {
+    if (!n)
+    {
+        *out = NULL;
+        return 0;
+    }
+
     // allocate memory for CTR mode
     unsigned char *counter = NULL;
     unsigned char *tmp = NULL; // to write encrypted counter to
@@ -469,6 +475,12 @@ int aes_decrypt_withSchedule(unsigned char *in_cipher, int n,
                              unsigned char iv[AES_BLOCK_LEN],
                              unsigned char **out)
 {
+    if (!n)
+    {
+        *out = NULL;
+        return 0;
+    }
+
     // allocate memory for CTR variables
     unsigned char *counter = NULL;
     if (mode == AES_CTR)
