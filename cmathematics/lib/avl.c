@@ -308,7 +308,7 @@ void avl_recalcHeight(avl *root)
 // get the value stored with a key
 void *avl_get(avl *root, void *key)
 {
-    if (!root)
+    if (!root || !root->key)
     {
         return NULL;
     }
