@@ -27,6 +27,9 @@ unsigned int strstream_available(strstream *s);
 char *strstream_substrLength(strstream *s, unsigned int i, int n);
 char *strstream_substrRange(strstream *s, unsigned int i, unsigned int f);
 
+int strstream_split(strstream *s, char regex, char ***out);
+void freeStringList(char **list, int n);
+
 /*
     modifiers
 */
