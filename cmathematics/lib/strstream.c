@@ -206,6 +206,25 @@ void freeStringList(char **list, int n)
     }
 }
 
+unsigned int strstream_indexOf(strstream *s, char c, int initIdx)
+{
+    if (!s)
+    {
+        return -1;
+    }
+
+    int i = initIdx;
+    for (; i < s->size; i++)
+    {
+        if (s->str[i] == c)
+        {
+            break;
+        }
+    }
+
+    return i;
+}
+
 /*
     modifiers
 */
