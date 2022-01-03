@@ -394,26 +394,45 @@ void avl_deleteNode(avl *node)
 // free key, value, and node memory
 void avl_deleteNodeDeep(avl *node)
 {
-    free(node->key);
-    free(node->val);
+    if (node)
+    {
+        if (node->key)
+        {
+            free(node->key);
+        }
+        if (node->val)
+        {
+            free(node->val);
+        }
 
-    free(node);
+        free(node);
+    }
 }
 
 // free value and key memory
 void avl_deleteNodeKey(avl *node)
 {
-    free(node->key);
-
-    free(node);
+    if (node)
+    {
+        if (node->key)
+        {
+            free(node->key);
+        }
+        free(node);
+    }
 }
 
 // free value and node memory
 void avl_deleteNodeVal(avl *node)
 {
-    free(node->val);
-
-    free(node);
+    if (node)
+    {
+        if (node->val)
+        {
+            free(node->val);
+        }
+        free(node);
+    }
 }
 
 // free subtree memory
