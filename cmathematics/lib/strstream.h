@@ -27,7 +27,7 @@ unsigned int strstream_available(strstream *s);
 char *strstream_substrLength(strstream *s, unsigned int i, int n);
 char *strstream_substrRange(strstream *s, unsigned int i, unsigned int f);
 
-int strstream_split(strstream *s, char regex, char ***out);
+int strstream_split(strstream *s, char regex, char ***out, int maxN);
 void freeStringList(char **list, int n);
 
 unsigned int strstream_indexOf(strstream *s, char c, int initIdx);
