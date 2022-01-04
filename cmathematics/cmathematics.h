@@ -25,7 +25,7 @@ typedef unsigned char bool;
  * finds the minimum of two values
  * @param i1 the first value
  * @param i2 the second value
- * @return the larger element
+ * @return the smaller element
  */
 #define MIN(i1, i2) (i1 < i2 ? i1 : i2)
 
