@@ -1,7 +1,7 @@
 #include "../../cmathematics.h"
 
 #ifndef PBKDF_H
-#define PBKDF_F
+#define PBKDF_H
 
 void pbkdf2_hmac_sha(unsigned char *pwd, int pwdLen,
                      unsigned char *salt, int saltLen,
