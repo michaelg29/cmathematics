@@ -110,6 +110,13 @@ unsigned char *printByteArr(unsigned char *arr, int noBytes, unsigned char *deli
     return ret.str;
 }
 
+void printHexString(char *array, int n, const char *title)
+{
+    unsigned char *tmp = printByteArr(array, n, 0, 0, 0);
+    printf("%s: %s\n", title, tmp);
+    free(tmp);
+}
+
 unsigned int smallEndianValue(unsigned char *str, int n)
 {
     n = MIN(n, sizeof(unsigned int));

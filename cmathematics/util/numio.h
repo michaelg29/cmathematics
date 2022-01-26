@@ -22,6 +22,7 @@ unsigned char *scanHex(char *str, int bytes);
  * @return the formatted string
  */
 unsigned char *printByteArr(unsigned char *arr, int noBytes, unsigned char *delim, int delimN, int wordSize);
+void printHexString(char *array, int n, const char *title);
 
 unsigned int smallEndianValue(unsigned char *str, int n);
 char *smallEndianStr(unsigned int val);
