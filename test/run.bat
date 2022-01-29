@@ -1,6 +1,7 @@
 gcc -o C:/src/cmathematics/test/run/main ^
 	C:/src/cmathematics/test/main.c ^
 	C:/src/cmathematics/cmathematics/cmathematics.c ^
+	C:/src/cmathematics/cmathematics/complex/complex.c ^
 	C:/src/cmathematics/cmathematics/data/encryption/aes.c ^
 	C:/src/cmathematics/cmathematics/data/hashing/hmac.c ^
 	C:/src/cmathematics/cmathematics/data/hashing/pbkdf.c ^
@@ -17,6 +18,7 @@ gcc -o C:/src/cmathematics/test/run/main ^
 	C:/src/cmathematics/cmathematics/lib/strstream.c ^
 	C:/src/cmathematics/cmathematics/linalg/matrix.c ^
 	C:/src/cmathematics/cmathematics/linalg/vec.c ^
+	C:/src/cmathematics/cmathematics/trig/trig.c ^
 	C:/src/cmathematics/cmathematics/util/bigint.c ^
 	C:/src/cmathematics/cmathematics/util/expressions.c ^
 	C:/src/cmathematics/cmathematics/util/exp_util.c ^
