@@ -110,13 +110,6 @@ unsigned char *printByteArr(unsigned char *arr, int noBytes, unsigned char *deli
     return ret.str;
 }
 
-void printHexString(char *array, int n, const char *title)
-{
-    unsigned char *tmp = printByteArr(array, n, 0, 0, 0);
-    printf("%s: %s\n", title, tmp);
-    free(tmp);
-}
-
 unsigned int smallEndianValue(unsigned char *str, int n)
 {
     n = MIN(n, sizeof(unsigned int));
@@ -131,18 +124,24 @@ unsigned int smallEndianValue(unsigned char *str, int n)
     return ret;
 }
 
-char *smallEndianStr(unsigned int val)
+char *newSmallEndianStr(unsigned int val)
 {
     char *ret = malloc(sizeof(unsigned int));
     memset(ret, 0, sizeof(unsigned int));
 
-    for (int i = 0; i < sizeof(unsigned int); i++)
+    smallEndianStr(val, ret, sizeof(unsigned int));
+    
+    return ret;
+}
+
+void smallEndianStr(unsigned int val, unsigned char *out, int n)
+{
+    // write entire 4 byte number or until end of string
+    for (int i = 0; i < sizeof(unsigned int) && i < n; i++)
     {
-        ret[i] = (unsigned char)val;
+        out[i] = (unsigned char)val;
         val >>= 8;
     }
-
-    return ret;
 }
 
 unsigned int largeEndianValue(unsigned char *str, int n)
@@ -160,17 +159,22 @@ unsigned int largeEndianValue(unsigned char *str, int n)
     return ret;
 }
 
-char *largeEndianStr(unsigned int val)
+char *newLargeEndianStr(unsigned int val)
 {
     char *ret = malloc(sizeof(unsigned int));
     memset(ret, 0, sizeof(unsigned int));
 
-    // <= because want last character to be 0
-    for (int i = sizeof(unsigned int) - 1; i >= 0; i--)
-    {
-        ret[i] = (unsigned char)val;
-        val >>= 8;
-    }
+    largeEndianStr(val, ret, sizeof(unsigned int));
 
     return ret;
+}
+
+void largeEndianStr(unsigned int val, unsigned char *out, int n)
+{
+    // write entire number or size of string
+    for (int i = MIN(n, sizeof(unsigned int)) - 1; i >= 0; i--)
+    {
+        out[i] = (unsigned char)val;
+        val >>= 8;
+    }
 }

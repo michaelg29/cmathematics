@@ -22,12 +22,13 @@ unsigned char *scanHex(char *str, int bytes);
  * @return the formatted string
  */
 unsigned char *printByteArr(unsigned char *arr, int noBytes, unsigned char *delim, int delimN, int wordSize);
-void printHexString(char *array, int n, const char *title);
 
 unsigned int smallEndianValue(unsigned char *str, int n);
-char *smallEndianStr(unsigned int val);
+char *newSmallEndianStr(unsigned int val);
+void smallEndianStr(unsigned int val, unsigned char *out, int n);
 
 unsigned int largeEndianValue(unsigned char *str, int n);
-char *largeEndianStr(unsigned int val);
+char *newLargeEndianStr(unsigned int val);
+void largeEndianStr(unsigned int val, unsigned char *out, int n);
 
 #endif // NUMIO_H
