@@ -7,6 +7,5 @@ float degToRad(float deg);
 float radToDeg(float rad);
 
 float invtan(float x, float y);
-float invtand(float x, float y);
 
 #endif

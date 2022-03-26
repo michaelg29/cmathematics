@@ -44,8 +44,3 @@ float invtan(float x, float y)
         return atanf(y / x) - M_PI;
     }
 }
-
-float invtand(float x, float y)
-{
-    return radToDeg(invtan(x, y));
-}
