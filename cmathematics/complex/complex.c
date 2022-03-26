@@ -131,6 +131,62 @@ imag imag_div(imag i1, imag i2)
     return ret;
 }
 
+imag imag_addd(imag i, double d)
+{
+    if (i.inPolar)
+    {
+        imag tmp = imag_polar(d, 0.0f);
+        i = imag_add(i, tmp);
+    }
+    else
+    {
+        i.r += d;
+    }
+    return i;
+}
+
+imag imag_subd(imag i, double d)
+{
+    if (i.inPolar)
+    {
+        imag tmp = imag_polar(d, 0.0f);
+        i = imag_sub(i, tmp);
+    }
+    else
+    {
+        i.r -= d;
+    }
+    return i;
+}
+
+imag imag_muld(imag i, double d)
+{
+    if (i.inPolar)
+    {
+        i.r *= d;
+    }
+    else
+    {
+        i.r *= d;
+        i.t *= d;
+    }
+    return i;
+}
+
+imag imag_divd(imag i, double d)
+{
+    if (i.inPolar)
+    {
+        i.r /= d;
+    }
+    else
+    {
+        i.r /= d;
+        i.t /= d;
+    }
+    return i;
+}
+
 imag imag_pow(imag i, int pow)
 {
     imag ret = i;

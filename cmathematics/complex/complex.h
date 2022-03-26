@@ -17,6 +17,11 @@ imag imag_sub(imag i1, imag i2);
 imag imag_mul(imag i1, imag i2);
 imag imag_div(imag i1, imag i2);
 
+imag imag_addd(imag i, double d);
+imag imag_subd(imag i, double d);
+imag imag_muld(imag i, double d);
+imag imag_divd(imag i, double d);
+
 imag imag_pow(imag i1, int pow);
 
 imag imag_conjugate(imag i);
