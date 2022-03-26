@@ -26,6 +26,7 @@ imag imag_pow(imag i1, int pow);
 
 imag imag_conjugate(imag i);
 float imag_magnitude(imag i);
+float imag_arg(imag i);
 
 imag imag_toPolar(imag i);
 void imag_setPolar(imag *i);

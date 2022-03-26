@@ -224,6 +224,16 @@ float imag_magnitude(imag i)
     return sqrtf(i.r * i.r + i.t * i.t);
 }
 
+float imag_arg(imag i)
+{
+    if (i.inPolar)
+    {
+        return i.t;
+    }
+
+    return invtan(i.r, i.t);
+}
+
 imag imag_toPolar(imag i)
 {
     imag ret = i;
