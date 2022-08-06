@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "../cmathematics.h"
 #include "../lib/strstream.h"
@@ -177,4 +178,79 @@ void largeEndianStr(unsigned int val, unsigned char *out, int n)
         out[i] = (unsigned char)val;
         val >>= 8;
     }
+}
+
+char padding = '=';
+char base64Digits[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+unsigned char *base64_encode(unsigned char *str, unsigned int strLen)
+{
+    unsigned int outLen = ceil((double)strLen * 8.0 / 6.0);
+    outLen += 4 - outLen & 0x3;
+    unsigned char *ret = malloc(outLen + 1);
+
+    unsigned int inIdx = 0;
+    unsigned int outIdx = 0;
+    for (unsigned int bitPos = 0, maxBitPos = strLen << 3; bitPos < maxBitPos; bitPos += 6, outIdx++)
+    {
+        // take 6 bits starting at bitPos
+        unsigned int val = 0;
+
+        // get bits from current byte
+        unsigned int startIdx = bitPos & 0x7; // bitPos % 8
+
+        // read two bytes
+        short combo = str[inIdx];
+        combo <<= 8;
+        combo |= str[inIdx + 1];
+
+        // take 6 bytes starting from startIdx
+        val = (combo >> (16 - 6 - startIdx)) & 0b111111;
+
+        if (startIdx >= 2)
+        {
+            // next group starts on next character
+            inIdx++;
+        }
+
+        ret[outIdx] = base64Digits[val];
+    }
+
+    // pad with '='
+    memset(ret + outIdx, '=', outLen - outIdx);
+    ret[outLen] = 0;
+
+    return ret;
+}
+
+unsigned char *base64_decode(unsigned char *str, unsigned int strLen)
+{
+    unsigned int outLen = ceil((double)strLen * 8.0 / 6.0);
+    unsigned char *ret = malloc(outLen + 1);
+
+    // to get number from base 64 character
+    char c = 'A';
+    unsigned int val = 0;
+    if (c >= 'a')
+    {
+        val = c - 'a' + 26;
+    }
+    else if (c >= 'A')
+    {
+        val = c - 'A';
+    }
+    else if (c >= '0')
+    {
+        val = c - '0' + 52;
+    }
+    else if (c == '+')
+    {
+        val = 63;
+    }
+    else if (c == '/')
+    {
+        val = 64;
+    }
+
+    return ret;
 }

@@ -31,4 +31,10 @@ unsigned int largeEndianValue(unsigned char *str, int n);
 char *newLargeEndianStr(unsigned int val);
 void largeEndianStr(unsigned int val, unsigned char *out, int n);
 
+extern char padding;
+extern char base64Digits[64];
+
+unsigned char *base64_encode(unsigned char *str, unsigned int n);
+unsigned char *base64_decode(unsigned char *str, unsigned int n);
+
 #endif // NUMIO_H
