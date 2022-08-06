@@ -1122,7 +1122,7 @@ float _determinantExclusion(mat *m,
         {
             if (skipCols[*noSkipCols - 1] != 0)
             {
-                while (arrContains(skipCols, *noSkipCols, c))
+                while (arrContains((void**)skipCols, *noSkipCols, (void*)c))
                 {
                     c--;
                 }
@@ -1139,7 +1139,7 @@ float _determinantExclusion(mat *m,
     for (unsigned int c = 1; c <= m->cols; c++)
     {
         // skip excluded cols
-        if (arrContains(skipCols, *noSkipCols, c))
+        if (arrContains((void**)skipCols, *noSkipCols, (void*)c))
         {
             continue;
         }
