@@ -200,11 +200,9 @@ unsigned char *base64_encode(unsigned char *str, unsigned int strLen)
         unsigned int startIdx = bitPos & 0x7; // bitPos % 8
 
         // read two bytes
-        short combo = str[inIdx];
-        combo <<= 8;
-        combo |= str[inIdx + 1];
+        short combo = (str[inIdx] << 8) | str[inIdx + 1];
 
-        // take 6 bytes starting from startIdx
+        // take 6 bits starting from startIdx
         val = (combo >> (16 - 6 - startIdx)) & 0b111111;
 
         if (startIdx >= 2)
@@ -217,7 +215,7 @@ unsigned char *base64_encode(unsigned char *str, unsigned int strLen)
     }
 
     // pad with '='
-    memset(ret + outIdx, '=', outLen - outIdx);
+    memset(ret + outIdx, padding, outLen - outIdx);
     ret[outLen] = 0;
 
     return ret;
@@ -225,32 +223,64 @@ unsigned char *base64_encode(unsigned char *str, unsigned int strLen)
 
 unsigned char *base64_decode(unsigned char *str, unsigned int strLen)
 {
-    unsigned int outLen = ceil((double)strLen * 8.0 / 6.0);
-    unsigned char *ret = malloc(outLen + 1);
+    unsigned char *ret = malloc(strLen);
+    unsigned int outIdx = 0;
+    
+    for (unsigned int i = 0; i < strLen; i += 4)
+    {
+        unsigned int val = 0;
+        for (int j = 0; j < 4; j++)
+        {
+            val <<= 6;
+            if (i + j < strLen)
+            {
+                // to get number from base 64 character
+                unsigned char c = str[i + j];
+                printf("%c ", c);
+                if (c >= 'a')
+                {
+                    c = c - 'a' + 26;
+                }
+                else if (c >= 'A')
+                {
+                    c = c - 'A';
+                }
+                else if (c >= '0')
+                {
+                    c = c - '0' + 52;
+                }
+                else if (c == '+')
+                {
+                    c = 62;
+                }
+                else if (c == '/')
+                {
+                    c = 63;
+                }
+                else if (c == padding)
+                {
+                    c = 0;
+                }
+                else
+                {
+                    free(ret);
+                    return NULL;
+                }
 
-    // to get number from base 64 character
-    char c = 'A';
-    unsigned int val = 0;
-    if (c >= 'a')
-    {
-        val = c - 'a' + 26;
+                val |= c;
+                printf("%d; ", c);
+            }
+        }
+
+        printf("=> %d, %08x\n", val, val);
+        memcpy(ret + outIdx, &val, 3);
+        unsigned char c = ret[outIdx];
+        ret[outIdx] = ret[outIdx + 2];
+        ret[outIdx + 2] = c;
+        outIdx += 3;
     }
-    else if (c >= 'A')
-    {
-        val = c - 'A';
-    }
-    else if (c >= '0')
-    {
-        val = c - '0' + 52;
-    }
-    else if (c == '+')
-    {
-        val = 63;
-    }
-    else if (c == '/')
-    {
-        val = 64;
-    }
+
+    ret[outIdx] = 0;
 
     return ret;
 }
