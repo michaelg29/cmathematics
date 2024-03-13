@@ -811,6 +811,7 @@ bool addMultiple(mat *m, unsigned int r1, unsigned int r2, float k)
         // add corresponding elements
         m->elements[r1][c] += k * m->elements[r2][c];
     }
+    return true;
 }
 
 /**
